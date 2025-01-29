@@ -6,6 +6,7 @@ import 'package:markdown_quill/markdown_quill.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'editor_state.dart';
+import '../utils/styles.dart';
 
 class EditorNotifier extends Notifier<EditorState> {
   late final QuillController quillController = QuillController.basic();
@@ -36,7 +37,9 @@ class EditorNotifier extends Notifier<EditorState> {
   }
 
   double getCurrentWidth(BuildContext context) {
-    return MediaQuery.of(context).size.width - (state.showStructure ? 250 : 0);
+    return MediaQuery.of(context).size.width -
+        (state.showStructure ? Styles.structureWidth : 0) -
+        (state.showAI ? Styles.structureWidth : 0);
   }
 
   void changeToolbarPosition(ToolbarPosition position) {
@@ -47,6 +50,10 @@ class EditorNotifier extends Notifier<EditorState> {
 
   void toggleStructure() {
     state = state.copyWith(showStructure: !state.showStructure);
+  }
+
+  void toggleAi({bool open = true}) {
+    state = state.copyWith(showAI: open);
   }
 
   void scrollToText(String text) {

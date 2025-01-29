@@ -1,11 +1,14 @@
-import 'package:ai_text_editor/editor_notifier.dart';
-import 'package:ai_text_editor/editor_state.dart';
-import 'package:ai_text_editor/logger.dart';
+import 'package:ai_text_editor/notifiers/editor_notifier.dart';
+import 'package:ai_text_editor/notifiers/editor_state.dart';
+import 'package:ai_text_editor/utils/logger.dart';
+import 'package:ai_text_editor/utils/some_shortcuts.dart';
+import 'package:ai_text_editor/utils/styles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'quill_toolbar_config.dart';
+import '../configs/quill_config.dart';
+import '../configs/quill_toolbar_config.dart';
 
 class Editor extends ConsumerStatefulWidget {
   const Editor({super.key});
@@ -20,16 +23,32 @@ class _EditorState extends ConsumerState<Editor> {
   bool dragging = false;
 
   @override
+  void initState() {
+    super.initState();
+    SomeShortcuts.setRef(ref);
+  }
+
+  @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
     double height = MediaQuery.of(context).size.height;
-    final toolbarPosition =
-        ref.watch(editorNotifierProvider.select((v) => v.toolbarPosition));
+    final state = ref.watch(editorNotifierProvider);
+    final toolbarPosition = state.toolbarPosition;
+
+    // final toolbarPosition =
+    //     ref.watch(editorNotifierProvider.select((v) => v.toolbarPosition));
     var padding = EdgeInsets.only(
-        left: toolbarPosition == ToolbarPosition.left ? 90 : 10,
-        right: toolbarPosition == ToolbarPosition.right ? 90 : 10,
-        top: toolbarPosition == ToolbarPosition.top ? 90 : 10,
-        bottom: toolbarPosition == ToolbarPosition.bottom ? 90 : 10);
+        left: toolbarPosition == ToolbarPosition.left
+            ? Styles.toolbarMinSize
+            : 10,
+        right: toolbarPosition == ToolbarPosition.right
+            ? Styles.toolbarMinSize
+            : 10,
+        top:
+            toolbarPosition == ToolbarPosition.top ? Styles.toolbarMinSize : 10,
+        bottom: toolbarPosition == ToolbarPosition.bottom
+            ? Styles.toolbarMinSize
+            : 10);
     return Scaffold(
       backgroundColor: Colors.white,
       body: Stack(
@@ -38,8 +57,7 @@ class _EditorState extends ConsumerState<Editor> {
           Padding(
             padding: padding,
             child: QuillEditor(
-              configurations:
-                  QuillEditorConfigurations(placeholder: "Write something..."),
+              configurations: QuillConfig.config,
               controller:
                   ref.read(editorNotifierProvider.notifier).quillController,
               focusNode: ref.read(editorNotifierProvider.notifier).focusNode,
@@ -227,8 +245,8 @@ class ToolbarWidget extends StatelessWidget {
   final VoidCallback onDragEnd;
   final VoidCallback onDragStart;
 
-  static Size size1 = Size(90, 500);
-  static Size size2 = Size(500, 90);
+  static Size size1 = Size(Styles.toolbarMinSize, 550);
+  static Size size2 = Size(550, Styles.toolbarMinSize);
 
   @override
   Widget build(BuildContext context) {

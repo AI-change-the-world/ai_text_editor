@@ -1,15 +1,16 @@
-import 'package:ai_text_editor/editor.dart';
-import 'package:ai_text_editor/editor_state.dart';
-import 'package:ai_text_editor/logger.dart';
-import 'package:ai_text_editor/markdown_util.dart';
-import 'package:ai_text_editor/editor_notifier.dart';
+import 'package:ai_text_editor/components/editor.dart';
+import 'package:ai_text_editor/notifiers/editor_state.dart';
+import 'package:ai_text_editor/utils/logger.dart';
+import 'package:ai_text_editor/utils/markdown_util.dart';
+import 'package:ai_text_editor/notifiers/editor_notifier.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:menu_bar/menu_bar.dart';
 
-import 'file_structure_view.dart';
+import 'components/ai_widget.dart';
+import 'components/file_structure_view.dart';
 
 class App extends StatelessWidget {
   const App({super.key});
@@ -120,7 +121,9 @@ class Home extends ConsumerWidget {
                 ),
                 MenuButton(
                   text: Text("AI"),
-                  onTap: () {},
+                  onTap: () {
+                    ref.read(editorNotifierProvider.notifier).toggleAi();
+                  },
                 )
               ]))
         ],
@@ -139,7 +142,8 @@ class Home extends ConsumerWidget {
                         models: models,
                       );
                     }),
-                Expanded(child: Editor())
+                Expanded(child: Editor()),
+                AiWidget()
               ],
             ),
           ),

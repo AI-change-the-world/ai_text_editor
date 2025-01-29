@@ -1,4 +1,4 @@
-import 'markdown_model.dart';
+import '../models/markdown_model.dart';
 // ignore: depend_on_referenced_packages
 import 'package:markdown/markdown.dart';
 
