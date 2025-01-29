@@ -31,6 +31,14 @@ class EditorNotifier extends Notifier<EditorState> {
     return EditorState();
   }
 
+  double getCurrentHeight(BuildContext context) {
+    return MediaQuery.of(context).size.height - 30 - /*padding*/ 10 * 2;
+  }
+
+  double getCurrentWidth(BuildContext context) {
+    return MediaQuery.of(context).size.width - (state.showStructure ? 250 : 0);
+  }
+
   void changeToolbarPosition(ToolbarPosition position) {
     if (position != state.toolbarPosition) {
       state = state.copyWith(toolbarPosition: position);

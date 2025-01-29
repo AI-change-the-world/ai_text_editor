@@ -1,5 +1,6 @@
 import 'package:ai_text_editor/editor.dart';
 import 'package:ai_text_editor/editor_state.dart';
+import 'package:ai_text_editor/logger.dart';
 import 'package:ai_text_editor/markdown_util.dart';
 import 'package:ai_text_editor/editor_notifier.dart';
 import 'package:file_selector/file_selector.dart';
@@ -59,7 +60,6 @@ class Home extends ConsumerWidget {
                 MenuButton(
                     text: Text("Open"),
                     onTap: () async {
-                      print("Open");
                       await openFile();
                     },
                     shortcut:
@@ -73,7 +73,6 @@ class Home extends ConsumerWidget {
                     control: true,
                   ),
                   onTap: () {
-                    print("Save");
                     print(ref.read(editorNotifierProvider.notifier).getText());
                   },
                 ),
@@ -85,7 +84,7 @@ class Home extends ConsumerWidget {
                     control: true,
                   ),
                   onTap: () {
-                    print("Exit");
+                    logger.d("Exiting");
                     SystemNavigator.pop();
                   },
                 )
