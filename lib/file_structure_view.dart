@@ -1,5 +1,5 @@
 import 'package:ai_text_editor/markdown_model.dart';
-import 'package:ai_text_editor/notifier.dart';
+import 'package:ai_text_editor/editor_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -9,8 +9,11 @@ class FileStructureView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return SizedBox(
-      width: 250,
+    final state =
+        ref.watch(editorNotifierProvider.select((v) => v.showStructure));
+    return AnimatedContainer(
+      duration: Duration(milliseconds: 300),
+      width: state ? 200 : 0,
       child: ListView.builder(
         itemBuilder: (c, i) {
           if (models[i].tag == "h1") {
@@ -18,6 +21,9 @@ class FileStructureView extends ConsumerWidget {
                 Text(
                   models[i].text,
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  maxLines: 1,
+                  overflow: TextOverflow.clip,
+                  softWrap: true,
                 ),
                 models[i].text,
                 ref);
@@ -26,21 +32,32 @@ class FileStructureView extends ConsumerWidget {
                 Text(
                   "  ${models[i].text}",
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+                  maxLines: 1,
+                  overflow: TextOverflow.clip,
+                  softWrap: true,
                 ),
                 models[i].text,
                 ref);
           } else if (models[i].tag == "h3") {
             return _wrapper(
-                Text("   ${models[i].text}",
-                    style:
-                        TextStyle(fontSize: 16, fontWeight: FontWeight.w400)),
+                Text(
+                  "   ${models[i].text}",
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w400),
+                  maxLines: 1,
+                  overflow: TextOverflow.clip,
+                  softWrap: true,
+                ),
                 models[i].text,
                 ref);
           } else if (models[i].tag == "h4") {
             return _wrapper(
-                Text("    ${models[i].text}",
-                    style:
-                        TextStyle(fontSize: 14, fontWeight: FontWeight.w100)),
+                Text(
+                  "    ${models[i].text}",
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w100),
+                  maxLines: 1,
+                  overflow: TextOverflow.clip,
+                  softWrap: true,
+                ),
                 models[i].text,
                 ref);
           }
@@ -54,11 +71,14 @@ class FileStructureView extends ConsumerWidget {
   }
 
   Widget _wrapper(Widget child, String content, WidgetRef ref) {
-    return GestureDetector(
-      onTap: () {
-        ref.read(editorNotifierProvider.notifier).scrollToText(content);
-      },
-      child: child,
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: () {
+          ref.read(editorNotifierProvider.notifier).scrollToText(content);
+        },
+        child: child,
+      ),
     );
   }
 }

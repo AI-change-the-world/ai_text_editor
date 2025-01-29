@@ -1,11 +1,13 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_quill/flutter_quill.dart';
+import 'package:flutter_quill/flutter_quill.dart' hide EditorState;
 import 'package:markdown_quill/markdown_quill.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class EditorNotifier extends Notifier {
+import 'editor_state.dart';
+
+class EditorNotifier extends Notifier<EditorState> {
   late final QuillController quillController = QuillController.basic();
   late final ScrollController scrollController = ScrollController();
   late final _deltaToMarkdown = DeltaToMarkdown();
@@ -16,7 +18,7 @@ class EditorNotifier extends Notifier {
   Stream<String> get quillTextChangeStream => quillTextChangeController.stream;
 
   @override
-  build() {
+  EditorState build() {
     quillController.document.changes.listen((event) {
       // ref.read(editorNotifierProvider.notifier).getText();
       quillTextChangeController.add(getText());
@@ -25,6 +27,18 @@ class EditorNotifier extends Notifier {
       quillController.dispose();
       scrollController.dispose();
     });
+
+    return EditorState();
+  }
+
+  void changeToolbarPosition(ToolbarPosition position) {
+    if (position != state.toolbarPosition) {
+      state = state.copyWith(toolbarPosition: position);
+    }
+  }
+
+  void toggleStructure() {
+    state = state.copyWith(showStructure: !state.showStructure);
   }
 
   void scrollToText(String text) {
@@ -37,18 +51,6 @@ class EditorNotifier extends Notifier {
 
     _setCursorPosition(docPositions.first);
     _scrollToFocusNode();
-
-    // if (docPositions.isNotEmpty) {
-    //   final position = docPositions.first;
-    //   final child = quillController.document.queryChild(position);
-    //   print(child.node);
-    //   if (child.node != null) {
-    //     print(child.node!.offset);
-    //     print(child.node!.runtimeType);
-
-    //     // print((child.node as Line).);
-    //   }
-    // }
   }
 
   void _setCursorPosition(int position) {
@@ -78,4 +80,4 @@ class EditorNotifier extends Notifier {
 }
 
 final editorNotifierProvider =
-    NotifierProvider<EditorNotifier, void>(EditorNotifier.new);
+    NotifierProvider<EditorNotifier, EditorState>(EditorNotifier.new);

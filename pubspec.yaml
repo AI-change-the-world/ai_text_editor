@@ -17,6 +17,7 @@ dependencies:
     sdk: flutter
   flutter_quill: ^10.8.5
   flutter_riverpod: ^2.6.1
+  logger: ^2.5.0
   markdown_quill: ^4.2.0
   menu_bar: ^0.5.3
   riverpod: ^2.6.1

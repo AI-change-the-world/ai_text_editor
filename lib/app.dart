@@ -1,6 +1,7 @@
 import 'package:ai_text_editor/editor.dart';
+import 'package:ai_text_editor/editor_state.dart';
 import 'package:ai_text_editor/markdown_util.dart';
-import 'package:ai_text_editor/notifier.dart';
+import 'package:ai_text_editor/editor_notifier.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -88,11 +89,45 @@ class Home extends ConsumerWidget {
                     SystemNavigator.pop();
                   },
                 )
+              ])),
+          BarButton(
+              text: Center(
+                child: Text("View"),
+              ),
+              submenu: SubMenu(menuItems: [
+                MenuButton(
+                  text: Text("Structure"),
+                  shortcutText: "Ctrl+P",
+                  shortcut: SingleActivator(
+                    LogicalKeyboardKey.keyP,
+                    control: true,
+                  ),
+                  onTap: () {
+                    ref.read(editorNotifierProvider.notifier).toggleStructure();
+                  },
+                ),
+                MenuButton(
+                  text: Text("Toolbar"),
+                  shortcutText: "Ctrl+T",
+                  shortcut: SingleActivator(
+                    LogicalKeyboardKey.keyT,
+                    control: true,
+                  ),
+                  onTap: () {
+                    ref
+                        .read(editorNotifierProvider.notifier)
+                        .changeToolbarPosition(ToolbarPosition.top);
+                  },
+                ),
+                MenuButton(
+                  text: Text("AI"),
+                  onTap: () {},
+                )
               ]))
         ],
         child: Scaffold(
           body: Padding(
-            padding: EdgeInsets.all(20),
+            padding: EdgeInsets.all(5),
             child: Row(
               children: [
                 StreamBuilder(
