@@ -54,6 +54,9 @@ class _EditorState extends ConsumerState<Editor> {
               });
             },
             onDragStart: () {
+              ref
+                  .read(editorNotifierProvider.notifier)
+                  .changeToolbarPosition(ToolbarPosition.none);
               setState(() {
                 dragging = true;
               });
@@ -75,13 +78,20 @@ class _EditorState extends ConsumerState<Editor> {
                 return true;
               }, builder: (c, _, __) {
                 if (dragging && toolbarPosition == ToolbarPosition.left) {
-                  return ToolbarWidget(
-                      position: toolbarPosition,
-                      controller: ref
-                          .read(editorNotifierProvider.notifier)
-                          .quillController,
-                      onDragEnd: () {},
-                      onDragStart: () {});
+                  return SizedBox(
+                    height: ref
+                        .read(editorNotifierProvider.notifier)
+                        .getCurrentHeight(context),
+                    child: Center(
+                      child: ToolbarWidget(
+                          position: toolbarPosition,
+                          controller: ref
+                              .read(editorNotifierProvider.notifier)
+                              .quillController,
+                          onDragEnd: () {},
+                          onDragStart: () {}),
+                    ),
+                  );
                 }
 
                 return Container(
@@ -107,13 +117,20 @@ class _EditorState extends ConsumerState<Editor> {
                 return true;
               }, builder: (c, _, __) {
                 if (dragging && toolbarPosition == ToolbarPosition.right) {
-                  return ToolbarWidget(
-                      position: toolbarPosition,
-                      controller: ref
-                          .read(editorNotifierProvider.notifier)
-                          .quillController,
-                      onDragEnd: () {},
-                      onDragStart: () {});
+                  return SizedBox(
+                    height: ref
+                        .read(editorNotifierProvider.notifier)
+                        .getCurrentHeight(context),
+                    child: Center(
+                      child: ToolbarWidget(
+                          position: toolbarPosition,
+                          controller: ref
+                              .read(editorNotifierProvider.notifier)
+                              .quillController,
+                          onDragEnd: () {},
+                          onDragStart: () {}),
+                    ),
+                  );
                 }
 
                 return Container(
@@ -135,13 +152,20 @@ class _EditorState extends ConsumerState<Editor> {
                 return true;
               }, builder: (c, _, __) {
                 if (dragging && toolbarPosition == ToolbarPosition.top) {
-                  return ToolbarWidget(
-                      position: toolbarPosition,
-                      controller: ref
-                          .read(editorNotifierProvider.notifier)
-                          .quillController,
-                      onDragEnd: () {},
-                      onDragStart: () {});
+                  return SizedBox(
+                    width: ref
+                        .read(editorNotifierProvider.notifier)
+                        .getCurrentWidth(context),
+                    child: Center(
+                      child: ToolbarWidget(
+                          position: toolbarPosition,
+                          controller: ref
+                              .read(editorNotifierProvider.notifier)
+                              .quillController,
+                          onDragEnd: () {},
+                          onDragStart: () {}),
+                    ),
+                  );
                 }
 
                 return Container(
@@ -163,13 +187,20 @@ class _EditorState extends ConsumerState<Editor> {
                 return true;
               }, builder: (c, _, __) {
                 if (dragging && toolbarPosition == ToolbarPosition.bottom) {
-                  return ToolbarWidget(
-                      position: toolbarPosition,
-                      controller: ref
-                          .read(editorNotifierProvider.notifier)
-                          .quillController,
-                      onDragEnd: () {},
-                      onDragStart: () {});
+                  return SizedBox(
+                    width: ref
+                        .read(editorNotifierProvider.notifier)
+                        .getCurrentWidth(context),
+                    child: Center(
+                      child: ToolbarWidget(
+                          position: toolbarPosition,
+                          controller: ref
+                              .read(editorNotifierProvider.notifier)
+                              .quillController,
+                          onDragEnd: () {},
+                          onDragStart: () {}),
+                    ),
+                  );
                 }
 
                 return Container(
