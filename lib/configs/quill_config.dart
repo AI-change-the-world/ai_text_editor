@@ -5,13 +5,16 @@ class QuillConfig {
   QuillConfig._();
 
   static QuillEditorConfigurations get config => QuillEditorConfigurations(
-      characterShortcutEvents: standardCharactersShortcutEvents,
-      spaceShortcutEvents: [
-        ...standardSpaceShorcutEvents,
-        SomeShortcuts.aiShowUp
-      ],
-      searchConfigurations: const QuillSearchConfigurations(
-        searchEmbedMode: SearchEmbedMode.plainText,
-      ),
-      placeholder: "Write something...");
+          characterShortcutEvents: [
+            ...standardCharactersShortcutEvents,
+            SomeShortcuts.aiInstEvent
+          ],
+          spaceShortcutEvents: [
+            ...standardSpaceShorcutEvents,
+            SomeShortcuts.aiShowUp
+          ],
+          searchConfigurations: const QuillSearchConfigurations(
+            searchEmbedMode: SearchEmbedMode.plainText,
+          ),
+          placeholder: "Write something...");
 }

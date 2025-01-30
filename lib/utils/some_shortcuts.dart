@@ -1,11 +1,15 @@
 import 'package:ai_packages_core/ai_packages_core.dart';
 import 'package:ai_text_editor/models/ai_model.dart';
 import 'package:ai_text_editor/notifiers/editor_notifier.dart';
+import 'package:ai_text_editor/utils/logger.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class SomeShortcuts {
   SomeShortcuts._();
+
+  static const String aiShowUpCharacter = "ai>";
+  static const String instruct = "<";
 
   static WidgetRef? ref;
   static setRef(WidgetRef r) {
@@ -13,10 +17,19 @@ class SomeShortcuts {
   }
 
   static final SpaceShortcutEvent aiShowUp = SpaceShortcutEvent(
-    character: "ai>",
+    character: aiShowUpCharacter,
     handler: (node, controller) => handleAiShowUp(
       controller: controller,
-      character: "ai>",
+      character: aiShowUpCharacter,
+    ),
+  );
+
+  static final CharacterShortcutEvent aiInstEvent = CharacterShortcutEvent(
+    key: "ai instruct",
+    character: instruct,
+    handler: (controller) => handleInstruct(
+      controller: controller,
+      character: instruct,
     ),
   );
 
@@ -52,17 +65,74 @@ class SomeShortcuts {
     //       ?.read(editorNotifierProvider.notifier)
     //       .insertDataToEditor(v, controller.selection);
     // });
-    GlobalModel.model.streamChat([
-      ChatMessage(
-          role: "user",
-          content: "hello",
-          createAt: DateTime.now().millisecondsSinceEpoch)
-    ]).listen((v) {
-      ref
-          ?.read(editorNotifierProvider.notifier)
-          .insertDataToEditor(v, controller.selection);
-    });
+    // GlobalModel.model.streamChat([
+    //   ChatMessage(
+    //       role: "user",
+    //       content: "hello",
+    //       createAt: DateTime.now().millisecondsSinceEpoch)
+    // ]).listen((v) {
+    //   ref
+    //       ?.read(editorNotifierProvider.notifier)
+    //       .insertDataToEditor(v, controller.selection);
+    // });
 
     return true;
+  }
+
+  static final RegExp instReg = RegExp(r'^<inst>');
+
+  // ignore: unintended_html_in_doc_comment
+  /// ai instruct:  <inst>something<
+  static bool handleInstruct(
+      {required QuillController controller, required String character}) {
+    final selection = controller.selection;
+    if (!selection.isCollapsed || selection.end < 5) {
+      return false;
+    }
+
+    final plainText = controller.document.toPlainText();
+
+    if (plainText.isEmpty) {
+      return false;
+    }
+
+    var lastCharIndex = -1;
+    for (var i = selection.end - 1; i >= 0; i--) {
+      if (plainText[i] == '\n' && lastCharIndex == -1) return false;
+
+      if (plainText[i] == character) {
+        lastCharIndex = i;
+        break;
+      }
+    }
+    if (lastCharIndex == -1) return false;
+
+    var subString = plainText.substring(lastCharIndex, selection.end);
+    logger.d("instruction: $subString");
+
+    /// TODO: will be other instructions
+    ///
+    /// handle ai instruction
+    if (instReg.hasMatch(subString)) {
+      controller.document.replace(lastCharIndex, subString.length, "");
+      controller.updateSelection(
+          controller.selection.copyWith(
+              baseOffset: lastCharIndex + 1, extentOffset: lastCharIndex + 1),
+          ChangeSource.local);
+
+      GlobalModel.model.streamChat([
+        ChatMessage(
+            role: "user",
+            content: subString.replaceAll("<inst>", ""),
+            createAt: DateTime.now().millisecondsSinceEpoch)
+      ]).listen((v) {
+        ref
+            ?.read(editorNotifierProvider.notifier)
+            .insertDataToEditor(v, controller.selection);
+      });
+      return true;
+    }
+
+    return false;
   }
 }
