@@ -78,6 +78,15 @@ class Home extends ConsumerWidget {
                   },
                 ),
                 MenuButton(
+                    text: Text("Save As"),
+                    submenu: SubMenu(menuItems: [
+                      MenuButton(
+                          text: Text("Save As Markdown"), onTap: () async {}),
+                      MenuButton(
+                        text: Text("Save As Pdf"),
+                      ),
+                    ])),
+                MenuButton(
                   text: Text("Exit"),
                   shortcutText: "Ctrl+E",
                   shortcut: SingleActivator(
