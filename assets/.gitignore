@@ -1,1 +1,8 @@
+# like: 
+# {
+#     "tag": "text-model",
+#     "llm-base": "https://",
+#     "llm-model-name": "gpt-4o",
+#     "llm-sk": "sk-"
+# }
 config.json

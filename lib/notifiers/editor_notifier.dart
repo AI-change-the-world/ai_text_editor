@@ -53,7 +53,9 @@ class EditorNotifier extends Notifier<EditorState> {
   }
 
   void toggleAi({bool open = true}) {
-    state = state.copyWith(showAI: open);
+    if (state.showAI != open) {
+      state = state.copyWith(showAI: open);
+    }
   }
 
   void scrollToText(String text) {
@@ -91,6 +93,27 @@ class EditorNotifier extends Notifier<EditorState> {
 
   String getText() {
     return _deltaToMarkdown.convert(quillController.document.toDelta());
+  }
+
+  void insertDataToEditor(Object data, TextSelection selection,
+      {bool updateSelection = true}) {
+    quillController.document.insert(selection.baseOffset, data);
+
+    if (updateSelection) {
+      if (data is String) {
+        quillController.updateSelection(
+            quillController.selection.copyWith(
+                baseOffset: selection.baseOffset + data.length,
+                extentOffset: selection.baseOffset + data.length),
+            ChangeSource.local);
+      } else {
+        quillController.updateSelection(
+            quillController.selection.copyWith(
+                baseOffset: selection.baseOffset + 1,
+                extentOffset: selection.baseOffset + 1),
+            ChangeSource.local);
+      }
+    }
   }
 }
 
