@@ -130,6 +130,19 @@ class EditorNotifier extends Notifier<EditorState> {
     }
   }
 
+  void addHistory(String q, String a) {
+    state = state.copyWith(
+      chatHistory: [
+        EditorChatHistory(
+          q: q,
+          a: a,
+          baseOffset: quillController.selection.baseOffset,
+        ),
+        ...state.chatHistory,
+      ],
+    );
+  }
+
   /// FIXME: could raise `The provided text position is not in the current node` exception
   void convertMarkdownToQuill(String markdown) {
     if (markdown.isEmpty) {
@@ -139,10 +152,16 @@ class EditorNotifier extends Notifier<EditorState> {
     Future.microtask(() {
       final delta = _mdToDelta.convert(markdown);
 
+      /// FIXME: not support some markdown syntax
+      delta.operations.removeWhere((element) => element.value is Map);
+
       quillController.document.replace(
           quillController.selection.baseOffset - markdown.length,
           markdown.length,
           delta);
+
+      /// partly solve `text position` exception
+      quillController.moveCursorToEnd();
     }).then((_) {
       setLoading(false);
     });

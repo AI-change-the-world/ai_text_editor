@@ -1,8 +1,10 @@
 import 'package:ai_text_editor/components/editor.dart';
 import 'package:ai_text_editor/notifiers/editor_state.dart';
+import 'package:ai_text_editor/utils/file_utils.dart';
 import 'package:ai_text_editor/utils/logger.dart';
 import 'package:ai_text_editor/utils/markdown_util.dart';
 import 'package:ai_text_editor/notifiers/editor_notifier.dart';
+import 'package:ai_text_editor/utils/toast_utils.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -84,9 +86,21 @@ class Home extends ConsumerWidget {
                     text: Text("Save As"),
                     submenu: SubMenu(menuItems: [
                       MenuButton(
-                          text: Text("Save As Markdown"), onTap: () async {}),
+                          text: Text("Markdown"),
+                          onTap: () async {
+                            final mdString = ref
+                                .read(editorNotifierProvider.notifier)
+                                .getText();
+                            FileUtils.saveFileToMarkdown(mdString).then((p) {
+                              ToastUtils.sucess(
+                                null,
+                                title: "File Saved",
+                                description: "check $p",
+                              );
+                            });
+                          }),
                       MenuButton(
-                        text: Text("Save As Pdf"),
+                        text: Text("Pdf"),
                       ),
                     ])),
                 MenuButton(
@@ -134,7 +148,8 @@ class Home extends ConsumerWidget {
                 MenuButton(
                   text: Text("AI"),
                   onTap: () {
-                    ref.read(editorNotifierProvider.notifier).toggleAi();
+                    ref.read(editorNotifierProvider.notifier).toggleAi(
+                        open: !ref.read(editorNotifierProvider).showAI);
                   },
                 )
               ]))

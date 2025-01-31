@@ -150,6 +150,10 @@ class SomeShortcuts {
                 title: "${generated.length} characters generated",
                 descryption: "replacing markdown to normal text");
 
+            ref
+                ?.read(editorNotifierProvider.notifier)
+                .addHistory(subString.replaceAll("<inst>", ""), generated);
+
             Future.delayed(Duration(milliseconds: 300)).then((_) {
               ref?.read(editorNotifierProvider.notifier).convertMarkdownToQuill(
                     generated,

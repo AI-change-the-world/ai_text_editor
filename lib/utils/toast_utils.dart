@@ -5,7 +5,7 @@ class ToastUtils {
   ToastUtils._();
 
   static void sucess(BuildContext? context,
-      {required String title, String? descryption, VoidCallback? onTap}) {
+      {required String title, String? description, VoidCallback? onTap}) {
     toastification.show(
       context: context,
       type: ToastificationType.success,
@@ -13,8 +13,11 @@ class ToastUtils {
       autoCloseDuration: const Duration(seconds: 2),
       title: Text(title),
       // you can also use RichText widget for title and description parameters
-      description: descryption != null
-          ? RichText(text: TextSpan(text: descryption))
+      description: description != null
+          ? RichText(
+              text: TextSpan(
+                  text: description,
+                  style: TextStyle(color: Colors.greenAccent.withAlpha(128))))
           : null,
       alignment: Alignment.topRight,
       direction: TextDirection.ltr,
