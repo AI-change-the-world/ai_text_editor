@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:menu_bar/menu_bar.dart';
+import 'package:toastification/toastification.dart';
 
 import 'components/ai_widget.dart';
 import 'components/file_structure_view.dart';
@@ -17,12 +18,13 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ProviderScope(
-        child: MaterialApp(
+    return ToastificationWrapper(
+        child: ProviderScope(
+            child: MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'AI Text Editor',
       home: Home(),
-    ));
+    )));
   }
 }
 

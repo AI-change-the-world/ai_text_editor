@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart' hide EditorState;
 import 'package:markdown_quill/markdown_quill.dart';
+// ignore: depend_on_referenced_packages
+import 'package:markdown/markdown.dart' as md;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'editor_state.dart';
@@ -12,6 +14,8 @@ class EditorNotifier extends Notifier<EditorState> {
   late final QuillController quillController = QuillController.basic();
   late final ScrollController scrollController = ScrollController();
   late final _deltaToMarkdown = DeltaToMarkdown();
+  late final _mdDocument = md.Document(encodeHtml: false);
+  late final _mdToDelta = MarkdownToDelta(markdownDocument: _mdDocument);
   StreamController<String> quillTextChangeController =
       StreamController<String>();
   late final FocusNode focusNode = FocusNode();
@@ -114,6 +118,34 @@ class EditorNotifier extends Notifier<EditorState> {
             ChangeSource.local);
       }
     }
+  }
+
+  void convertMarkdownToQuill(String markdown, TextSelection selection) {
+    if (markdown.isEmpty) {
+      return;
+    }
+    final delta = _mdToDelta.convert(markdown);
+
+    print("delta: $delta");
+    quillController.document
+        .replace(selection.baseOffset - markdown.length, markdown.length, "");
+    quillController.updateSelection(
+        quillController.selection.copyWith(
+            baseOffset: selection.baseOffset - markdown.length,
+            extentOffset: selection.baseOffset - markdown.length),
+        ChangeSource.local);
+
+    var totalDelta = quillController.document.toDelta();
+    // totalDelta.push(operation);
+
+    quillController.compose(
+        totalDelta, quillController.selection, ChangeSource.local);
+
+    // quillController.updateSelection(
+    //     quillController.selection.copyWith(
+    //         baseOffset: quillController.selection.baseOffset + delta.length,
+    //         extentOffset: quillController.selection.baseOffset + delta.length),
+    //     ChangeSource.local);
   }
 }
 

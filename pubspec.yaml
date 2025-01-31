@@ -25,6 +25,7 @@ dependencies:
   markdown_quill: ^4.2.0
   menu_bar: ^0.5.3
   riverpod: ^2.6.1
+  toastification: ^2.3.0
   window_manager: ^0.4.3
 
 dev_dependencies:

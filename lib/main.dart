@@ -7,9 +7,15 @@ import 'package:window_manager/window_manager.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  final config = await APPConfig.init();
+  if (config.openAIInfo != null) {
+    GlobalModel.setModel(config.openAIInfo!);
+  } else {
+    logger.e("Model not found");
+  }
   await windowManager.ensureInitialized();
   WindowOptions windowOptions = WindowOptions(
-    title: "AI Text Editor",
+    title: config.appName,
     size: Size(800, 600),
     minimumSize: Size(800, 600),
     backgroundColor: Colors.white,
@@ -19,12 +25,6 @@ void main() async {
     await windowManager.show();
     await windowManager.focus();
   });
-  final model = await initOpenAILikeModel();
-  if (model != null) {
-    GlobalModel.setModel(model);
-  } else {
-    logger.e("Model not found");
-  }
 
   runApp(const App());
 }

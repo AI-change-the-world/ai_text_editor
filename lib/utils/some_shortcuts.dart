@@ -2,6 +2,7 @@ import 'package:ai_packages_core/ai_packages_core.dart';
 import 'package:ai_text_editor/models/ai_model.dart';
 import 'package:ai_text_editor/notifiers/editor_notifier.dart';
 import 'package:ai_text_editor/utils/logger.dart';
+import 'package:ai_text_editor/utils/toast_utils.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -114,22 +115,45 @@ class SomeShortcuts {
     ///
     /// handle ai instruction
     if (instReg.hasMatch(subString)) {
-      controller.document.replace(lastCharIndex, subString.length, "");
-      controller.updateSelection(
-          controller.selection.copyWith(
-              baseOffset: lastCharIndex + 1, extentOffset: lastCharIndex + 1),
-          ChangeSource.local);
+      ref
+          ?.read(editorNotifierProvider.notifier)
+          .insertDataToEditor("</inst>", controller.selection);
 
-      GlobalModel.model.streamChat([
-        ChatMessage(
-            role: "user",
-            content: subString.replaceAll("<inst>", ""),
-            createAt: DateTime.now().millisecondsSinceEpoch)
-      ]).listen((v) {
-        ref
-            ?.read(editorNotifierProvider.notifier)
-            .insertDataToEditor(v, controller.selection);
+      String generated = "";
+      Future.delayed(Duration(milliseconds: 300)).then((_) {
+        controller.document
+            .replace(lastCharIndex, subString.length + "</inst>".length, "");
+        controller.updateSelection(
+            controller.selection.copyWith(
+                baseOffset: lastCharIndex + 1, extentOffset: lastCharIndex + 1),
+            ChangeSource.local);
+
+        GlobalModel.model.streamChat([
+          ChatMessage(
+              role: "user",
+              content: subString.replaceAll("<inst>", ""),
+              createAt: DateTime.now().millisecondsSinceEpoch)
+        ]).listen(
+          (v) {
+            generated += v;
+            ref
+                ?.read(editorNotifierProvider.notifier)
+                .insertDataToEditor(v, controller.selection);
+          },
+          onDone: () {
+            ToastUtils.info(null,
+                title: "${generated.length} characters generated",
+                descryption: "replacing markdown to normal text");
+
+            Future.delayed(Duration(milliseconds: 300)).then((_) {
+              ref
+                  ?.read(editorNotifierProvider.notifier)
+                  .convertMarkdownToQuill(generated, controller.selection);
+            });
+          },
+        );
       });
+
       return true;
     }
 
