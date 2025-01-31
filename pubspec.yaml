@@ -22,6 +22,8 @@ dependencies:
   flutter_riverpod: ^2.6.1
   gpt_markdown: ^1.0.6
   he: ^0.0.2+1
+  isar: ^3.1.0+1
+  isar_flutter_libs: ^3.1.0+1
   langchain: ^0.7.7+2
   langchain_openai: ^0.7.3
   logger: ^2.5.0
@@ -42,6 +44,8 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^5.0.0
+  isar_generator: ^3.1.0+1
+  build_runner: ^2.4.13
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

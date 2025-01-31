@@ -5,6 +5,8 @@ import 'package:ai_text_editor/utils/logger.dart';
 import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart';
 
+import 'isar/database.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final config = await APPConfig.init();
@@ -25,6 +27,7 @@ void main() async {
     await windowManager.show();
     await windowManager.focus();
   });
+  await IsarDatabase().initialDatabase();
 
   runApp(const App());
 }
