@@ -115,6 +115,7 @@ class SomeShortcuts {
     ///
     /// handle ai instruction
     if (instReg.hasMatch(subString)) {
+      ref?.read(editorNotifierProvider.notifier).setLoading(true);
       ref
           ?.read(editorNotifierProvider.notifier)
           .insertDataToEditor("</inst>", controller.selection);
@@ -140,15 +141,19 @@ class SomeShortcuts {
                 ?.read(editorNotifierProvider.notifier)
                 .insertDataToEditor(v, controller.selection);
           },
+          onError: (e) {
+            ToastUtils.error(null, title: "Error", descryption: e.toString());
+            ref?.read(editorNotifierProvider.notifier).setLoading(false);
+          },
           onDone: () {
             ToastUtils.info(null,
                 title: "${generated.length} characters generated",
                 descryption: "replacing markdown to normal text");
 
             Future.delayed(Duration(milliseconds: 300)).then((_) {
-              ref
-                  ?.read(editorNotifierProvider.notifier)
-                  .convertMarkdownToQuill(generated, controller.selection);
+              ref?.read(editorNotifierProvider.notifier).convertMarkdownToQuill(
+                    generated,
+                  );
             });
           },
         );

@@ -413,6 +413,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.4.4"
+  he:
+    dependency: "direct main"
+    description:
+      name: he
+      sha256: "83b3d58bfd015821c4a2aee9ce3ba2977c9f0e33679b466fccea9671dc531662"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.2+1"
   html:
     dependency: transitive
     description:

@@ -1,5 +1,8 @@
 import 'dart:async';
+import 'dart:math';
 
+// ignore: depend_on_referenced_packages
+import 'package:meta/meta.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart' hide EditorState;
 import 'package:flutter_quill/quill_delta.dart';
@@ -121,38 +124,56 @@ class EditorNotifier extends Notifier<EditorState> {
     }
   }
 
-  void convertMarkdownToQuill(String markdown, TextSelection selection) {
+  void setLoading(bool loading) {
+    if (state.loading != loading) {
+      state = state.copyWith(loading: loading);
+    }
+  }
+
+  /// FIXME: could raise `The provided text position is not in the current node` exception
+  void convertMarkdownToQuill(String markdown) {
     if (markdown.isEmpty) {
       return;
     }
-    final delta = _mdToDelta.convert(markdown);
+    setLoading(true);
+    Future.microtask(() {
+      final delta = _mdToDelta.convert(markdown);
 
-    quillController.document
-        .replace(selection.baseOffset - markdown.length, markdown.length, "");
-    quillController.updateSelection(
-        quillController.selection.copyWith(
-            baseOffset: selection.baseOffset - markdown.length,
-            extentOffset: selection.baseOffset - markdown.length),
-        ChangeSource.local);
+      quillController.document.replace(
+          quillController.selection.baseOffset - markdown.length,
+          markdown.length,
+          delta);
+    }).then((_) {
+      setLoading(false);
+    });
+  }
 
-    delta.retain(quillController.selection.baseOffset);
+  @experimental
+  // ignore: unused_element
+  void _mergeDelta(Delta originalDelta, Delta delta, Delta finalDelta) {
+    int minLength = min(originalDelta.length, finalDelta.length);
+    if (minLength == 0) {
+      return;
+    }
+    int index = 0;
+    for (int i = 0; i < minLength; i++) {
+      final op1 = originalDelta.elementAt(i);
+      final op2 = finalDelta.elementAt(i);
+      if (op1 == op2) {
+        index++;
+        continue;
+      } else {
+        finalDelta.operations.insertAll(i + 1, delta.toList());
+        break;
+      }
+    }
 
-    print("delta: $delta");
-
-    quillController.compose(
-        delta, quillController.selection, ChangeSource.local);
-
-    int deltaLength = _calculateDeltaTextLength(delta);
-
-    quillController.updateSelection(
-        quillController.selection.copyWith(
-            baseOffset: quillController.selection.baseOffset + deltaLength,
-            extentOffset: quillController.selection.baseOffset + deltaLength),
-        ChangeSource.local);
+    finalDelta.operations.removeAt(index);
   }
 
   /// 计算Delta对象中插入的文本长度
   /// only support text
+  // ignore: unused_element
   int _calculateDeltaTextLength(Delta delta) {
     int length = 0;
 

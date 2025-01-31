@@ -9,6 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:menu_bar/menu_bar.dart';
 import 'package:toastification/toastification.dart';
+import 'package:he/he.dart';
 
 import 'components/ai_widget.dart';
 import 'components/file_structure_view.dart';
@@ -141,20 +142,33 @@ class Home extends ConsumerWidget {
         child: Scaffold(
           body: Padding(
             padding: EdgeInsets.all(5),
-            child: Row(
+            child: Stack(
               children: [
-                StreamBuilder(
-                    stream: ref
-                        .read(editorNotifierProvider.notifier)
-                        .quillTextChangeStream,
-                    builder: (c, s) {
-                      final models = MarkdownUtil.fromMdString(s.data ?? "");
-                      return FileStructureView(
-                        models: models,
-                      );
-                    }),
-                Expanded(child: Editor()),
-                AiWidget()
+                SizedBox.expand(
+                  child: Row(
+                    children: [
+                      StreamBuilder(
+                          stream: ref
+                              .read(editorNotifierProvider.notifier)
+                              .quillTextChangeStream,
+                          builder: (c, s) {
+                            final models =
+                                MarkdownUtil.fromMdString(s.data ?? "");
+                            return FileStructureView(
+                              models: models,
+                            );
+                          }),
+                      Expanded(child: Editor()),
+                      AiWidget()
+                    ],
+                  ),
+                ),
+                if (ref.watch(editorNotifierProvider.select((v) => v.loading)))
+                  Positioned(
+                    bottom: 10,
+                    right: 10,
+                    child: AnimatedEightTrigrams(size: 50),
+                  )
               ],
             ),
           ),
