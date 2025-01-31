@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart' hide EditorState;
+import 'package:flutter_quill/quill_delta.dart';
 import 'package:markdown_quill/markdown_quill.dart';
 // ignore: depend_on_referenced_packages
 import 'package:markdown/markdown.dart' as md;
@@ -126,7 +127,6 @@ class EditorNotifier extends Notifier<EditorState> {
     }
     final delta = _mdToDelta.convert(markdown);
 
-    print("delta: $delta");
     quillController.document
         .replace(selection.baseOffset - markdown.length, markdown.length, "");
     quillController.updateSelection(
@@ -135,17 +135,37 @@ class EditorNotifier extends Notifier<EditorState> {
             extentOffset: selection.baseOffset - markdown.length),
         ChangeSource.local);
 
-    var totalDelta = quillController.document.toDelta();
-    // totalDelta.push(operation);
+    delta.retain(quillController.selection.baseOffset);
+
+    print("delta: $delta");
 
     quillController.compose(
-        totalDelta, quillController.selection, ChangeSource.local);
+        delta, quillController.selection, ChangeSource.local);
 
-    // quillController.updateSelection(
-    //     quillController.selection.copyWith(
-    //         baseOffset: quillController.selection.baseOffset + delta.length,
-    //         extentOffset: quillController.selection.baseOffset + delta.length),
-    //     ChangeSource.local);
+    int deltaLength = _calculateDeltaTextLength(delta);
+
+    quillController.updateSelection(
+        quillController.selection.copyWith(
+            baseOffset: quillController.selection.baseOffset + deltaLength,
+            extentOffset: quillController.selection.baseOffset + deltaLength),
+        ChangeSource.local);
+  }
+
+  /// 计算Delta对象中插入的文本长度
+  /// only support text
+  int _calculateDeltaTextLength(Delta delta) {
+    int length = 0;
+
+    for (final op in delta.toList()) {
+      if (op.isInsert) {
+        // 如果操作是插入文本，累加文本长度
+        if (op.data is String) {
+          length += (op.data as String).length;
+        }
+      }
+    }
+
+    return length;
   }
 }
 

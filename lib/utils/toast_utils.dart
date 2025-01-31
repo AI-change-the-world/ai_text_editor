@@ -65,7 +65,10 @@ class ToastUtils {
       title: Text(title),
       // you can also use RichText widget for title and description parameters
       description: descryption != null
-          ? RichText(text: TextSpan(text: descryption))
+          ? RichText(
+              text: TextSpan(
+                  text: descryption,
+                  style: TextStyle(color: Colors.blueAccent.withAlpha(128))))
           : null,
       alignment: Alignment.topRight,
       direction: TextDirection.ltr,
