@@ -1,0 +1,66 @@
+# .github\workflows\build.yml
+name: build and release windows 
+on:
+  push:
+    branches:
+      - release
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.27.1
+
+      - name: Cache pubspec
+        id: cache-pubspec
+        uses: actions/cache@v3
+        with:
+          path: |
+            ${{ env.FLUTTER_HOME }}/.pub-cache
+            **/.flutter-plugins
+            **/.flutter-plugin-dependencies
+            **/.dart_tool/package_config.json
+          key: pubspec-${{ hashFiles('**/pubspec.lock') }}
+          restore-keys: |
+            pubspec-
+
+      - name: Run pub get
+        working-directory: save_my_back
+        run: | 
+          flutter pub get
+
+      - name: Bump build number
+        working-directory: save_my_back
+        run: |
+          flutter pub global activate cider
+
+      - name: Build windows
+        working-directory: save_my_back
+        run: |
+          flutter config --enable-windows-desktop
+          flutter build windows --release
+
+      - name: Set tag name
+        working-directory: save_my_back
+        run: echo "tag_name=v$(cider version)" >> $env:GITHUB_ENV
+
+      - name: Archive release
+        uses: thedoctor0/zip-release@0.7.6
+        with:
+          type: 'zip'
+          filename: 'windows.zip'
+          directory: save_my_back/build/windows/x64/runner/Release
+
+      - name: Publish release
+        uses: ncipollo/release-action@v1
+        with:
+          allowUpdates: true
+          artifacts: save_my_back/build/windows/x64/runner/Release/windows.zip
+          generateReleaseNotes: true
+          tag: ${{ env.tag_name }}
+          token: ${{ secrets.RELEASE_TOKEN }}
