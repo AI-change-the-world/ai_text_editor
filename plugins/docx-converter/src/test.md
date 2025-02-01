@@ -1,13 +1,3 @@
-// ignore_for_file: unnecessary_string_escapes, avoid_print
-
-import 'dart:convert';
-
-import 'package:flutter/material.dart';
-// ignore: depend_on_referenced_packages
-import 'package:markdown/markdown.dart' as md;
-import 'package:markdown_quill/markdown_quill.dart';
-
-const String mdString = """
 ## ChatGPT Response
 
 ----
@@ -45,29 +35,3 @@ You can also use LaTeX for mathematical expressions. Here's an example:
 ### Conclusion
 
 Markdown and LaTeX can be powerful tools for formatting text and mathematical expressions in your Flutter app. If you have any questions or need further assistance, feel free to ask!
-
-""";
-
-void main() {
-  late final mdDocument = md.Document(encodeHtml: false);
-  late final mdToDelta = MarkdownToDelta(markdownDocument: mdDocument);
-  final delta = mdToDelta.convert(mdString);
-  final text = delta.toJson();
-  print(jsonEncode(text));
-
-  for (final op in delta.toList()) {
-    print("op.key  ${op.key}  ${op.value}  ${op.value.runtimeType}");
-  }
-  runApp(App());
-}
-
-class App extends StatelessWidget {
-  const App({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Container(),
-    );
-  }
-}
