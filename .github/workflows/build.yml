@@ -54,13 +54,13 @@ jobs:
         with:
           type: 'zip'
           filename: 'windows.zip'
-          directory: save_my_back/build/windows/x64/runner/Release
+          directory: build/windows/x64/runner/Release
 
       - name: Publish release
         uses: ncipollo/release-action@v1
         with:
           allowUpdates: true
-          artifacts: save_my_back/build/windows/x64/runner/Release/windows.zip
+          artifacts: build/windows/x64/runner/Release/windows.zip
           generateReleaseNotes: true
           tag: ${{ env.tag_name }}
           token: ${{ secrets.RELEASE_TOKEN }}
