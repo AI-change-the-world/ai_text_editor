@@ -14,7 +14,7 @@ jobs:
       - name: Install flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: 3.27.1
+          flutter-version: 3.27.3
 
       - name: Cache pubspec
         id: cache-pubspec
