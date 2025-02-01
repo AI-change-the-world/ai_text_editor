@@ -13,6 +13,7 @@ class FileStructureView extends ConsumerWidget {
     final state =
         ref.watch(editorNotifierProvider.select((v) => v.showStructure));
     return AnimatedContainer(
+      decoration: BoxDecoration(color: Colors.grey[100]),
       duration: Duration(milliseconds: 300),
       width: state ? Styles.structureWidth : 0,
       child: ListView.builder(

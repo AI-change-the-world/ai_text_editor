@@ -1,9 +1,11 @@
 import 'package:ai_text_editor/components/editor.dart';
+import 'package:ai_text_editor/components/faded_text.dart';
 import 'package:ai_text_editor/notifiers/editor_state.dart';
 import 'package:ai_text_editor/utils/file_utils.dart';
 import 'package:ai_text_editor/utils/logger.dart';
 import 'package:ai_text_editor/utils/markdown_util.dart';
 import 'package:ai_text_editor/notifiers/editor_notifier.dart';
+import 'package:ai_text_editor/utils/styles.dart';
 import 'package:ai_text_editor/utils/toast_utils.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
@@ -25,6 +27,7 @@ class App extends StatelessWidget {
         child: ProviderScope(
             child: MaterialApp(
       debugShowCheckedModeBanner: false,
+      theme: Styles.lightTheme,
       title: 'AI Text Editor',
       home: Home(),
     )));
@@ -36,157 +39,175 @@ class Home extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return MenuBarWidget(
-        menuButtonStyle: ButtonStyle(
-            fixedSize: WidgetStateProperty.all(Size.fromHeight(25)),
-            padding: WidgetStateProperty.all(
-                EdgeInsets.only(left: 16, right: 16, top: 4, bottom: 4))),
-        barButtonStyle: ButtonStyle(
-            alignment: Alignment.center,
-            padding: WidgetStateProperty.all(EdgeInsets.all(1)),
-            shape: WidgetStateProperty.all(RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(4),
-            ))),
-        barStyle: MenuStyle(
-            fixedSize: WidgetStateProperty.all(Size.fromHeight(25)),
-            padding:
-                WidgetStatePropertyAll(EdgeInsets.symmetric(vertical: 8.0)),
-            shape: WidgetStateProperty.all(
-              RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(0),
-                side: BorderSide.none,
-              ),
-            )),
-        barButtons: [
-          BarButton(
-              text: Center(
-                child: Text("File"),
-              ),
-              submenu: SubMenu(menuItems: [
-                MenuButton(
-                    text: Text("Open"),
-                    onTap: () async {
-                      await openFile();
-                    },
-                    shortcut:
-                        SingleActivator(LogicalKeyboardKey.keyO, control: true),
-                    shortcutText: "Ctrl+O"),
-                MenuButton(
-                  text: Text("Save"),
-                  shortcutText: "Ctrl+S",
-                  shortcut: SingleActivator(
-                    LogicalKeyboardKey.keyS,
-                    control: true,
+    return Stack(
+      children: [
+        SizedBox.expand(
+          child: MenuBarWidget(
+            menuButtonStyle: ButtonStyle(
+                backgroundColor: WidgetStatePropertyAll(Colors.grey[200]),
+                fixedSize: WidgetStateProperty.all(Size.fromHeight(25)),
+                padding: WidgetStateProperty.all(
+                    EdgeInsets.only(left: 16, right: 16, top: 4, bottom: 4))),
+            barButtonStyle: ButtonStyle(
+                alignment: Alignment.center,
+                padding: WidgetStateProperty.all(EdgeInsets.all(1)),
+                shape: WidgetStateProperty.all(RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(4),
+                ))),
+            barStyle: MenuStyle(
+                backgroundColor: WidgetStatePropertyAll(Colors.grey[200]),
+                fixedSize: WidgetStateProperty.all(Size.fromHeight(25)),
+                padding:
+                    WidgetStatePropertyAll(EdgeInsets.symmetric(vertical: 8.0)),
+                shape: WidgetStateProperty.all(
+                  RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(0),
+                    side: BorderSide.none,
                   ),
-                  onTap: () {
-                    print(ref.read(editorNotifierProvider.notifier).getText());
-                  },
-                ),
-                MenuButton(
-                    text: Text("Save As"),
-                    submenu: SubMenu(menuItems: [
-                      MenuButton(
-                          text: Text("Markdown"),
-                          onTap: () async {
-                            final mdString = ref
-                                .read(editorNotifierProvider.notifier)
-                                .getText();
-                            FileUtils.saveFileToMarkdown(mdString).then((p) {
-                              ToastUtils.sucess(
-                                null,
-                                title: "File Saved",
-                                description: "check $p",
-                              );
-                            });
-                          }),
-                      MenuButton(
-                        text: Text("Pdf"),
+                )),
+            barButtons: [
+              BarButton(
+                  text: Center(
+                    child: Text("File"),
+                  ),
+                  submenu: SubMenu(menuItems: [
+                    MenuButton(
+                        text: Text("Open"),
+                        onTap: () async {
+                          await openFile();
+                        },
+                        shortcut: SingleActivator(LogicalKeyboardKey.keyO,
+                            control: true),
+                        shortcutText: "Ctrl+O"),
+                    MenuButton(
+                      text: Text("Save"),
+                      shortcutText: "Ctrl+S",
+                      shortcut: SingleActivator(
+                        LogicalKeyboardKey.keyS,
+                        control: true,
                       ),
-                    ])),
-                MenuButton(
-                  text: Text("Exit"),
-                  shortcutText: "Ctrl+E",
-                  shortcut: SingleActivator(
-                    LogicalKeyboardKey.keyE,
-                    control: true,
+                      onTap: () {
+                        print(ref
+                            .read(editorNotifierProvider.notifier)
+                            .getText());
+                      },
+                    ),
+                    MenuButton(
+                        text: Text("Save As"),
+                        submenu: SubMenu(menuItems: [
+                          MenuButton(
+                              text: Text("Markdown"),
+                              onTap: () async {
+                                final mdString = ref
+                                    .read(editorNotifierProvider.notifier)
+                                    .getText();
+                                if (mdString.isEmpty) {
+                                  ToastUtils.error(
+                                    null,
+                                    title: "Error",
+                                    description: "Editor is empty",
+                                  );
+                                  return;
+                                }
+                                FileUtils.saveFileToMarkdown(mdString)
+                                    .then((p) {
+                                  ToastUtils.sucess(
+                                    null,
+                                    title: "File Saved",
+                                    description: "check $p",
+                                  );
+                                });
+                              }),
+                          MenuButton(
+                            text: Text("Pdf"),
+                          ),
+                        ])),
+                    MenuButton(
+                      text: Text("Exit"),
+                      shortcutText: "Ctrl+E",
+                      shortcut: SingleActivator(
+                        LogicalKeyboardKey.keyE,
+                        control: true,
+                      ),
+                      onTap: () {
+                        logger.d("Exiting");
+                        SystemNavigator.pop();
+                      },
+                    )
+                  ])),
+              BarButton(
+                  text: Center(
+                    child: Text("View"),
                   ),
-                  onTap: () {
-                    logger.d("Exiting");
-                    SystemNavigator.pop();
-                  },
-                )
-              ])),
-          BarButton(
-              text: Center(
-                child: Text("View"),
+                  submenu: SubMenu(menuItems: [
+                    MenuButton(
+                      text: Text("Structure"),
+                      shortcutText: "Ctrl+P",
+                      shortcut: SingleActivator(
+                        LogicalKeyboardKey.keyP,
+                        control: true,
+                      ),
+                      onTap: () {
+                        ref
+                            .read(editorNotifierProvider.notifier)
+                            .toggleStructure();
+                      },
+                    ),
+                    MenuButton(
+                      text: Text("Toolbar"),
+                      shortcutText: "Ctrl+T",
+                      shortcut: SingleActivator(
+                        LogicalKeyboardKey.keyT,
+                        control: true,
+                      ),
+                      onTap: () {
+                        ref
+                            .read(editorNotifierProvider.notifier)
+                            .changeToolbarPosition(ToolbarPosition.top);
+                      },
+                    ),
+                    MenuButton(
+                      text: Text("AI"),
+                      onTap: () {
+                        ref.read(editorNotifierProvider.notifier).toggleAi(
+                            open: !ref.read(editorNotifierProvider).showAI);
+                      },
+                    )
+                  ]))
+            ],
+            child: Scaffold(
+              body: Row(
+                children: [
+                  StreamBuilder(
+                      stream: ref
+                          .read(editorNotifierProvider.notifier)
+                          .quillTextChangeStream,
+                      builder: (c, s) {
+                        final models = MarkdownUtil.fromMdString(s.data ?? "");
+                        return FileStructureView(
+                          models: models,
+                        );
+                      }),
+                  Expanded(child: Editor()),
+                  AiWidget()
+                ],
               ),
-              submenu: SubMenu(menuItems: [
-                MenuButton(
-                  text: Text("Structure"),
-                  shortcutText: "Ctrl+P",
-                  shortcut: SingleActivator(
-                    LogicalKeyboardKey.keyP,
-                    control: true,
-                  ),
-                  onTap: () {
-                    ref.read(editorNotifierProvider.notifier).toggleStructure();
-                  },
-                ),
-                MenuButton(
-                  text: Text("Toolbar"),
-                  shortcutText: "Ctrl+T",
-                  shortcut: SingleActivator(
-                    LogicalKeyboardKey.keyT,
-                    control: true,
-                  ),
-                  onTap: () {
-                    ref
-                        .read(editorNotifierProvider.notifier)
-                        .changeToolbarPosition(ToolbarPosition.top);
-                  },
-                ),
-                MenuButton(
-                  text: Text("AI"),
-                  onTap: () {
-                    ref.read(editorNotifierProvider.notifier).toggleAi(
-                        open: !ref.read(editorNotifierProvider).showAI);
-                  },
-                )
-              ]))
-        ],
-        child: Scaffold(
-          body: Padding(
-            padding: EdgeInsets.all(5),
-            child: Stack(
-              children: [
-                SizedBox.expand(
-                  child: Row(
-                    children: [
-                      StreamBuilder(
-                          stream: ref
-                              .read(editorNotifierProvider.notifier)
-                              .quillTextChangeStream,
-                          builder: (c, s) {
-                            final models =
-                                MarkdownUtil.fromMdString(s.data ?? "");
-                            return FileStructureView(
-                              models: models,
-                            );
-                          }),
-                      Expanded(child: Editor()),
-                      AiWidget()
-                    ],
-                  ),
-                ),
-                if (ref.watch(editorNotifierProvider.select((v) => v.loading)))
-                  Positioned(
-                    bottom: 10,
-                    right: 10,
-                    child: AnimatedEightTrigrams(size: 50),
-                  )
-              ],
             ),
           ),
-        ));
+        ),
+        if (ref.watch(editorNotifierProvider.select((v) => v.loading)))
+          Positioned(
+            bottom: 10,
+            right: 10,
+            child: AnimatedEightTrigrams(size: 50),
+          ),
+        if (ref.watch(editorNotifierProvider.select((v) => v.saved)))
+          Positioned(
+            top: 0,
+            right: 10,
+            child: FadedText(),
+          )
+      ],
+    );
   }
 }

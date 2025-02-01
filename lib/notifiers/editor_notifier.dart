@@ -31,6 +31,7 @@ class EditorNotifier extends Notifier<EditorState> {
     quillController.document.changes.listen((event) {
       // ref.read(editorNotifierProvider.notifier).getText();
       quillTextChangeController.add(getText());
+      changeSavedStatus(true);
     });
     ref.onDispose(() {
       quillController.dispose();
@@ -66,9 +67,20 @@ class EditorNotifier extends Notifier<EditorState> {
     }
   }
 
+  void changeSavedStatus(bool saved) {
+    if (saved != state.saved) state = state.copyWith(saved: saved);
+  }
+
+  final firstCharChineseReg = RegExp(r'^\p{Script=Han}', unicode: true);
+  final lastCharChineseReg = RegExp(r'\p{Script=Han}$', unicode: true);
+
+  @experimental
   void scrollToText(String text) {
-    final docPositions = quillController.document
-        .search(text, caseSensitive: true, wholeWord: true);
+    bool isFirstCharChinese = firstCharChineseReg.hasMatch(text);
+    bool isLastCharChinese = lastCharChineseReg.hasMatch(text);
+    final docPositions = quillController.document.search(text,
+        caseSensitive: true,
+        wholeWord: !(isFirstCharChinese || isLastCharChinese));
 
     if (docPositions.isEmpty) {
       return;

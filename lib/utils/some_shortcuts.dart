@@ -142,7 +142,7 @@ class SomeShortcuts {
                 .insertDataToEditor(v, controller.selection);
           },
           onError: (e) {
-            ToastUtils.error(null, title: "Error", descryption: e.toString());
+            ToastUtils.error(null, title: "Error", description: e.toString());
             ref?.read(editorNotifierProvider.notifier).setLoading(false);
           },
           onDone: () {

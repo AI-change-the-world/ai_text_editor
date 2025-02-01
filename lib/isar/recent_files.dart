@@ -8,4 +8,5 @@ class RecentFiles {
 
   String? path;
   int createdAt = DateTime.now().millisecondsSinceEpoch;
+  int lastEdited = DateTime.now().millisecondsSinceEpoch;
 }

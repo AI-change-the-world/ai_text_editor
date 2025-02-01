@@ -32,6 +32,7 @@ class _AiWidgetState extends ConsumerState<AiWidget>
   Widget build(BuildContext context) {
     final state = ref.watch(editorNotifierProvider.select((v) => v.showAI));
     return AnimatedContainer(
+      decoration: BoxDecoration(color: Colors.grey[100]),
       duration: Duration(milliseconds: 300),
       width: state ? Styles.structureWidth : 0,
       child: Column(

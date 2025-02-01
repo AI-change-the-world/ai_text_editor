@@ -22,7 +22,7 @@ class IsarDatabase {
     final dir = await getApplicationSupportDirectory();
     isar = await Isar.open(
       schemas,
-      name: "DontSitAllDay",
+      name: "AITextEditor",
       directory: dir.path,
     );
   }

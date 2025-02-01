@@ -22,8 +22,13 @@ const RecentFilesSchema = CollectionSchema(
       name: r'createdAt',
       type: IsarType.long,
     ),
-    r'path': PropertySchema(
+    r'lastEdited': PropertySchema(
       id: 1,
+      name: r'lastEdited',
+      type: IsarType.long,
+    ),
+    r'path': PropertySchema(
+      id: 2,
       name: r'path',
       type: IsarType.string,
     )
@@ -64,7 +69,8 @@ void _recentFilesSerialize(
   Map<Type, List<int>> allOffsets,
 ) {
   writer.writeLong(offsets[0], object.createdAt);
-  writer.writeString(offsets[1], object.path);
+  writer.writeLong(offsets[1], object.lastEdited);
+  writer.writeString(offsets[2], object.path);
 }
 
 RecentFiles _recentFilesDeserialize(
@@ -76,7 +82,8 @@ RecentFiles _recentFilesDeserialize(
   final object = RecentFiles();
   object.createdAt = reader.readLong(offsets[0]);
   object.id = id;
-  object.path = reader.readStringOrNull(offsets[1]);
+  object.lastEdited = reader.readLong(offsets[1]);
+  object.path = reader.readStringOrNull(offsets[2]);
   return object;
 }
 
@@ -90,6 +97,8 @@ P _recentFilesDeserializeProp<P>(
     case 0:
       return (reader.readLong(offset)) as P;
     case 1:
+      return (reader.readLong(offset)) as P;
+    case 2:
       return (reader.readStringOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -298,6 +307,62 @@ extension RecentFilesQueryFilter
     });
   }
 
+  QueryBuilder<RecentFiles, RecentFiles, QAfterFilterCondition>
+      lastEditedEqualTo(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'lastEdited',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<RecentFiles, RecentFiles, QAfterFilterCondition>
+      lastEditedGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'lastEdited',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<RecentFiles, RecentFiles, QAfterFilterCondition>
+      lastEditedLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'lastEdited',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<RecentFiles, RecentFiles, QAfterFilterCondition>
+      lastEditedBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'lastEdited',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
   QueryBuilder<RecentFiles, RecentFiles, QAfterFilterCondition> pathIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNull(
@@ -467,6 +532,18 @@ extension RecentFilesQuerySortBy
     });
   }
 
+  QueryBuilder<RecentFiles, RecentFiles, QAfterSortBy> sortByLastEdited() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'lastEdited', Sort.asc);
+    });
+  }
+
+  QueryBuilder<RecentFiles, RecentFiles, QAfterSortBy> sortByLastEditedDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'lastEdited', Sort.desc);
+    });
+  }
+
   QueryBuilder<RecentFiles, RecentFiles, QAfterSortBy> sortByPath() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'path', Sort.asc);
@@ -506,6 +583,18 @@ extension RecentFilesQuerySortThenBy
     });
   }
 
+  QueryBuilder<RecentFiles, RecentFiles, QAfterSortBy> thenByLastEdited() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'lastEdited', Sort.asc);
+    });
+  }
+
+  QueryBuilder<RecentFiles, RecentFiles, QAfterSortBy> thenByLastEditedDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'lastEdited', Sort.desc);
+    });
+  }
+
   QueryBuilder<RecentFiles, RecentFiles, QAfterSortBy> thenByPath() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'path', Sort.asc);
@@ -524,6 +613,12 @@ extension RecentFilesQueryWhereDistinct
   QueryBuilder<RecentFiles, RecentFiles, QDistinct> distinctByCreatedAt() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'createdAt');
+    });
+  }
+
+  QueryBuilder<RecentFiles, RecentFiles, QDistinct> distinctByLastEdited() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'lastEdited');
     });
   }
 
@@ -546,6 +641,12 @@ extension RecentFilesQueryProperty
   QueryBuilder<RecentFiles, int, QQueryOperations> createdAtProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'createdAt');
+    });
+  }
+
+  QueryBuilder<RecentFiles, int, QQueryOperations> lastEditedProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'lastEdited');
     });
   }
 
