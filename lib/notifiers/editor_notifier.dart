@@ -21,6 +21,32 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'editor_state.dart';
 import '../utils/styles.dart';
 
+class CurrentPositionNotifier extends Notifier<double> {
+  @override
+  double build() {
+    return 0;
+  }
+
+  changePosition(double s) {
+    if (s != state) {
+      state = s;
+    }
+  }
+}
+
+class SavedNotifier extends Notifier<bool> {
+  @override
+  bool build() {
+    return false;
+  }
+
+  changeSavedStatus(bool saved) {
+    if (saved != state) {
+      state = saved;
+    }
+  }
+}
+
 class EditorNotifier extends Notifier<EditorState> {
   late final QuillController quillController = QuillController.basic();
   late final ScrollController scrollController = ScrollController();
@@ -32,9 +58,6 @@ class EditorNotifier extends Notifier<EditorState> {
       StreamController<String>();
 
   Stream<String> get quillTextChangeStream => quillTextChangeController.stream;
-  StreamController<double> scrollPositionController =
-      StreamController<double>();
-  StreamController<double> scrollPositionStream = StreamController<double>();
 
   @override
   EditorState build() {
@@ -46,14 +69,15 @@ class EditorNotifier extends Notifier<EditorState> {
     scrollController.addListener(() {
       final h = _getEditorHeight();
       final totalHeight = h + scrollController.position.maxScrollExtent;
-      double currentHeight = scrollController.position.pixels > 0
-          ? scrollController.position.pixels
-          : 0 + h;
+      double currentHeight = (scrollController.position.pixels > 0
+              ? scrollController.position.pixels
+              : 0) +
+          h;
       if (currentHeight > totalHeight) currentHeight = totalHeight;
       if (totalHeight == 0) {
-        scrollPositionController.add(currentHeight);
+        _changeCurrentPosition(0);
       } else {
-        scrollPositionController.add(currentHeight / totalHeight);
+        _changeCurrentPosition(currentHeight / totalHeight);
       }
     });
     ref.onDispose(() {
@@ -62,6 +86,10 @@ class EditorNotifier extends Notifier<EditorState> {
     });
 
     return EditorState();
+  }
+
+  void _changeCurrentPosition(double p) {
+    ref.read(currentPositionProvider.notifier).changePosition(p);
   }
 
   double _getEditorHeight() {
@@ -97,7 +125,8 @@ class EditorNotifier extends Notifier<EditorState> {
   }
 
   void changeSavedStatus(bool saved) {
-    if (saved != state.saved) state = state.copyWith(saved: saved);
+    // if (saved != state.saved) state = state.copyWith(saved: saved);
+    ref.read(savedNotifierProvider.notifier).changeSavedStatus(saved);
   }
 
   final firstCharChineseReg = RegExp(r'^\p{Script=Han}', unicode: true);
@@ -286,3 +315,11 @@ class EditorNotifier extends Notifier<EditorState> {
 
 final editorNotifierProvider =
     NotifierProvider<EditorNotifier, EditorState>(EditorNotifier.new);
+
+final currentPositionProvider =
+    NotifierProvider<CurrentPositionNotifier, double>(
+  CurrentPositionNotifier.new,
+);
+
+final savedNotifierProvider =
+    NotifierProvider<SavedNotifier, bool>(SavedNotifier.new);

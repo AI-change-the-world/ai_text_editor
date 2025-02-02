@@ -263,7 +263,6 @@ class ToolbarWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    logger.d("position: $position");
     Widget child;
     if (position == ToolbarPosition.left || position == ToolbarPosition.right) {
       child = SizedBox.fromSize(

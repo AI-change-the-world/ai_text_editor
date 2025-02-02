@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:ai_text_editor/components/editor.dart';
 import 'package:ai_text_editor/components/faded_text.dart';
+import 'package:ai_text_editor/components/position_widget.dart';
 import 'package:ai_text_editor/notifiers/editor_state.dart';
 import 'package:ai_text_editor/utils/file_utils.dart';
 import 'package:ai_text_editor/utils/logger.dart';
@@ -306,12 +307,17 @@ class Home extends ConsumerWidget {
             right: 10,
             child: AnimatedEightTrigrams(size: 50),
           ),
-        if (ref.watch(editorNotifierProvider.select((v) => v.saved)))
+        if (ref.watch(savedNotifierProvider))
           Positioned(
             top: 0,
             right: 10,
             child: FadedText(),
-          )
+          ),
+        Positioned(
+          right: 100,
+          top: 1,
+          child: PositionWidget(),
+        )
       ],
     );
   }

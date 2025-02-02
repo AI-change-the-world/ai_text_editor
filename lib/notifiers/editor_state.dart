@@ -18,7 +18,6 @@ class EditorState {
   final bool showAI;
   final ToolbarPosition toolbarPosition;
   final bool loading;
-  final bool saved;
   final String? currentFilePath;
   final List<EditorChatHistory> chatHistory;
 
@@ -28,7 +27,6 @@ class EditorState {
     this.toolbarPosition = ToolbarPosition.none,
     this.loading = false,
     this.chatHistory = const [],
-    this.saved = false,
     this.currentFilePath,
   });
 
@@ -40,6 +38,7 @@ class EditorState {
     List<EditorChatHistory>? chatHistory,
     bool? saved,
     String? currentFilePath,
+    double? currentPosition,
   }) {
     return EditorState(
       showStructure: showStructure ?? this.showStructure,
@@ -47,7 +46,6 @@ class EditorState {
       toolbarPosition: toolbarPosition ?? this.toolbarPosition,
       loading: loading ?? this.loading,
       chatHistory: chatHistory ?? this.chatHistory,
-      saved: saved ?? this.saved,
       currentFilePath: currentFilePath,
     );
   }
