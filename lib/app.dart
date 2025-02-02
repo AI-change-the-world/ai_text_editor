@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:ai_text_editor/components/editor.dart';
 import 'package:ai_text_editor/components/faded_text.dart';
 import 'package:ai_text_editor/notifiers/editor_state.dart';
@@ -33,6 +35,11 @@ class App extends StatelessWidget {
     )));
   }
 }
+
+const XTypeGroup typeGroup = XTypeGroup(
+  label: 'delta',
+  extensions: <String>['json'],
+);
 
 class Home extends ConsumerWidget {
   const Home({super.key});
@@ -74,7 +81,16 @@ class Home extends ConsumerWidget {
                     MenuButton(
                         text: Text("Open"),
                         onTap: () async {
-                          await openFile();
+                          await openFile(acceptedTypeGroups: [typeGroup])
+                              .then((v) {
+                            if (v == null) {
+                              return;
+                            }
+                            File f = File(v.path);
+                            ref
+                                .read(editorNotifierProvider.notifier)
+                                .loadFromFile(f);
+                          });
                         },
                         shortcut: SingleActivator(LogicalKeyboardKey.keyO,
                             control: true),
@@ -87,16 +103,49 @@ class Home extends ConsumerWidget {
                         control: true,
                       ),
                       onTap: () {
-                        print(ref
-                            .read(editorNotifierProvider.notifier)
-                            .getText());
+                        final j =
+                            ref.read(editorNotifierProvider.notifier).getJson();
+                        if (j.isEmpty) {
+                          ToastUtils.error(
+                            null,
+                            title: "Error",
+                            description: "Editor is empty",
+                          );
+                          return;
+                        }
+
+                        /// TODO 判断这个文件是否已经被储存过
+                        final filename = "${DateTime.now()}.json";
+                        FileUtils.saveFileToJson(j, filename: filename)
+                            .then((p) {
+                          ToastUtils.sucess(
+                            null,
+                            title: "File Saved",
+                            description: "check $p",
+                          );
+                          ref
+                              .read(editorNotifierProvider.notifier)
+                              .setLoading(false);
+                        });
                       },
                     ),
                     MenuButton(
-                        text: Text("Save As"),
+                        text: Text("Export As"),
                         submenu: SubMenu(menuItems: [
                           MenuButton(
-                              text: Text("Markdown"),
+                              text: Row(
+                                children: [
+                                  Expanded(child: Text("Markdown")),
+                                  Tooltip(
+                                    message: "Experimental feature",
+                                    child: Icon(
+                                      Icons.info_outline,
+                                      color: Colors.grey,
+                                      size: 15,
+                                    ),
+                                  )
+                                ],
+                              ),
                               onTap: () async {
                                 final mdString = ref
                                     .read(editorNotifierProvider.notifier)
@@ -119,7 +168,63 @@ class Home extends ConsumerWidget {
                                 });
                               }),
                           MenuButton(
-                            text: Text("Pdf"),
+                            text: Row(
+                              children: [
+                                Expanded(child: Text("Pdf")),
+                                Tooltip(
+                                  message: "Experimental feature",
+                                  child: Icon(
+                                    Icons.info_outline,
+                                    color: Colors.grey,
+                                    size: 15,
+                                  ),
+                                )
+                              ],
+                            ),
+                          ),
+                          MenuButton(
+                            onTap: () {
+                              ref
+                                  .read(editorNotifierProvider.notifier)
+                                  .getImage()
+                                  .then((v) {
+                                if (v == null) {
+                                  ToastUtils.error(
+                                    null,
+                                    title: "Error",
+                                    description: "Convert failed",
+                                  );
+                                } else {
+                                  FileUtils.saveFileToImage(v).then((p) {
+                                    ToastUtils.sucess(
+                                      null,
+                                      title: "File Saved",
+                                      description: "check $p",
+                                    );
+                                  });
+                                }
+                              });
+                            },
+                            text: Row(
+                              children: [
+                                Expanded(child: Text("Image")),
+                              ],
+                            ),
+                          ),
+                          MenuButton(
+                            text: Row(
+                              children: [
+                                Expanded(child: Text("Docx")),
+                                Tooltip(
+                                  message: "Experimental feature",
+                                  child: Icon(
+                                    Icons.info_outline,
+                                    color: Colors.grey,
+                                    size: 15,
+                                  ),
+                                )
+                              ],
+                            ),
                           ),
                         ])),
                     MenuButton(

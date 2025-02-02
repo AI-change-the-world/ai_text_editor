@@ -1,5 +1,4 @@
-use docx_rs::{Docx, Style, StyleType};
-use serde::de;
+use docx_rs::{Docx, Style};
 
 use crate::delta::{DeltaOperation, Insert};
 

@@ -724,6 +724,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.1.0+1"
+  isolate_transformer:
+    dependency: transitive
+    description:
+      name: isolate_transformer
+      sha256: c938216e83587cd2b42eed0807e5f73b73edcbc1e7d456456cf63359cd85eae1
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.2.2"
   js:
     dependency: transitive
     description:
@@ -804,6 +812,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "5.1.1"
+  listview_screenshot:
+    dependency: "direct main"
+    description:
+      name: listview_screenshot
+      sha256: a028b0fab9ffd5dfb257d38ba2e09fdcdde4549bfa41f0d0402e32ab65755549
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.2.0"
   logger:
     dependency: "direct main"
     description:

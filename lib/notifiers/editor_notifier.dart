@@ -1,13 +1,20 @@
-import 'dart:async';
-import 'dart:math';
+// ignore_for_file: depend_on_referenced_packages
 
-// ignore: depend_on_referenced_packages
+import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
+import 'dart:math';
+import 'dart:typed_data';
+
+import 'package:ai_text_editor/utils/logger.dart';
+import 'package:ai_text_editor/utils/toast_utils.dart';
+import 'package:listview_screenshot/listview_screenshot.dart';
 import 'package:meta/meta.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart' hide EditorState;
 import 'package:flutter_quill/quill_delta.dart';
 import 'package:markdown_quill/markdown_quill.dart';
-// ignore: depend_on_referenced_packages
+
 import 'package:markdown/markdown.dart' as md;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -20,11 +27,14 @@ class EditorNotifier extends Notifier<EditorState> {
   late final _deltaToMarkdown = DeltaToMarkdown();
   late final _mdDocument = md.Document(encodeHtml: false);
   late final _mdToDelta = MarkdownToDelta(markdownDocument: _mdDocument);
+  late final FocusNode focusNode = FocusNode();
   StreamController<String> quillTextChangeController =
       StreamController<String>();
-  late final FocusNode focusNode = FocusNode();
 
   Stream<String> get quillTextChangeStream => quillTextChangeController.stream;
+  StreamController<double> scrollPositionController =
+      StreamController<double>();
+  StreamController<double> scrollPositionStream = StreamController<double>();
 
   @override
   EditorState build() {
@@ -33,12 +43,31 @@ class EditorNotifier extends Notifier<EditorState> {
       quillTextChangeController.add(getText());
       changeSavedStatus(true);
     });
+    scrollController.addListener(() {
+      final h = _getEditorHeight();
+      final totalHeight = h + scrollController.position.maxScrollExtent;
+      double currentHeight = scrollController.position.pixels > 0
+          ? scrollController.position.pixels
+          : 0 + h;
+      if (currentHeight > totalHeight) currentHeight = totalHeight;
+      if (totalHeight == 0) {
+        scrollPositionController.add(currentHeight);
+      } else {
+        scrollPositionController.add(currentHeight / totalHeight);
+      }
+    });
     ref.onDispose(() {
       quillController.dispose();
       scrollController.dispose();
     });
 
     return EditorState();
+  }
+
+  double _getEditorHeight() {
+    final RenderBox renderBox =
+        editorKey.currentContext?.findRenderObject() as RenderBox;
+    return renderBox.size.height;
   }
 
   double getCurrentHeight(BuildContext context) {
@@ -111,6 +140,7 @@ class EditorNotifier extends Notifier<EditorState> {
     }
   }
 
+  /// markdown string
   String getText() {
     return _deltaToMarkdown.convert(quillController.document.toDelta());
   }
@@ -153,6 +183,39 @@ class EditorNotifier extends Notifier<EditorState> {
         ...state.chatHistory,
       ],
     );
+  }
+
+  String getJson() {
+    return jsonEncode(quillController.document.toDelta().toJson());
+  }
+
+  GlobalKey editorKey = GlobalKey();
+
+  Future<Uint8List?> getImage() async {
+    try {
+      WidgetShotRenderRepaintBoundary repaintBoundary =
+          editorKey.currentContext!.findRenderObject()
+              as WidgetShotRenderRepaintBoundary;
+      var resultImage = await repaintBoundary.screenshotPng(
+        backgroundColor: Colors.white,
+      );
+
+      return resultImage;
+    } catch (e) {
+      logger.e('截取图片失败: $e');
+      return null;
+    }
+  }
+
+  Future loadFromFile(File f) async {
+    final s = await f.readAsString();
+    try {
+      final json = jsonDecode(s);
+      quillController.document = Document.fromJson(json);
+      quillController.moveCursorToEnd();
+    } catch (e) {
+      ToastUtils.error(null, title: e.toString());
+    }
   }
 
   /// FIXME: could raise `The provided text position is not in the current node` exception

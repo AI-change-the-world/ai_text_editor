@@ -27,6 +27,7 @@ dependencies:
   isar_flutter_libs: ^3.1.0+1
   langchain: ^0.7.7+2
   langchain_openai: ^0.7.3
+  listview_screenshot: ^3.2.0
   logger: ^2.5.0
   markdown_quill: ^4.2.0
   menu_bar: ^0.5.3
