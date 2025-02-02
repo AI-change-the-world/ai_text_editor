@@ -1,11 +1,11 @@
 import 'package:ai_text_editor/notifiers/editor_notifier.dart';
 import 'package:ai_text_editor/notifiers/editor_state.dart';
-import 'package:ai_text_editor/utils/logger.dart';
 import 'package:ai_text_editor/utils/some_shortcuts.dart';
 import 'package:ai_text_editor/utils/styles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:listview_screenshot/listview_screenshot.dart';
 
 import '../configs/quill_config.dart';
 import '../configs/quill_toolbar_config.dart';
@@ -54,17 +54,29 @@ class _EditorState extends ConsumerState<Editor> {
       body: Stack(
         children: [
           SizedBox.expand(),
-          Padding(
-            padding: padding,
-            child: QuillEditor(
-              configurations: QuillConfig.config,
-              controller:
-                  ref.read(editorNotifierProvider.notifier).quillController,
-              focusNode: ref.read(editorNotifierProvider.notifier).focusNode,
-              scrollController:
-                  ref.read(editorNotifierProvider.notifier).scrollController,
-            ),
-          ),
+          ScrollConfiguration(
+              behavior: ScrollConfiguration.of(context).copyWith(
+                scrollbars: false, // 隐藏滚动条
+              ),
+              child: WidgetShot(
+                key: ref.read(editorNotifierProvider.notifier).editorKey,
+                controller:
+                    ref.read(editorNotifierProvider.notifier).scrollController,
+                child: Padding(
+                  padding: padding,
+                  child: QuillEditor(
+                    configurations: QuillConfig.config,
+                    controller: ref
+                        .read(editorNotifierProvider.notifier)
+                        .quillController,
+                    focusNode:
+                        ref.read(editorNotifierProvider.notifier).focusNode,
+                    scrollController: ref
+                        .read(editorNotifierProvider.notifier)
+                        .scrollController,
+                  ),
+                ),
+              )),
           PositionedToolbarWidget(
             onDragEnd: () {
               setState(() {
@@ -250,7 +262,6 @@ class ToolbarWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    logger.d("position: $position");
     Widget child;
     if (position == ToolbarPosition.left || position == ToolbarPosition.right) {
       child = SizedBox.fromSize(

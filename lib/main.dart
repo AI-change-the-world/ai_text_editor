@@ -4,11 +4,13 @@ import 'package:ai_text_editor/models/ai_model.dart';
 import 'package:ai_text_editor/utils/logger.dart';
 import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart';
+import 'package:ai_text_editor/src/rust/frb_generated.dart';
 
 import 'isar/database.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await RustLib.init();
   final config = await APPConfig.init();
   if (config.openAIInfo != null) {
     GlobalModel.setModel(config.openAIInfo!);
