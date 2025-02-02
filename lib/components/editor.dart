@@ -1,6 +1,5 @@
 import 'package:ai_text_editor/notifiers/editor_notifier.dart';
 import 'package:ai_text_editor/notifiers/editor_state.dart';
-import 'package:ai_text_editor/utils/logger.dart';
 import 'package:ai_text_editor/utils/some_shortcuts.dart';
 import 'package:ai_text_editor/utils/styles.dart';
 import 'package:flutter/material.dart';
