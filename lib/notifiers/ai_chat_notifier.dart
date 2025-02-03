@@ -1,3 +1,6 @@
+import 'package:ai_packages_core/ai_packages_core.dart';
+import 'package:ai_text_editor/models/ai_model.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class AIChatMessage {
@@ -26,18 +29,21 @@ class AIChatNotifier extends Notifier<AIChatState> {
     return AIChatState();
   }
 
+  final ScrollController controller = ScrollController();
+
   void addMessage(AIChatMessage message) {
-    state = state.copyWith(messages: [...state.messages, message]);
+    state = state
+        .copyWith(messages: [...state.messages, message], isGenerating: true);
   }
 
-  void updateMessage(AIChatMessage message) {
+  void updateMessage(String m) {
     if (!state.isGenerating) {
       return;
     }
 
     final last = state.messages.last;
     AIChatMessage newLast = AIChatMessage(
-      content: last.content + message.content,
+      content: last.content + m,
       role: last.role,
     );
 
@@ -45,5 +51,32 @@ class AIChatNotifier extends Notifier<AIChatState> {
       ...state.messages.sublist(0, state.messages.length - 1),
       newLast
     ]);
+
+    controller.jumpTo(controller.position.maxScrollExtent);
+  }
+
+  handleMessage() {
+    final d = DateTime.now();
+    final history = state.messages
+        .map((v) => ChatMessage<String>(
+            role: v.role,
+            content: v.content,
+            createAt: d.millisecondsSinceEpoch))
+        .toList();
+
+    addMessage(AIChatMessage(role: "assistant", content: ""));
+
+    GlobalModel.model.streamChat(history).listen(
+      (v) {
+        updateMessage(v);
+        controller.jumpTo(controller.position.maxScrollExtent);
+      },
+      onDone: () {
+        state = state.copyWith(isGenerating: false);
+      },
+    );
   }
 }
+
+final aiChatNotifierProvider =
+    NotifierProvider<AIChatNotifier, AIChatState>(() => AIChatNotifier());

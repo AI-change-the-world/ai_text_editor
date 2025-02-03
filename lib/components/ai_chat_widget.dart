@@ -1,6 +1,9 @@
+import 'package:ai_text_editor/notifiers/ai_chat_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import 'message_box.dart';
 
 class AiChatWidget extends ConsumerStatefulWidget {
   const AiChatWidget({super.key});
@@ -41,14 +44,36 @@ class _AiChatWidgetState extends ConsumerState<AiChatWidget> {
   }
 
   Future _submit() async {
+    if (ref.read(aiChatNotifierProvider).isGenerating) return;
+
+    ref
+        .read(aiChatNotifierProvider.notifier)
+        .addMessage(AIChatMessage(role: "user", content: _textController.text));
+    ref.read(aiChatNotifierProvider.notifier).handleMessage();
     _textController.clear();
   }
 
   @override
   Widget build(BuildContext context) {
+    final state = ref.watch(aiChatNotifierProvider);
     return Column(
       children: [
-        Expanded(child: Container()),
+        Expanded(
+            child: SingleChildScrollView(
+          controller: ref.read(aiChatNotifierProvider.notifier).controller,
+          child: Column(
+            spacing: 20,
+            children: state.messages.map((e) {
+              if (e.role == "user") {
+                return UserMessageBox(message: e.content);
+              } else {
+                return AiMessageBox(
+                  message: e.content,
+                );
+              }
+            }).toList(),
+          ),
+        )),
         Padding(
           padding: EdgeInsets.all(15),
           child: TextField(
