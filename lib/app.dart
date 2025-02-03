@@ -4,6 +4,8 @@ import 'package:ai_text_editor/components/editor.dart';
 import 'package:ai_text_editor/components/faded_text.dart';
 import 'package:ai_text_editor/components/position_widget.dart';
 import 'package:ai_text_editor/notifiers/editor_state.dart';
+import 'package:ai_text_editor/src/rust/api/converter_api.dart';
+import 'package:ai_text_editor/src/rust/messages.dart';
 import 'package:ai_text_editor/utils/file_utils.dart';
 import 'package:ai_text_editor/utils/logger.dart';
 import 'package:ai_text_editor/utils/markdown_util.dart';
@@ -20,6 +22,7 @@ import 'package:he/he.dart';
 
 import 'components/ai_widget.dart';
 import 'components/file_structure_view.dart';
+import 'src/rust/api/message_api.dart';
 
 class App extends StatelessWidget {
   const App({super.key});
@@ -42,11 +45,37 @@ const XTypeGroup typeGroup = XTypeGroup(
   extensions: <String>['json'],
 );
 
-class Home extends ConsumerWidget {
+class Home extends ConsumerStatefulWidget {
   const Home({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<Home> createState() => _HomeState();
+}
+
+class _HomeState extends ConsumerState<Home> {
+  late final stream = normalMessageStream();
+  @override
+  void initState() {
+    super.initState();
+    stream.listen((v) {
+      if (v.$2 == MessageType.error) {
+        ToastUtils.error(
+          null,
+          title: "Error",
+          description: v.$1,
+        );
+      } else {
+        ToastUtils.sucess(
+          null,
+          title: "AI Response",
+          description: v.$1,
+        );
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Stack(
       children: [
         SizedBox.expand(
@@ -115,19 +144,45 @@ class Home extends ConsumerWidget {
                           return;
                         }
 
-                        /// TODO 判断这个文件是否已经被储存过
-                        final filename = "${DateTime.now()}.json";
-                        FileUtils.saveFileToJson(j, filename: filename)
-                            .then((p) {
-                          ToastUtils.sucess(
-                            null,
-                            title: "File Saved",
-                            description: "check $p",
-                          );
-                          ref
-                              .read(editorNotifierProvider.notifier)
-                              .setLoading(false);
-                        });
+                        if (ref.read(editorNotifierProvider).currentFilePath !=
+                            null) {
+                          FileUtils.updateJsonFile(
+                                  j,
+                                  ref
+                                      .read(editorNotifierProvider)
+                                      .currentFilePath!)
+                              .then((_) {
+                            ToastUtils.sucess(
+                              null,
+                              title: "File Saved",
+                            );
+                            ref.read(editorNotifierProvider.notifier).updateDoc(
+                                ref
+                                    .read(editorNotifierProvider)
+                                    .currentFilePath!);
+                            ref
+                                .read(editorNotifierProvider.notifier)
+                                .setLoading(false);
+                          });
+                        } else {
+                          final filename = "${DateTime.now()}.json";
+                          FileUtils.saveFileToJson(j, filename: filename)
+                              .then((p) {
+                            ToastUtils.sucess(
+                              null,
+                              title: "File Saved",
+                              description: "check $p",
+                            );
+                            ref.read(editorNotifierProvider.notifier).newDoc(p);
+                            ref
+                                .read(editorNotifierProvider.notifier)
+                                .setLoading(false);
+                          });
+                        }
+
+                        ref
+                            .read(editorNotifierProvider.notifier)
+                            .changeSavedStatus(true);
                       },
                     ),
                     MenuButton(
@@ -169,6 +224,27 @@ class Home extends ConsumerWidget {
                                 });
                               }),
                           MenuButton(
+                            onTap: () {
+                              FileUtils.saveFileToPdf(ref
+                                      .read(editorNotifierProvider.notifier)
+                                      .quillController
+                                      .document)
+                                  .then((v) {
+                                if (v.toString().isNotEmpty) {
+                                  ToastUtils.sucess(
+                                    null,
+                                    title: "File Saved",
+                                    description: "check $v",
+                                  );
+                                } else {
+                                  ToastUtils.error(
+                                    null,
+                                    title: "Error",
+                                    description: "Failed to save file",
+                                  );
+                                }
+                              });
+                            },
                             text: Row(
                               children: [
                                 Expanded(child: Text("Pdf")),
@@ -213,6 +289,15 @@ class Home extends ConsumerWidget {
                             ),
                           ),
                           MenuButton(
+                            onTap: () async {
+                              final filePath =
+                                  await FileUtils.getDocxFilepath();
+                              final mdString = ref
+                                  .read(editorNotifierProvider.notifier)
+                                  .getText();
+                              markdownToDocx(
+                                  markdownText: mdString, filepath: filePath);
+                            },
                             text: Row(
                               children: [
                                 Expanded(child: Text("Docx")),

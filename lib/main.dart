@@ -7,10 +7,13 @@ import 'package:window_manager/window_manager.dart';
 import 'package:ai_text_editor/src/rust/frb_generated.dart';
 
 import 'isar/database.dart';
+import 'utils/font_loader.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await RustLib.init();
+  final FontsLoader loader = FontsLoader();
+  await loader.loadFonts();
   final config = await APPConfig.init();
   if (config.openAIInfo != null) {
     GlobalModel.setModel(config.openAIInfo!);

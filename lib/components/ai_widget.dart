@@ -3,6 +3,7 @@ import 'package:ai_text_editor/utils/styles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'ai_chat_widget.dart';
 import 'history_list.dart';
 
 class AiWidget extends ConsumerStatefulWidget {
@@ -55,7 +56,7 @@ class _AiWidgetState extends ConsumerState<AiWidget>
             child: TabBarView(
               controller: _tabController,
               children: [
-                Container(),
+                AiChatWidget(),
                 HistoryList(),
               ],
             ),
