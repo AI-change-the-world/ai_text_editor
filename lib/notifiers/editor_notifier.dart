@@ -6,8 +6,11 @@ import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 
+import 'package:ai_text_editor/isar/database.dart';
+import 'package:ai_text_editor/isar/recent_files.dart';
 import 'package:ai_text_editor/utils/logger.dart';
 import 'package:ai_text_editor/utils/toast_utils.dart';
+import 'package:isar/isar.dart';
 import 'package:listview_screenshot/listview_screenshot.dart';
 import 'package:meta/meta.dart';
 import 'package:flutter/material.dart';
@@ -54,6 +57,7 @@ class EditorNotifier extends Notifier<EditorState> {
   late final _mdDocument = md.Document(encodeHtml: false);
   late final _mdToDelta = MarkdownToDelta(markdownDocument: _mdDocument);
   late final FocusNode focusNode = FocusNode();
+  late final IsarDatabase database = IsarDatabase();
   StreamController<String> quillTextChangeController =
       StreamController<String>();
 
@@ -90,6 +94,36 @@ class EditorNotifier extends Notifier<EditorState> {
 
   void _changeCurrentPosition(double p) {
     ref.read(currentPositionProvider.notifier).changePosition(p);
+  }
+
+  void setCurrentFilePath(String? path) {
+    if (path != state.currentFilePath) {
+      state = state.copyWith(currentFilePath: path);
+    }
+  }
+
+  Future newDoc(String filepath) async {
+    RecentFiles recentFiles = RecentFiles()
+      ..path = filepath
+      ..createdAt = DateTime.now().millisecondsSinceEpoch
+      ..lastEdited = DateTime.now().millisecondsSinceEpoch;
+
+    database.isar!.writeTxn(() async {
+      await database.isar!.recentFiles.put(recentFiles);
+    });
+  }
+
+  Future updateDoc(String filepath) async {
+    database.isar!.writeTxn(() async {
+      final recentFiles = await database.isar!.recentFiles
+          .filter()
+          .pathEqualTo(filepath)
+          .findFirst();
+      if (recentFiles != null) {
+        recentFiles.lastEdited = DateTime.now().millisecondsSinceEpoch;
+        await database.isar!.recentFiles.put(recentFiles);
+      }
+    });
   }
 
   double _getEditorHeight() {
