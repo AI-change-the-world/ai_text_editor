@@ -92,16 +92,19 @@ class EditorNotifier extends Notifier<EditorState> {
     return EditorState();
   }
 
+  /// 调整滚动条位置
   void _changeCurrentPosition(double p) {
     ref.read(currentPositionProvider.notifier).changePosition(p);
   }
 
+  /// 设置当前文件路径
   void setCurrentFilePath(String? path) {
     if (path != state.currentFilePath) {
       state = state.copyWith(currentFilePath: path);
     }
   }
 
+  /// 新建文件
   Future newDoc(String filepath) async {
     RecentFiles recentFiles = RecentFiles()
       ..path = filepath
@@ -113,6 +116,7 @@ class EditorNotifier extends Notifier<EditorState> {
     });
   }
 
+  /// 更新文件
   Future updateDoc(String filepath) async {
     database.isar!.writeTxn(() async {
       final recentFiles = await database.isar!.recentFiles
@@ -126,38 +130,45 @@ class EditorNotifier extends Notifier<EditorState> {
     });
   }
 
+  /// 获取组件高度
   double _getEditorHeight() {
     final RenderBox renderBox =
         editorKey.currentContext?.findRenderObject() as RenderBox;
     return renderBox.size.height;
   }
 
+  /// 获取当前窗口高度
   double getCurrentHeight(BuildContext context) {
     return MediaQuery.of(context).size.height - 30 - /*padding*/ 10 * 2;
   }
 
+  /// 获取当前窗口宽度
   double getCurrentWidth(BuildContext context) {
     return MediaQuery.of(context).size.width -
         (state.showStructure ? Styles.structureWidth : 0) -
         (state.showAI ? Styles.structureWidth : 0);
   }
 
+  /// 切换工具栏位置
   void changeToolbarPosition(ToolbarPosition position) {
     if (position != state.toolbarPosition) {
       state = state.copyWith(toolbarPosition: position);
     }
   }
 
+  /// 打开/关闭结构栏
   void toggleStructure() {
     state = state.copyWith(showStructure: !state.showStructure);
   }
 
+  /// 打开/关闭AI
   void toggleAi({bool open = true}) {
     if (state.showAI != open) {
       state = state.copyWith(showAI: open);
     }
   }
 
+  /// 修改保存状态
   void changeSavedStatus(bool saved) {
     // if (saved != state.saved) state = state.copyWith(saved: saved);
     ref.read(savedNotifierProvider.notifier).changeSavedStatus(saved);
@@ -206,6 +217,20 @@ class EditorNotifier extends Notifier<EditorState> {
   /// markdown string
   String getText() {
     return _deltaToMarkdown.convert(quillController.document.toDelta());
+  }
+
+  /// apply AI response
+  void applyAiResponse(String mdString) {
+    if (mdString.isNotEmpty) {
+      final delta = _mdToDelta.convert(mdString);
+
+      /// FIXME: not support some markdown syntax
+      delta.operations.removeWhere((element) => element.value is Map);
+      quillController.document
+          .replace(quillController.selection.baseOffset, 0, delta);
+
+      quillController.moveCursorToEnd();
+    }
   }
 
   void insertDataToEditor(Object data, TextSelection selection,
