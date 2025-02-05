@@ -99,6 +99,40 @@ class EditorNotifier extends Notifier<EditorState> {
     ref.read(currentPositionProvider.notifier).changePosition(p);
   }
 
+  int getCurrentBaseOffset() {
+    return quillController.selection.baseOffset;
+  }
+
+  void onEmbedTrigger(String uuid) {
+    final l = quillController.document.search(uuid);
+    if (l.isEmpty) {
+      return;
+    }
+    quillController.updateSelection(
+      TextSelection.collapsed(offset: l.first),
+      ChangeSource.local,
+    );
+  }
+
+  /// 修改表格数据
+  void changeTable(Map data) {
+    try {
+      quillController.replaceText(
+          quillController.selection.baseOffset,
+          1,
+          CustomTableEmbed(customTableEmbedType, jsonEncode(data)),
+          quillController.selection);
+
+      quillController.updateSelection(
+        TextSelection.collapsed(
+            offset: quillController.selection.baseOffset + 1),
+        ChangeSource.local,
+      );
+    } catch (e) {
+      logger.e("更新失败 $e");
+    }
+  }
+
   /// 设置当前文件路径
   void setCurrentFilePath(String? path) {
     if (path != state.currentFilePath) {

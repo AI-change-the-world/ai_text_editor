@@ -1,8 +1,6 @@
-import 'package:flutter_quill/flutter_quill.dart';
+import 'dart:convert';
 
-// ignore: prefer_function_declarations_over_variables
-final customTableEmbed =
-    (String data) => CustomBlockEmbed('custom-embed-table', data);
+import 'package:flutter_quill/flutter_quill.dart';
 
 void customTableEmbedToMarkdown(Embed embed, StringSink out) {
   // TODO: Implement custom table embed to markdown
@@ -11,4 +9,20 @@ void customTableEmbedToMarkdown(Embed embed, StringSink out) {
   out.write('<td></td>');
   out.write('</tr>');
   out.write('</table>');
+}
+
+const String customTableEmbedType = 'custom-embed-table';
+
+class CustomTableEmbed extends CustomBlockEmbed {
+  CustomTableEmbed(super.type, super.data);
+
+  @override
+  String toJsonString() {
+    return jsonEncode(toJson());
+  }
+
+  static CustomTableEmbed fromJson(Map<String, dynamic> json) {
+    final embeddable = Embeddable.fromJson(json);
+    return CustomTableEmbed(customTableEmbedType, embeddable.data);
+  }
 }

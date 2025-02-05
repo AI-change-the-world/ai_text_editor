@@ -1,3 +1,6 @@
+import 'dart:convert';
+// ignore: depend_on_referenced_packages
+import 'package:uuid/uuid.dart';
 import 'package:ai_packages_core/ai_packages_core.dart';
 import 'package:ai_text_editor/embeds/table/table_embed.dart';
 import 'package:ai_text_editor/models/ai_model.dart';
@@ -173,11 +176,11 @@ class SomeShortcuts {
 
       Future.delayed(Duration(milliseconds: 300)).then((_) {
         final s = subString.replaceAll("<table>", "");
-
+        List list = s.split(",");
         if (s == "") {
-          /// TODO show dialog
+          /// TODO: show config dialog
+          return false;
         } else {
-          List list = s.split(",");
           if (list.length != 2) {
             return false;
           }
@@ -193,7 +196,17 @@ class SomeShortcuts {
                 baseOffset: lastCharIndex + 1, extentOffset: lastCharIndex + 1),
             ChangeSource.local);
 
-        final block = customTableEmbed(s);
+        var rowCount = int.parse(list[0]);
+        var colCount = int.parse(list[1]);
+
+        var m = {
+          "uuid": Uuid().v4(),
+          "rowCount": rowCount,
+          "colCount": colCount,
+          "values": List<String>.generate(rowCount * colCount, (index) => "")
+        };
+
+        final block = CustomTableEmbed(customTableEmbedType, jsonEncode(m));
 
         controller.replaceText(controller.selection.baseOffset, 0, block, null);
 
