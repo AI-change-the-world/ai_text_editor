@@ -6,6 +6,7 @@ import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 
+import 'package:ai_text_editor/embeds/roll/roll_embed.dart';
 import 'package:ai_text_editor/embeds/table/table_embed.dart';
 import 'package:ai_text_editor/isar/database.dart';
 import 'package:ai_text_editor/isar/recent_files.dart';
@@ -54,8 +55,10 @@ class SavedNotifier extends Notifier<bool> {
 class EditorNotifier extends Notifier<EditorState> {
   late final QuillController quillController = QuillController.basic();
   late final ScrollController scrollController = ScrollController();
-  late final _deltaToMarkdown = DeltaToMarkdown(
-      customEmbedHandlers: {'custom-embed-table': customTableEmbedToMarkdown});
+  late final _deltaToMarkdown = DeltaToMarkdown(customEmbedHandlers: {
+    customTableEmbedType: customTableEmbedToMarkdown,
+    customRollEmbedType: customRollEmbedToMarkdown
+  });
   late final _mdDocument = md.Document(encodeHtml: false);
   late final _mdToDelta = MarkdownToDelta(markdownDocument: _mdDocument);
   late final FocusNode focusNode = FocusNode();

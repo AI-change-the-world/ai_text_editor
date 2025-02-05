@@ -38,3 +38,20 @@ target_include_directories(${BINARY_NAME} PRIVATE "${CMAKE_SOURCE_DIR}")
 
 # Run the Flutter tool portions of the build. This must not be removed.
 add_dependencies(${BINARY_NAME} flutter_assemble)
+
+
+get_filename_component(P1 ${CMAKE_CURRENT_BINARY_DIR} DIRECTORY)
+message(STATUS "P1 ==> " ${P1})
+
+string(REPLACE "/build/windows/x64" "" ROOT_DIR ${P1})
+message(STATUS "ROOT_DIR ==> " ${ROOT_DIR})
+
+set(MSVCP_PATH ${ROOT_DIR}/dlls/msvcp140.dll)
+set(VCRUNTIME ${ROOT_DIR}/dlls/vcruntime140.dll)
+set(VCRUNTIME2 ${ROOT_DIR}/dlls/vcruntime140_1.dll)
+
+add_custom_target(copy-runtime-files ALL
+  COMMAND ${CMAKE_COMMAND} -E copy ${MSVCP_PATH} ${P1}/runner/Release/msvcp140.dll
+  COMMAND ${CMAKE_COMMAND} -E copy ${VCRUNTIME} ${P1}/runner/Release/vcruntime140.dll
+  COMMAND ${CMAKE_COMMAND} -E copy ${VCRUNTIME2} ${P1}/runner/Release/vcruntime140_1.dll
+)
