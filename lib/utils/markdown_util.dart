@@ -8,8 +8,8 @@ class MarkdownUtil {
   static List<MarkdownModel> fromMdString(String mdString) {
     List<Node> parsedResult = Document().parse(mdString);
     return parsedResult.map((node) {
-      assert(node is Element);
-      return MarkdownModel(tag: (node as Element).tag, text: node.textContent);
+      if (node is! Element) return MarkdownModel(tag: "", text: "");
+      return MarkdownModel(tag: node.tag, text: node.textContent);
     }).toList();
   }
 }

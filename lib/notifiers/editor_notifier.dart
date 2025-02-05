@@ -6,6 +6,8 @@ import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 
+import 'package:ai_text_editor/embeds/roll/roll_embed.dart';
+import 'package:ai_text_editor/embeds/table/table_embed.dart';
 import 'package:ai_text_editor/isar/database.dart';
 import 'package:ai_text_editor/isar/recent_files.dart';
 import 'package:ai_text_editor/utils/logger.dart';
@@ -53,7 +55,10 @@ class SavedNotifier extends Notifier<bool> {
 class EditorNotifier extends Notifier<EditorState> {
   late final QuillController quillController = QuillController.basic();
   late final ScrollController scrollController = ScrollController();
-  late final _deltaToMarkdown = DeltaToMarkdown();
+  late final _deltaToMarkdown = DeltaToMarkdown(customEmbedHandlers: {
+    customTableEmbedType: customTableEmbedToMarkdown,
+    customRollEmbedType: customRollEmbedToMarkdown
+  });
   late final _mdDocument = md.Document(encodeHtml: false);
   late final _mdToDelta = MarkdownToDelta(markdownDocument: _mdDocument);
   late final FocusNode focusNode = FocusNode();
@@ -92,16 +97,53 @@ class EditorNotifier extends Notifier<EditorState> {
     return EditorState();
   }
 
+  /// 调整滚动条位置
   void _changeCurrentPosition(double p) {
     ref.read(currentPositionProvider.notifier).changePosition(p);
   }
 
+  int getCurrentBaseOffset() {
+    return quillController.selection.baseOffset;
+  }
+
+  void onEmbedTrigger(String uuid) {
+    final l = quillController.document.search(uuid);
+    if (l.isEmpty) {
+      return;
+    }
+    quillController.updateSelection(
+      TextSelection.collapsed(offset: l.first),
+      ChangeSource.local,
+    );
+  }
+
+  /// 修改表格数据
+  void changeTable(Map data) {
+    try {
+      quillController.replaceText(
+          quillController.selection.baseOffset,
+          1,
+          CustomTableEmbed(customTableEmbedType, jsonEncode(data)),
+          quillController.selection);
+
+      quillController.updateSelection(
+        TextSelection.collapsed(
+            offset: quillController.selection.baseOffset + 1),
+        ChangeSource.local,
+      );
+    } catch (e) {
+      logger.e("更新失败 $e");
+    }
+  }
+
+  /// 设置当前文件路径
   void setCurrentFilePath(String? path) {
     if (path != state.currentFilePath) {
       state = state.copyWith(currentFilePath: path);
     }
   }
 
+  /// 新建文件
   Future newDoc(String filepath) async {
     RecentFiles recentFiles = RecentFiles()
       ..path = filepath
@@ -113,6 +155,7 @@ class EditorNotifier extends Notifier<EditorState> {
     });
   }
 
+  /// 更新文件
   Future updateDoc(String filepath) async {
     database.isar!.writeTxn(() async {
       final recentFiles = await database.isar!.recentFiles
@@ -126,38 +169,45 @@ class EditorNotifier extends Notifier<EditorState> {
     });
   }
 
+  /// 获取组件高度
   double _getEditorHeight() {
     final RenderBox renderBox =
         editorKey.currentContext?.findRenderObject() as RenderBox;
     return renderBox.size.height;
   }
 
+  /// 获取当前窗口高度
   double getCurrentHeight(BuildContext context) {
     return MediaQuery.of(context).size.height - 30 - /*padding*/ 10 * 2;
   }
 
+  /// 获取当前窗口宽度
   double getCurrentWidth(BuildContext context) {
     return MediaQuery.of(context).size.width -
         (state.showStructure ? Styles.structureWidth : 0) -
         (state.showAI ? Styles.structureWidth : 0);
   }
 
+  /// 切换工具栏位置
   void changeToolbarPosition(ToolbarPosition position) {
     if (position != state.toolbarPosition) {
       state = state.copyWith(toolbarPosition: position);
     }
   }
 
+  /// 打开/关闭结构栏
   void toggleStructure() {
     state = state.copyWith(showStructure: !state.showStructure);
   }
 
+  /// 打开/关闭AI
   void toggleAi({bool open = true}) {
     if (state.showAI != open) {
       state = state.copyWith(showAI: open);
     }
   }
 
+  /// 修改保存状态
   void changeSavedStatus(bool saved) {
     // if (saved != state.saved) state = state.copyWith(saved: saved);
     ref.read(savedNotifierProvider.notifier).changeSavedStatus(saved);
@@ -206,6 +256,20 @@ class EditorNotifier extends Notifier<EditorState> {
   /// markdown string
   String getText() {
     return _deltaToMarkdown.convert(quillController.document.toDelta());
+  }
+
+  /// apply AI response
+  void applyAiResponse(String mdString) {
+    if (mdString.isNotEmpty) {
+      final delta = _mdToDelta.convert(mdString);
+
+      /// FIXME: not support some markdown syntax
+      delta.operations.removeWhere((element) => element.value is Map);
+      quillController.document
+          .replace(quillController.selection.baseOffset, 0, delta);
+
+      quillController.moveCursorToEnd();
+    }
   }
 
   void insertDataToEditor(Object data, TextSelection selection,

@@ -1,5 +1,6 @@
 mod delta;
 mod docx;
+mod docx_to_markdown;
 mod markdown_to_docx;
 mod test;
 

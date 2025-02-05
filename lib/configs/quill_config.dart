@@ -1,3 +1,5 @@
+import 'package:ai_text_editor/embeds/roll/roll_builder.dart';
+import 'package:ai_text_editor/embeds/table/table_builder.dart';
 import 'package:ai_text_editor/utils/some_shortcuts.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 
@@ -12,6 +14,10 @@ class QuillConfig {
           spaceShortcutEvents: [
             ...standardSpaceShorcutEvents,
             SomeShortcuts.aiShowUp
+          ],
+          embedBuilders: [
+            CustomTableEmbedBuilder(),
+            CustomRollEmbedBuilder(),
           ],
           searchConfigurations: const QuillSearchConfigurations(
             searchEmbedMode: SearchEmbedMode.plainText,

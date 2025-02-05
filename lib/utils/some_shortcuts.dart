@@ -1,4 +1,11 @@
+import 'dart:convert';
+// ignore: depend_on_referenced_packages
+import 'package:ai_text_editor/embeds/roll/roll_embed.dart';
+import 'package:ai_text_editor/embeds/table/table_builder.dart';
+import 'package:flutter/material.dart';
+import 'package:uuid/uuid.dart';
 import 'package:ai_packages_core/ai_packages_core.dart';
+import 'package:ai_text_editor/embeds/table/table_embed.dart';
 import 'package:ai_text_editor/models/ai_model.dart';
 import 'package:ai_text_editor/notifiers/editor_notifier.dart';
 import 'package:ai_text_editor/utils/logger.dart';
@@ -81,6 +88,8 @@ class SomeShortcuts {
   }
 
   static final RegExp instReg = RegExp(r'^<inst>');
+  static final RegExp tableReg = RegExp(r'^<table>');
+  static final RegExp rollReg = RegExp(r'^<roll>');
 
   // ignore: unintended_html_in_doc_comment
   /// ai instruct:  <inst>something<
@@ -163,6 +172,101 @@ class SomeShortcuts {
         );
       });
 
+      return true;
+    } else if (tableReg.hasMatch(subString)) {
+      ref?.read(editorNotifierProvider.notifier).insertDataToEditor(
+          "/table>", controller.selection,
+          updateSelection: false);
+
+      Future.delayed(Duration(milliseconds: 300)).then((_) async {
+        controller.document
+            .replace(lastCharIndex, subString.length + "</table>".length, "");
+        controller.updateSelection(
+            controller.selection.copyWith(
+                baseOffset: lastCharIndex + 1, extentOffset: lastCharIndex + 1),
+            ChangeSource.local);
+        final s = subString.replaceAll("<table>", "");
+        List list = s.split(",");
+        if (s == "") {
+          await showGeneralDialog(
+              barrierColor: Colors.white,
+              context: ref!.context,
+              pageBuilder: (c, _, __) {
+                return AnimatedDialog(
+                  rowCount: 1,
+                  colCount: 1,
+                  values: [""],
+                  height: 200,
+                  top: MediaQuery.of(ref!.context).size.width,
+                );
+              }).then((v) {
+            if (v == null) {
+              return false;
+            }
+            // print(v);
+            (v as Map)['uuid'] = Uuid().v4();
+            final block = CustomTableEmbed(customTableEmbedType, jsonEncode(v));
+
+            controller.replaceText(
+                controller.selection.baseOffset, 0, block, null);
+
+            ref?.read(editorNotifierProvider.notifier).insertDataToEditor(
+                  "\n",
+                  controller.selection.copyWith(
+                      baseOffset: controller.selection.baseOffset + 1,
+                      extentOffset: controller.selection.baseOffset + 1),
+                );
+            return true;
+          });
+        } else {
+          if (list.length != 2) {
+            return false;
+          }
+          if (int.tryParse(list[0]) == null || int.tryParse(list[1]) == null) {
+            return false;
+          }
+
+          if (int.parse(list[0]) < 1 || int.parse(list[1]) < 1) {
+            return false;
+          }
+
+          var rowCount = int.parse(list[0]);
+          var colCount = int.parse(list[1]);
+
+          var m = {
+            "uuid": Uuid().v4(),
+            "rowCount": rowCount,
+            "colCount": colCount,
+            "values": List<String>.generate(rowCount * colCount, (index) => "")
+          };
+
+          final block = CustomTableEmbed(customTableEmbedType, jsonEncode(m));
+
+          controller.replaceText(
+              controller.selection.baseOffset, 0, block, null);
+
+          ref?.read(editorNotifierProvider.notifier).insertDataToEditor(
+                "\n",
+                controller.selection.copyWith(
+                    baseOffset: controller.selection.baseOffset + 1,
+                    extentOffset: controller.selection.baseOffset + 1),
+              );
+          return true;
+        }
+      });
+    } else if (rollReg.hasMatch(subString)) {
+      final block = CustomRollEmbed(customRollEmbedType, "");
+      controller.document.replace(lastCharIndex, subString.length, "");
+      controller.updateSelection(
+          controller.selection.copyWith(
+              baseOffset: lastCharIndex + 1, extentOffset: lastCharIndex + 1),
+          ChangeSource.local);
+      controller.replaceText(controller.selection.baseOffset, 0, block, null);
+      controller.updateSelection(
+          controller.selection.copyWith(
+              baseOffset: controller.selection.baseOffset + 1,
+              extentOffset: controller.selection.baseOffset + 1),
+          ChangeSource.local);
       return true;
     }
 
