@@ -173,6 +173,9 @@ class _HomeState extends ConsumerState<Home> {
                               title: "File Saved",
                               description: "check $p",
                             );
+                            ref
+                                .read(editorNotifierProvider.notifier)
+                                .setCurrentFilePath(p);
                             ref.read(editorNotifierProvider.notifier).newDoc(p);
                             ref
                                 .read(editorNotifierProvider.notifier)

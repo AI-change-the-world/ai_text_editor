@@ -6,6 +6,7 @@ import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 
+import 'package:ai_text_editor/embeds/table/table_embed.dart';
 import 'package:ai_text_editor/isar/database.dart';
 import 'package:ai_text_editor/isar/recent_files.dart';
 import 'package:ai_text_editor/utils/logger.dart';
@@ -53,7 +54,8 @@ class SavedNotifier extends Notifier<bool> {
 class EditorNotifier extends Notifier<EditorState> {
   late final QuillController quillController = QuillController.basic();
   late final ScrollController scrollController = ScrollController();
-  late final _deltaToMarkdown = DeltaToMarkdown();
+  late final _deltaToMarkdown = DeltaToMarkdown(
+      customEmbedHandlers: {'custom-embed-table': customTableEmbedToMarkdown});
   late final _mdDocument = md.Document(encodeHtml: false);
   late final _mdToDelta = MarkdownToDelta(markdownDocument: _mdDocument);
   late final FocusNode focusNode = FocusNode();
@@ -95,6 +97,40 @@ class EditorNotifier extends Notifier<EditorState> {
   /// 调整滚动条位置
   void _changeCurrentPosition(double p) {
     ref.read(currentPositionProvider.notifier).changePosition(p);
+  }
+
+  int getCurrentBaseOffset() {
+    return quillController.selection.baseOffset;
+  }
+
+  void onEmbedTrigger(String uuid) {
+    final l = quillController.document.search(uuid);
+    if (l.isEmpty) {
+      return;
+    }
+    quillController.updateSelection(
+      TextSelection.collapsed(offset: l.first),
+      ChangeSource.local,
+    );
+  }
+
+  /// 修改表格数据
+  void changeTable(Map data) {
+    try {
+      quillController.replaceText(
+          quillController.selection.baseOffset,
+          1,
+          CustomTableEmbed(customTableEmbedType, jsonEncode(data)),
+          quillController.selection);
+
+      quillController.updateSelection(
+        TextSelection.collapsed(
+            offset: quillController.selection.baseOffset + 1),
+        ChangeSource.local,
+      );
+    } catch (e) {
+      logger.e("更新失败 $e");
+    }
   }
 
   /// 设置当前文件路径
