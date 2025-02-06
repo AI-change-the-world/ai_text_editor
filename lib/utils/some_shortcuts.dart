@@ -1,5 +1,9 @@
+// ignore_for_file: depend_on_referenced_packages, use_build_context_synchronously
+
 import 'dart:convert';
-// ignore: depend_on_referenced_packages
+
+import 'package:ai_text_editor/components/select_or_input_file_url_dialog.dart';
+import 'package:ai_text_editor/embeds/image/image_embed.dart';
 import 'package:ai_text_editor/embeds/roll/roll_embed.dart';
 import 'package:ai_text_editor/embeds/table/table_builder.dart';
 import 'package:flutter/material.dart';
@@ -90,6 +94,7 @@ class SomeShortcuts {
   static final RegExp instReg = RegExp(r'^<inst>');
   static final RegExp tableReg = RegExp(r'^<table>');
   static final RegExp rollReg = RegExp(r'^<roll>');
+  static final RegExp imageReg = RegExp(r'^<image>');
 
   // ignore: unintended_html_in_doc_comment
   /// ai instruct:  <inst>something<
@@ -268,6 +273,43 @@ class SomeShortcuts {
               extentOffset: controller.selection.baseOffset + 1),
           ChangeSource.local);
       return true;
+    } else if (imageReg.hasMatch(subString)) {
+      ref?.read(editorNotifierProvider.notifier).insertDataToEditor(
+          "/image>", controller.selection,
+          updateSelection: false);
+
+      Future.delayed(Duration(milliseconds: 300)).then((_) {
+        controller.document
+            .replace(lastCharIndex, subString.length + "</image>".length, "");
+        controller.updateSelection(
+            controller.selection.copyWith(
+                baseOffset: lastCharIndex + 1, extentOffset: lastCharIndex + 1),
+            ChangeSource.local);
+        showGeneralDialog(
+            barrierColor: Colors.transparent,
+            context: ref!.context,
+            pageBuilder: (c, _, __) {
+              return Center(
+                child: SelectOrInputFileUrlDialog(),
+              );
+            }).then((v) {
+          if (v == null) {
+            return false;
+          }
+          (v as Map)['uuid'] = Uuid().v4();
+          final block = CustomImageEmbed(customImageEmbedType, jsonEncode(v));
+          controller.replaceText(
+              controller.selection.baseOffset, 0, block, null);
+
+          ref?.read(editorNotifierProvider.notifier).insertDataToEditor(
+                "\n",
+                controller.selection.copyWith(
+                    baseOffset: controller.selection.baseOffset + 1,
+                    extentOffset: controller.selection.baseOffset + 1),
+              );
+          return true;
+        });
+      });
     }
 
     return false;

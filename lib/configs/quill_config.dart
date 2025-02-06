@@ -1,3 +1,4 @@
+import 'package:ai_text_editor/embeds/image/image_builder.dart';
 import 'package:ai_text_editor/embeds/roll/roll_builder.dart';
 import 'package:ai_text_editor/embeds/table/table_builder.dart';
 import 'package:ai_text_editor/utils/some_shortcuts.dart';
@@ -18,6 +19,7 @@ class QuillConfig {
           embedBuilders: [
             CustomTableEmbedBuilder(),
             CustomRollEmbedBuilder(),
+            CustomImageEmbedBuilder(),
           ],
           searchConfigurations: const QuillSearchConfigurations(
             searchEmbedMode: SearchEmbedMode.plainText,
