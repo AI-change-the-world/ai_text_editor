@@ -340,6 +340,7 @@ class EditorNotifier extends Notifier<EditorState> {
       final json = jsonDecode(s);
       quillController.document = Document.fromJson(json);
       quillController.moveCursorToEnd();
+      quillTextChangeController.add(getText());
     } catch (e) {
       ToastUtils.error(null, title: e.toString());
     }

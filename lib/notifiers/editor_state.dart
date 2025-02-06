@@ -46,7 +46,7 @@ class EditorState {
       toolbarPosition: toolbarPosition ?? this.toolbarPosition,
       loading: loading ?? this.loading,
       chatHistory: chatHistory ?? this.chatHistory,
-      currentFilePath: currentFilePath,
+      currentFilePath: currentFilePath ?? this.currentFilePath,
     );
   }
 }

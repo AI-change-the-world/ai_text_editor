@@ -120,6 +120,9 @@ class _HomeState extends ConsumerState<Home> {
                             ref
                                 .read(editorNotifierProvider.notifier)
                                 .loadFromFile(f);
+                            ref
+                                .read(editorNotifierProvider.notifier)
+                                .setCurrentFilePath(f.path);
                           });
                         },
                         shortcut: SingleActivator(LogicalKeyboardKey.keyO,
@@ -146,6 +149,8 @@ class _HomeState extends ConsumerState<Home> {
 
                         if (ref.read(editorNotifierProvider).currentFilePath !=
                             null) {
+                          logger.d(
+                              "save file to ${ref.read(editorNotifierProvider).currentFilePath}");
                           FileUtils.updateJsonFile(
                                   j,
                                   ref
@@ -266,6 +271,10 @@ class _HomeState extends ConsumerState<Home> {
                             onTap: () {
                               ref
                                   .read(editorNotifierProvider.notifier)
+                                  .changeToolbarPosition(ToolbarPosition.none);
+
+                              ref
+                                  .read(editorNotifierProvider.notifier)
                                   .getImage()
                                   .then((v) {
                                 if (v == null) {
@@ -355,9 +364,16 @@ class _HomeState extends ConsumerState<Home> {
                         control: true,
                       ),
                       onTap: () {
-                        ref
-                            .read(editorNotifierProvider.notifier)
-                            .changeToolbarPosition(ToolbarPosition.top);
+                        if (ref.read(editorNotifierProvider).toolbarPosition ==
+                            ToolbarPosition.none) {
+                          ref
+                              .read(editorNotifierProvider.notifier)
+                              .changeToolbarPosition(ToolbarPosition.top);
+                        } else {
+                          ref
+                              .read(editorNotifierProvider.notifier)
+                              .changeToolbarPosition(ToolbarPosition.none);
+                        }
                       },
                     ),
                     MenuButton(
