@@ -1,4 +1,5 @@
 import 'package:ai_text_editor/notifiers/ai_chat_notifier.dart';
+import 'package:ai_text_editor/notifiers/editor_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -56,8 +57,43 @@ class _AiChatWidgetState extends ConsumerState<AiChatWidget> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(aiChatNotifierProvider);
+    final selected = ref.watch(selectedNotifierProvider);
     return Column(
       children: [
+        if (selected != "")
+          Container(
+            padding: EdgeInsets.all(10),
+            margin: EdgeInsets.all(10),
+            decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10), color: Colors.white),
+            height: 100,
+            child: Column(
+              children: [
+                Expanded(child: Text(selected)),
+                SizedBox(
+                  height: 30,
+                  child: Row(
+                    children: [
+                      Spacer(),
+                      TextButton(
+                          onPressed: () {
+                            _textController.text = selected;
+                            Future.delayed(Duration(milliseconds: 300))
+                                .then((_) {
+                              _submit().then((_) {
+                                ref
+                                    .read(selectedNotifierProvider.notifier)
+                                    .changeSelectedString("");
+                              });
+                            });
+                          },
+                          child: Text("Ask AI"))
+                    ],
+                  ),
+                )
+              ],
+            ),
+          ),
         Expanded(
             child: SingleChildScrollView(
           controller: ref.read(aiChatNotifierProvider.notifier).controller,

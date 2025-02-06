@@ -53,6 +53,19 @@ class SavedNotifier extends Notifier<bool> {
   }
 }
 
+class SelectedStringNotifier extends Notifier<String> {
+  @override
+  String build() {
+    return "";
+  }
+
+  changeSelectedString(String s) {
+    if (s != state) {
+      state = s;
+    }
+  }
+}
+
 class EditorNotifier extends Notifier<EditorState> {
   late final QuillController quillController = QuillController.basic();
   late final ScrollController scrollController = ScrollController();
@@ -72,6 +85,23 @@ class EditorNotifier extends Notifier<EditorState> {
 
   @override
   EditorState build() {
+    quillController.onSelectionChanged = (selection) {
+      // print("${selection.start} -> ${selection.end}");
+      if (!selection.isCollapsed) {
+        if (selection.end - selection.start > 0) {
+          try {
+            final selectedText = quillController.getPlainText();
+            if (selectedText.trim() != "") {
+              ref
+                  .read(selectedNotifierProvider.notifier)
+                  .changeSelectedString(selectedText);
+            }
+          } catch (_) {}
+        }
+      } else {
+        ref.read(selectedNotifierProvider.notifier).changeSelectedString("");
+      }
+    };
     quillController.document.changes.listen((event) {
       // ref.read(editorNotifierProvider.notifier).getText();
       quillTextChangeController.add(getText());
@@ -267,6 +297,21 @@ class EditorNotifier extends Notifier<EditorState> {
 
       /// FIXME: not support some markdown syntax
       delta.operations.removeWhere((element) => element.value is Map);
+
+      /// remove selected text if there is selected text
+      if (quillController.selection.end != quillController.selection.start) {
+        quillController.document.replace(
+            quillController.selection.start,
+            quillController.selection.end - quillController.selection.start,
+            "");
+
+        quillController.updateSelection(
+            TextSelection(
+                baseOffset: quillController.selection.start,
+                extentOffset: quillController.selection.start),
+            ChangeSource.local);
+      }
+
       quillController.document
           .replace(quillController.selection.baseOffset, 0, delta);
 
@@ -424,3 +469,7 @@ final currentPositionProvider =
 
 final savedNotifierProvider =
     NotifierProvider<SavedNotifier, bool>(SavedNotifier.new);
+
+final selectedNotifierProvider =
+    NotifierProvider<SelectedStringNotifier, String>(
+        SelectedStringNotifier.new);
