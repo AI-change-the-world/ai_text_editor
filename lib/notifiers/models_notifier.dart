@@ -1,5 +1,7 @@
 import 'package:ai_text_editor/isar/database.dart';
 import 'package:ai_text_editor/isar/model.dart';
+import 'package:ai_text_editor/models/ai_model.dart';
+import 'package:ai_text_editor/utils/toast_utils.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar/isar.dart';
 
@@ -21,7 +23,9 @@ class ModelsNotifier extends AutoDisposeNotifier<ModelsState> {
   ModelsState build() {
     final models = database.isar!.models.where().findAllSync();
     final last = database.isar!.modelChangeHistorys
-        .where(sort: Sort.desc)
+        .where()
+        .sortByCreatedAtDesc()
+        .limit(1)
         .findFirstSync();
 
     return ModelsState(
@@ -43,6 +47,15 @@ class ModelsNotifier extends AutoDisposeNotifier<ModelsState> {
     });
 
     state = state.copyWith(current: model.tag);
+    GlobalModel.setModel(
+        OpenAIInfo(model.baseUrl!, model.sk!, model.modelName!));
+  }
+
+  Model? getCurrent() {
+    if (state.current == null) return null;
+    final m =
+        state.models.firstWhere((element) => element.tag == state.current);
+    return m;
   }
 
   Future<void> addModel(Model model) async {
@@ -58,6 +71,11 @@ class ModelsNotifier extends AutoDisposeNotifier<ModelsState> {
   }
 
   Future<void> deleteModel(Model model) async {
+    if (model.tag == state.current) {
+      ToastUtils.error(null, title: "Cannot delete current model");
+      return;
+    }
+
     database.isar!.writeTxnSync(() {
       database.isar!.models.deleteSync(model.id);
     });

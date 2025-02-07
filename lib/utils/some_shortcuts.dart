@@ -129,6 +129,11 @@ class SomeShortcuts {
     ///
     /// handle ai instruction
     if (instReg.hasMatch(subString)) {
+      if (GlobalModel.model == null) {
+        ToastUtils.error(null, title: "Model not set");
+        return false;
+      }
+
       ref?.read(editorNotifierProvider.notifier).setLoading(true);
       ref
           ?.read(editorNotifierProvider.notifier)
@@ -143,7 +148,7 @@ class SomeShortcuts {
                 baseOffset: lastCharIndex + 1, extentOffset: lastCharIndex + 1),
             ChangeSource.local);
 
-        GlobalModel.model.streamChat([
+        GlobalModel.model!.streamChat([
           ChatMessage(
               role: "user",
               content: subString.replaceAll("<inst>", ""),

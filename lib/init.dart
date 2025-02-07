@@ -4,21 +4,16 @@ import 'package:ai_text_editor/models/ai_model.dart';
 import 'package:flutter/services.dart';
 
 class APPConfig {
-  final OpenAIInfo? openAIInfo;
   final String appName;
-  APPConfig({this.openAIInfo, this.appName = "AI Text Editor"});
+  APPConfig({this.appName = "AI Text Editor"});
 
   static Future<APPConfig> init() async {
     late Map<String, dynamic> config = {};
     try {
       final String r = await rootBundle.loadString("assets/config.json");
       config = json.decode(r);
-      String sk = config['llm-sk'];
-      String model = config['llm-model-name'];
-      String baseUrl = config['llm-base'];
-      OpenAIInfo openAIInfo = OpenAIInfo(baseUrl, sk, model);
       String appName = config['app-name'] ?? "AI Text Editor";
-      return APPConfig(openAIInfo: openAIInfo, appName: appName);
+      return APPConfig(appName: appName);
     } catch (_) {
       return APPConfig();
     }

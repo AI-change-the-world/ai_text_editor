@@ -4,7 +4,9 @@ import 'package:ai_text_editor/components/editor.dart';
 import 'package:ai_text_editor/components/faded_text.dart';
 import 'package:ai_text_editor/components/model_settings_widget.dart';
 import 'package:ai_text_editor/components/position_widget.dart';
+import 'package:ai_text_editor/models/ai_model.dart';
 import 'package:ai_text_editor/notifiers/editor_state.dart';
+import 'package:ai_text_editor/notifiers/models_notifier.dart';
 import 'package:ai_text_editor/src/rust/api/converter_api.dart';
 import 'package:ai_text_editor/src/rust/messages.dart';
 import 'package:ai_text_editor/utils/file_utils.dart';
@@ -73,6 +75,14 @@ class _HomeState extends ConsumerState<Home> {
         );
       }
     });
+    final model = ref.read(modelsProvider.notifier).getCurrent();
+    if (model != null) {
+      GlobalModel.setModel(
+          OpenAIInfo(model.baseUrl!, model.sk!, model.modelName!));
+      logger.i("Model found, set model ${model.modelName}");
+    } else {
+      logger.i("Model not found, should set model first");
+    }
   }
 
   @override

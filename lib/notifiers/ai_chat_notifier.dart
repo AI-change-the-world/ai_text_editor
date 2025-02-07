@@ -1,5 +1,6 @@
 import 'package:ai_packages_core/ai_packages_core.dart';
 import 'package:ai_text_editor/models/ai_model.dart';
+import 'package:ai_text_editor/utils/toast_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -56,6 +57,10 @@ class AIChatNotifier extends Notifier<AIChatState> {
   }
 
   handleMessage() {
+    if (GlobalModel.model == null) {
+      ToastUtils.error(null, title: "No model selected");
+      return;
+    }
     final d = DateTime.now();
     final history = state.messages
         .map((v) => ChatMessage<String>(
@@ -66,7 +71,7 @@ class AIChatNotifier extends Notifier<AIChatState> {
 
     addMessage(AIChatMessage(role: "assistant", content: ""));
 
-    GlobalModel.model.streamChat(history).listen(
+    GlobalModel.model!.streamChat(history).listen(
       (v) {
         updateMessage(v);
         controller.jumpTo(controller.position.maxScrollExtent);
