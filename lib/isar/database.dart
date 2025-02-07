@@ -1,3 +1,4 @@
+import 'package:ai_text_editor/isar/model.dart';
 import 'package:ai_text_editor/isar/recent_files.dart';
 import 'package:isar/isar.dart';
 // ignore: depend_on_referenced_packages
@@ -13,7 +14,11 @@ class IsarDatabase {
 
   IsarDatabase._init();
 
-  late List<CollectionSchema<Object>> schemas = [RecentFilesSchema];
+  late List<CollectionSchema<Object>> schemas = [
+    RecentFilesSchema,
+    ModelSchema,
+    ModelChangeHistorySchema
+  ];
 
   Future initialDatabase() async {
     if (isar != null && isar!.isOpen) {

@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:ai_text_editor/components/editor.dart';
 import 'package:ai_text_editor/components/faded_text.dart';
+import 'package:ai_text_editor/components/model_settings_widget.dart';
 import 'package:ai_text_editor/components/position_widget.dart';
 import 'package:ai_text_editor/notifiers/editor_state.dart';
 import 'package:ai_text_editor/src/rust/api/converter_api.dart';
@@ -383,6 +384,33 @@ class _HomeState extends ConsumerState<Home> {
                             open: !ref.read(editorNotifierProvider).showAI);
                       },
                     )
+                  ])),
+              BarButton(
+                  text: Padding(
+                    padding: EdgeInsets.only(left: 10, right: 10),
+                    child: Text("Settings"),
+                  ),
+                  submenu: SubMenu(menuItems: [
+                    MenuButton(
+                      onTap: () {
+                        showGeneralDialog(
+                            barrierColor: Colors.transparent,
+                            context: context,
+                            pageBuilder: (c, _, __) {
+                              return ModelSettingsWidget();
+                            });
+                      },
+                      text: Row(
+                        spacing: 10,
+                        children: [
+                          Icon(
+                            Icons.desktop_mac,
+                            size: 16,
+                          ),
+                          Text("Models")
+                        ],
+                      ),
+                    ),
                   ]))
             ],
             child: Scaffold(
