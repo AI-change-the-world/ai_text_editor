@@ -135,15 +135,32 @@ class EditorNotifier extends Notifier<EditorState> {
       _debounceTimer?.cancel();
 
       if (_listening) {
-        if (event.change.operations.last.isDelete) {
-          if (event.change.operations.last.data == "@") {
+        if (_currentGreyHint.isNotEmpty &&
+            _currentGreyHint.length > 1 &&
+            event.change.operations.last.isInsert &&
+            event.change.operations.last.data is String &&
+            (event.change.operations.last.data as String).length == 1) {
+          /// delete suggestion
+          quillController.replaceText(quillController.selection.baseOffset,
+              _currentGreyHint.length, "", null);
+          _currentGreyHint = "";
+        }
+
+        if (event.change.operations.last.isDelete &&
+            event.change.operations.last.length == 1) {
+          if (_currentHint.isEmpty) {
             _listening = false;
-            _currentHint = "";
-          } else if (event.change.operations.last.data is String &&
-              (event.change.operations.last.data as String).length == 1) {
-            if (_currentHint.isNotEmpty) {
-              _currentHint = _currentHint.substring(0, _currentHint.length - 1);
-            }
+          }
+
+          /// delete suggestion
+          if (_currentGreyHint.isNotEmpty) {
+            quillController.replaceText(quillController.selection.baseOffset,
+                _currentGreyHint.length, "", null);
+            _currentGreyHint = "";
+          }
+
+          if (_currentHint.isNotEmpty) {
+            _currentHint = _currentHint.substring(0, _currentHint.length - 1);
           }
         } else if (event.change.operations.last.isInsert) {
           if (event.change.operations.last.data is String &&
@@ -153,6 +170,7 @@ class EditorNotifier extends Notifier<EditorState> {
         }
 
         if (_listening) {
+          print(_currentHint);
           _debounceTimer = Timer(Duration(milliseconds: 1000), () {
             if (_currentHint.isNotEmpty) {
               final index = suggestions
@@ -162,8 +180,12 @@ class EditorNotifier extends Notifier<EditorState> {
                 suggestion = suggestion.substring(
                     _currentHint.length, suggestion.length);
                 if (suggestion.isNotEmpty && _currentGreyHint.isEmpty) {
-                  _currentGreyHint = suggestions[index];
+                  _currentGreyHint = suggestion;
                   _insertGrayText(suggestion);
+                }
+
+                if (suggestion.isEmpty) {
+                  _currentGreyHint = "";
                 }
               }
             }
