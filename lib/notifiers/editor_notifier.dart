@@ -83,6 +83,35 @@ class EditorNotifier extends Notifier<EditorState> {
 
   Stream<String> get quillTextChangeStream => quillTextChangeController.stream;
 
+  bool _listening = false;
+  String _currentHint = "";
+  String _currentGreyHint = "";
+
+  late final List<String> suggestions = ["Alice", "Ack", "Bob", "Car"];
+
+  Timer? _debounceTimer;
+
+  void _insertGrayText(String suggestion) {
+    final selection = quillController.selection;
+    final baseOffset = selection.baseOffset;
+
+    if (baseOffset > 0) {
+      quillController.replaceText(
+        baseOffset,
+        0,
+        suggestion,
+        TextSelection.collapsed(offset: baseOffset),
+      );
+
+      // 设置灰色样式
+      quillController.formatText(
+        baseOffset,
+        suggestion.length,
+        ColorAttribute("#A0A0A0"), // 灰色字体
+      );
+    }
+  }
+
   @override
   EditorState build() {
     quillController.onSelectionChanged = (selection) {
@@ -103,6 +132,54 @@ class EditorNotifier extends Notifier<EditorState> {
       }
     };
     quillController.document.changes.listen((event) {
+      _debounceTimer?.cancel();
+
+      if (_listening) {
+        if (event.change.operations.last.isDelete) {
+          if (event.change.operations.last.data == "@") {
+            _listening = false;
+            _currentHint = "";
+          } else if (event.change.operations.last.data is String &&
+              (event.change.operations.last.data as String).length == 1) {
+            if (_currentHint.isNotEmpty) {
+              _currentHint = _currentHint.substring(0, _currentHint.length - 1);
+            }
+          }
+        } else if (event.change.operations.last.isInsert) {
+          if (event.change.operations.last.data is String &&
+              (event.change.operations.last.data as String).length == 1) {
+            _currentHint += event.change.operations.last.data.toString();
+          }
+        }
+
+        if (_listening) {
+          _debounceTimer = Timer(Duration(milliseconds: 1000), () {
+            if (_currentHint.isNotEmpty) {
+              final index = suggestions
+                  .indexWhere((element) => element.startsWith(_currentHint));
+              if (index != -1) {
+                String suggestion = suggestions[index];
+                suggestion = suggestion.substring(
+                    _currentHint.length, suggestion.length);
+                if (suggestion.isNotEmpty && _currentGreyHint.isEmpty) {
+                  _currentGreyHint = suggestions[index];
+                  _insertGrayText(suggestion);
+                }
+              }
+            }
+          });
+        }
+      }
+
+      if (event.change.operations.last.isInsert) {
+        if (event.change.operations.last.data == "@") {
+          _listening = true;
+          // _debounceTimer = Timer(Duration(milliseconds: 1000), () {
+          //   _insertGrayText("Alice");
+          // });
+        }
+      }
+
       // ref.read(editorNotifierProvider.notifier).getText();
       quillTextChangeController.add(getText());
       changeSavedStatus(true);
@@ -124,6 +201,7 @@ class EditorNotifier extends Notifier<EditorState> {
     ref.onDispose(() {
       quillController.dispose();
       scrollController.dispose();
+      _debounceTimer?.cancel();
     });
 
     return EditorState();
