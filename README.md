@@ -13,13 +13,16 @@ using `flutter` and `flutter_quill` to build a text editor
 
 ### Features
 
-- AI generate with instruction
+- AI generate with instruction  
+
 ![image](readme/ai_generate/output.gif)
 
-- Table generate  with instruction
+- Table generate  with instruction  
+
 ![image](readme/table/output.gif)
 
-- spell check with AI
+- spell check with AI  
+
 ![image](readme/spell_check/output.gif)
 
 - try `<roll></roll>`
