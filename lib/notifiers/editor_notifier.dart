@@ -66,6 +66,33 @@ class SelectedStringNotifier extends Notifier<String> {
   }
 }
 
+class _CurrentGreyHint {
+  final String text;
+  final int baseOffset;
+
+  _CurrentGreyHint({this.text = "", this.baseOffset = -1});
+
+  _CurrentGreyHint copyWith({
+    String? text,
+    int? baseOffset,
+  }) {
+    return _CurrentGreyHint(
+      text: text ?? this.text,
+      baseOffset: baseOffset ?? this.baseOffset,
+    );
+  }
+
+  bool get isNotEmpty => text.isNotEmpty;
+  bool get isEmpty => text.isEmpty;
+
+  int get length => text.length;
+
+  @override
+  String toString() {
+    return "text: $text, baseOffset: $baseOffset";
+  }
+}
+
 class EditorNotifier extends Notifier<EditorState> {
   late final QuillController quillController = QuillController.basic();
   late final ScrollController scrollController = ScrollController();
@@ -85,7 +112,8 @@ class EditorNotifier extends Notifier<EditorState> {
 
   bool _listening = false;
   String _currentHint = "";
-  String _currentGreyHint = "";
+  // String _currentGreyHint = "";
+  _CurrentGreyHint _currentGreyHint = _CurrentGreyHint();
 
   late final List<String> suggestions = ["Alice", "Ack", "Bob", "Car"];
 
@@ -112,10 +140,18 @@ class EditorNotifier extends Notifier<EditorState> {
     }
   }
 
+  int _start = -1;
+  int _end = -1;
+
   @override
   EditorState build() {
     quillController.onSelectionChanged = (selection) {
       // print("${selection.start} -> ${selection.end}");
+      if (selection.start != selection.end) {
+        _start = selection.start;
+        _end = selection.end;
+      }
+
       if (!selection.isCollapsed) {
         if (selection.end - selection.start > 0) {
           try {
@@ -143,7 +179,8 @@ class EditorNotifier extends Notifier<EditorState> {
           /// delete suggestion
           quillController.replaceText(quillController.selection.baseOffset,
               _currentGreyHint.length, "", null);
-          _currentGreyHint = "";
+          _currentGreyHint = _currentGreyHint.copyWith(
+              text: "", baseOffset: quillController.selection.baseOffset);
         }
 
         if (event.change.operations.last.isDelete &&
@@ -156,7 +193,8 @@ class EditorNotifier extends Notifier<EditorState> {
           if (_currentGreyHint.isNotEmpty) {
             quillController.replaceText(quillController.selection.baseOffset,
                 _currentGreyHint.length, "", null);
-            _currentGreyHint = "";
+            _currentGreyHint = _currentGreyHint.copyWith(
+                text: "", baseOffset: quillController.selection.baseOffset);
           }
 
           if (_currentHint.isNotEmpty) {
@@ -170,7 +208,6 @@ class EditorNotifier extends Notifier<EditorState> {
         }
 
         if (_listening) {
-          print(_currentHint);
           _debounceTimer = Timer(Duration(milliseconds: 1000), () {
             if (_currentHint.isNotEmpty) {
               final index = suggestions
@@ -180,12 +217,17 @@ class EditorNotifier extends Notifier<EditorState> {
                 suggestion = suggestion.substring(
                     _currentHint.length, suggestion.length);
                 if (suggestion.isNotEmpty && _currentGreyHint.isEmpty) {
-                  _currentGreyHint = suggestion;
+                  // _currentGreyHint = suggestion;
+                  _currentGreyHint = _currentGreyHint.copyWith(
+                      text: suggestion,
+                      baseOffset: quillController.selection.baseOffset);
                   _insertGrayText(suggestion);
                 }
 
                 if (suggestion.isEmpty) {
-                  _currentGreyHint = "";
+                  _currentGreyHint = _currentGreyHint.copyWith(
+                      text: "",
+                      baseOffset: quillController.selection.baseOffset);
                 }
               }
             }
