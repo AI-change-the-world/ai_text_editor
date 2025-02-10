@@ -16,6 +16,7 @@ class EditorChatHistory {
 class EditorState {
   final bool showStructure;
   final bool showAI;
+  final bool showSpellCheck;
   final ToolbarPosition toolbarPosition;
   final bool loading;
   final String? currentFilePath;
@@ -28,6 +29,7 @@ class EditorState {
     this.loading = false,
     this.chatHistory = const [],
     this.currentFilePath,
+    this.showSpellCheck = false,
   });
 
   EditorState copyWith({
@@ -39,6 +41,7 @@ class EditorState {
     bool? saved,
     String? currentFilePath,
     double? currentPosition,
+    bool? showSpellCheck,
   }) {
     return EditorState(
       showStructure: showStructure ?? this.showStructure,
@@ -47,6 +50,7 @@ class EditorState {
       loading: loading ?? this.loading,
       chatHistory: chatHistory ?? this.chatHistory,
       currentFilePath: currentFilePath ?? this.currentFilePath,
+      showSpellCheck: showSpellCheck ?? this.showSpellCheck,
     );
   }
 }

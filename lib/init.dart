@@ -1,37 +1,25 @@
+// ignore_for_file: no_leading_underscores_for_local_identifiers
+
 import 'dart:convert';
 
-import 'package:ai_text_editor/models/ai_model.dart';
 import 'package:flutter/services.dart';
 
 class APPConfig {
-  final String appName;
-  APPConfig({this.appName = "AI Text Editor"});
+  static String appName = "AI Text Editor";
+  static String spellCheckPrompt =
+      "Please correct the spelling mistakes in the following text: {text}";
 
-  static Future<APPConfig> init() async {
+  static Future<void> init() async {
     late Map<String, dynamic> config = {};
     try {
       final String r = await rootBundle.loadString("assets/config.json");
       config = json.decode(r);
-      String appName = config['app-name'] ?? "AI Text Editor";
-      return APPConfig(appName: appName);
-    } catch (_) {
-      return APPConfig();
-    }
-  }
-}
-
-@Deprecated("Use `APPConfig.init()` instead")
-Future<OpenAIInfo?> initOpenAILikeModel() async {
-  late Map<String, dynamic> config = {};
-  try {
-    final String r = await rootBundle.loadString("assets/config.json");
-    config = json.decode(r);
-    String sk = config['llm-sk'];
-    String model = config['llm-model-name'];
-    String baseUrl = config['llm-base'];
-    OpenAIInfo openAIInfo = OpenAIInfo(baseUrl, sk, model);
-    return openAIInfo;
-  } catch (_) {
-    return null;
+      String _appName = config['app-name'] ?? "AI Text Editor";
+      final String _spellCheck =
+          await rootBundle.loadString("assets/prompts/spell-check-prompt.txt");
+      // return APPConfig(appName: appName, spellCheckPrompt: spellCheck);
+      appName = _appName;
+      spellCheckPrompt = _spellCheck;
+    } catch (_) {}
   }
 }

@@ -12,11 +12,11 @@ void main() async {
   await RustLib.init();
   final FontsLoader loader = FontsLoader();
   await loader.loadFonts();
-  final config = await APPConfig.init();
+  final _ = await APPConfig.init();
 
   await windowManager.ensureInitialized();
   WindowOptions windowOptions = WindowOptions(
-    title: config.appName,
+    title: APPConfig.appName,
     size: Size(800, 600),
     minimumSize: Size(800, 600),
     backgroundColor: Colors.white,

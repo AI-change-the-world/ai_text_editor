@@ -6,11 +6,15 @@ import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 
+import 'package:ai_packages_core/ai_packages_core.dart' as core;
 import 'package:ai_text_editor/embeds/image/image_embed.dart';
 import 'package:ai_text_editor/embeds/roll/roll_embed.dart';
 import 'package:ai_text_editor/embeds/table/table_embed.dart';
+import 'package:ai_text_editor/init.dart';
 import 'package:ai_text_editor/isar/database.dart';
 import 'package:ai_text_editor/isar/recent_files.dart';
+import 'package:ai_text_editor/models/ai_model.dart';
+import 'package:ai_text_editor/models/json_error_model.dart';
 import 'package:ai_text_editor/utils/logger.dart';
 import 'package:ai_text_editor/utils/toast_utils.dart';
 import 'package:isar/isar.dart';
@@ -63,6 +67,17 @@ class SelectedStringNotifier extends Notifier<String> {
     if (s != state) {
       state = s;
     }
+  }
+}
+
+class SpellCheckErrorNotifier extends Notifier<List<Errors>> {
+  @override
+  List<Errors> build() {
+    return [];
+  }
+
+  changeSpellCheckError(List<Errors> errors) {
+    state = errors;
   }
 }
 
@@ -132,6 +147,77 @@ class EditorNotifier extends Notifier<EditorState> {
   /// 调整滚动条位置
   void _changeCurrentPosition(double p) {
     ref.read(currentPositionProvider.notifier).changePosition(p);
+  }
+
+  /// 获取当前编辑器文本
+  String getPlainText() {
+    return quillController.document.toPlainText();
+  }
+
+  Future<void> spellCheck() async {
+    if (GlobalModel.model == null) {
+      ToastUtils.error(null, title: "请先选择模型");
+      return;
+    }
+    final s = getPlainText();
+    if (s.trim() == "") {
+      ToastUtils.error(null, title: "请先输入文本");
+      return;
+    }
+    setLoading(true);
+
+    final prompt = APPConfig.spellCheckPrompt.replaceAll("{text}", s);
+    core.ChatMessage message = core.ChatMessage(
+        role: "user",
+        content: prompt,
+        createAt: DateTime.now().millisecondsSinceEpoch);
+
+    final res = await GlobalModel.model!.chat([message]);
+    setLoading(false);
+
+    try {
+      final r = res.replaceFirst("```json", "").replaceAll("```", "");
+      final model = JsonErrorModel.fromJson(jsonDecode(r));
+      ref
+          .read(spellCheckErrorNotifierProvider.notifier)
+          .changeSpellCheckError(model.errors ?? []);
+      if (!state.showSpellCheck) toggleSpellCheck();
+    } catch (_) {
+      ToastUtils.error(null, title: " spell check error");
+    }
+  }
+
+  void highlightText(String targetText) {
+    final matches = quillController.document.search(targetText);
+    if (matches.isEmpty) {
+      return;
+    }
+
+    /// TODO: FIXME: 如果有多个一样targetText存在问题，只能显示第一个
+    int start = matches[0];
+    int length = targetText.length;
+
+    quillController.updateSelection(
+        TextSelection(
+          baseOffset: start,
+          extentOffset: start + length,
+        ),
+        ChangeSource.local);
+  }
+
+  void removeHighlight() {
+    quillController.moveCursorToEnd();
+  }
+
+  void replaceCertainText(String targetText, String replaceText) {
+    final matches = quillController.document.search(targetText);
+    if (matches.isEmpty) {
+      return;
+    }
+
+    int start = matches[0];
+    int length = targetText.length;
+    quillController.replaceText(start, length, replaceText, null);
   }
 
   int getCurrentBaseOffset() {
@@ -235,8 +321,16 @@ class EditorNotifier extends Notifier<EditorState> {
   /// 打开/关闭AI
   void toggleAi({bool open = true}) {
     if (state.showAI != open) {
-      state = state.copyWith(showAI: open);
+      state = state.copyWith(
+          showAI: open, showSpellCheck: open ? false : state.showSpellCheck);
     }
+  }
+
+  /// 切换拼写检查
+  void toggleSpellCheck() {
+    state = state.copyWith(
+        showSpellCheck: !state.showSpellCheck,
+        showAI: !state.showSpellCheck ? false : state.showAI);
   }
 
   /// 修改保存状态
@@ -473,3 +567,7 @@ final savedNotifierProvider =
 final selectedNotifierProvider =
     NotifierProvider<SelectedStringNotifier, String>(
         SelectedStringNotifier.new);
+
+final spellCheckErrorNotifierProvider =
+    NotifierProvider<SpellCheckErrorNotifier, List<Errors>>(
+        SpellCheckErrorNotifier.new);

@@ -4,6 +4,7 @@ import 'package:ai_text_editor/components/editor.dart';
 import 'package:ai_text_editor/components/faded_text.dart';
 import 'package:ai_text_editor/components/model_settings_widget.dart';
 import 'package:ai_text_editor/components/position_widget.dart';
+import 'package:ai_text_editor/components/spell_check_view.dart';
 import 'package:ai_text_editor/models/ai_model.dart';
 import 'package:ai_text_editor/notifiers/editor_state.dart';
 import 'package:ai_text_editor/notifiers/models_notifier.dart';
@@ -216,7 +217,7 @@ class _HomeState extends ConsumerState<Home> {
                                     child: Icon(
                                       Icons.info_outline,
                                       color: Colors.grey,
-                                      size: 15,
+                                      size: Styles.menuBarIconSize,
                                     ),
                                   )
                                 ],
@@ -272,7 +273,7 @@ class _HomeState extends ConsumerState<Home> {
                                   child: Icon(
                                     Icons.info_outline,
                                     color: Colors.grey,
-                                    size: 15,
+                                    size: Styles.menuBarIconSize,
                                   ),
                                 )
                               ],
@@ -329,7 +330,7 @@ class _HomeState extends ConsumerState<Home> {
                                   child: Icon(
                                     Icons.info_outline,
                                     color: Colors.grey,
-                                    size: 15,
+                                    size: Styles.menuBarIconSize,
                                   ),
                                 )
                               ],
@@ -396,6 +397,27 @@ class _HomeState extends ConsumerState<Home> {
                     )
                   ])),
               BarButton(
+                  text: Center(
+                    child: Text("Tools"),
+                  ),
+                  submenu: SubMenu(menuItems: [
+                    MenuButton(
+                      text: Row(
+                        spacing: 5,
+                        children: [
+                          Icon(
+                            Icons.spellcheck,
+                            size: Styles.menuBarIconSize,
+                          ),
+                          Text("Spell check")
+                        ],
+                      ),
+                      onTap: () async {
+                        ref.read(editorNotifierProvider.notifier).spellCheck();
+                      },
+                    ),
+                  ])),
+              BarButton(
                   text: Padding(
                     padding: EdgeInsets.only(left: 10, right: 10),
                     child: Text("Settings"),
@@ -415,7 +437,7 @@ class _HomeState extends ConsumerState<Home> {
                         children: [
                           Icon(
                             Icons.desktop_mac,
-                            size: 16,
+                            size: Styles.menuBarIconSize,
                           ),
                           Text("Models")
                         ],
@@ -437,7 +459,8 @@ class _HomeState extends ConsumerState<Home> {
                         );
                       }),
                   Expanded(child: Editor()),
-                  AiWidget()
+                  AiWidget(),
+                  SpellCheckView()
                 ],
               ),
             ),
