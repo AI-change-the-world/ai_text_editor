@@ -1,0 +1,112 @@
+{
+  "_note1": "KEEP THIS FILE! Check it into a version control system (VCS) like git.",
+  "_note2": "ObjectBox manages crucial IDs for your object model. See docs for details.",
+  "_note3": "If you have VCS merge conflicts, you must resolve them according to ObjectBox docs.",
+  "entities": [
+    {
+      "id": "1:7888250155119839798",
+      "lastPropertyId": "6:2366938397299607619",
+      "name": "Model",
+      "properties": [
+        {
+          "id": "1:5937691340998417933",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:6951274381860307434",
+          "name": "tag",
+          "type": 9,
+          "flags": 2080,
+          "indexId": "1:1206263127548344179"
+        },
+        {
+          "id": "3:6960838681920661592",
+          "name": "baseUrl",
+          "type": 9
+        },
+        {
+          "id": "4:2570535714279082758",
+          "name": "modelName",
+          "type": 9
+        },
+        {
+          "id": "5:6092301172657730544",
+          "name": "sk",
+          "type": 9
+        },
+        {
+          "id": "6:2366938397299607619",
+          "name": "createdAt",
+          "type": 6
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "2:5223053008767375278",
+      "lastPropertyId": "3:1942603380177103989",
+      "name": "ModelChangeHistory",
+      "properties": [
+        {
+          "id": "1:3242355618125967367",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:4165174399635639401",
+          "name": "tag",
+          "type": 9
+        },
+        {
+          "id": "3:1942603380177103989",
+          "name": "createdAt",
+          "type": 6
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "3:2532242625166821128",
+      "lastPropertyId": "4:5191401903020052050",
+      "name": "RecentFiles",
+      "properties": [
+        {
+          "id": "1:6605414093469963303",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:6446781946106700428",
+          "name": "path",
+          "type": 9
+        },
+        {
+          "id": "3:2229186183726866292",
+          "name": "createdAt",
+          "type": 6
+        },
+        {
+          "id": "4:5191401903020052050",
+          "name": "lastEdited",
+          "type": 6
+        }
+      ],
+      "relations": []
+    }
+  ],
+  "lastEntityId": "3:2532242625166821128",
+  "lastIndexId": "1:1206263127548344179",
+  "lastRelationId": "0:0",
+  "lastSequenceId": "0:0",
+  "modelVersion": 5,
+  "modelVersionParserMinimum": 5,
+  "retiredEntityUids": [],
+  "retiredIndexUids": [],
+  "retiredPropertyUids": [],
+  "retiredRelationUids": [],
+  "version": 1
+}

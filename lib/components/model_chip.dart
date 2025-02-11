@@ -1,5 +1,5 @@
-import 'package:ai_text_editor/isar/model.dart';
 import 'package:ai_text_editor/notifiers/models_notifier.dart';
+import 'package:ai_text_editor/objectbox/model.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -83,7 +83,7 @@ class _ModelChipState extends ConsumerState<ModelChip> {
                     children: [
                       Expanded(
                           child: AutoSizeText(
-                        widget.model.modelName ?? "Default",
+                        widget.model.modelName,
                         maxLines: 1,
                       )),
                       if (isHovering)

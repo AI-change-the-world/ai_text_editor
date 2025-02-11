@@ -1,10 +1,10 @@
 import 'package:ai_text_editor/app.dart';
 import 'package:ai_text_editor/init.dart';
+import 'package:ai_text_editor/objectbox/database.dart';
 import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:ai_text_editor/src/rust/frb_generated.dart';
 
-import 'isar/database.dart';
 import 'utils/font_loader.dart';
 
 void main() async {
@@ -26,7 +26,7 @@ void main() async {
     await windowManager.show();
     await windowManager.focus();
   });
-  await IsarDatabase().initialDatabase();
+  await ObxDatabase.create();
 
   runApp(const App());
 }

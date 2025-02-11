@@ -1,9 +1,9 @@
-import 'package:ai_text_editor/isar/database.dart';
-import 'package:ai_text_editor/isar/model.dart';
 import 'package:ai_text_editor/models/ai_model.dart';
+import 'package:ai_text_editor/objectbox.g.dart';
+import 'package:ai_text_editor/objectbox/database.dart';
+import 'package:ai_text_editor/objectbox/model.dart';
 import 'package:ai_text_editor/utils/toast_utils.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:isar/isar.dart';
 
 class ModelsState {
   final List<Model> models;
@@ -17,56 +17,53 @@ class ModelsState {
 }
 
 class ModelsNotifier extends AutoDisposeNotifier<ModelsState> {
-  final IsarDatabase database = IsarDatabase();
+  final ObxDatabase database = ObxDatabase.db;
 
   @override
   ModelsState build() {
-    final models = database.isar!.models.where().findAllSync();
-    final last = database.isar!.modelChangeHistorys
-        .where()
-        .sortByCreatedAtDesc()
-        .limit(1)
-        .findFirstSync();
+    final models = database.modelBox.getAll();
+    final lastQuery = database.modelChangeHistoryBox
+        .query()
+        .order(ModelChangeHistory_.createdAt, flags: Order.descending)
+        .build();
+    final List<ModelChangeHistory> lastList = lastQuery.find();
+    final last = lastList.firstOrNull;
 
     return ModelsState(
         models: models,
         current: models
             .firstWhere(
               (v) => v.tag == last?.tag,
-              orElse: () => Model()..tag = '',
+              orElse: () => Model.empty(),
             )
             .tag);
   }
 
   Future<void> addChangeHistory(Model model) async {
-    final history = ModelChangeHistory()
-      ..tag = model.tag!
+    final history = ModelChangeHistory(tag: model.tag)
       ..createdAt = DateTime.now().millisecondsSinceEpoch;
-    database.isar!.writeTxnSync(() {
-      database.isar!.modelChangeHistorys.putSync(history);
-    });
+    database.modelChangeHistoryBox.put(history);
 
     state = state.copyWith(current: model.tag);
-    GlobalModel.setModel(
-        OpenAIInfo(model.baseUrl!, model.sk!, model.modelName!));
+    GlobalModel.setModel(OpenAIInfo(model.baseUrl, model.sk, model.modelName));
   }
 
   Model? getCurrent() {
-    if (state.current == null) return null;
+    if (state.current == null || state.current == "") return null;
     final m =
         state.models.firstWhere((element) => element.tag == state.current);
     return m;
   }
 
   Future<void> addModel(Model model) async {
-    final models = database.isar!.models.where().findAllSync();
+    final models = database.modelBox.getAll();
+
     final modelExists = models.any((m) => m.tag == model.tag);
     if (modelExists) {
       return;
     }
-    database.isar!.writeTxnSync(() {
-      database.isar!.models.putSync(model);
-    });
+
+    database.modelBox.put(model);
     state = state.copyWith(models: [...state.models, model]);
   }
 
@@ -76,9 +73,8 @@ class ModelsNotifier extends AutoDisposeNotifier<ModelsState> {
       return;
     }
 
-    database.isar!.writeTxnSync(() {
-      database.isar!.models.deleteSync(model.id);
-    });
+    database.modelBox.remove(model.id);
+
     state = state.copyWith(models: [
       for (final m in state.models)
         if (m.id != model.id) m,
