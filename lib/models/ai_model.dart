@@ -39,7 +39,8 @@ class OpenAIInfo extends ModelCallBase {
 class GlobalModel {
   GlobalModel._();
 
-  static late OpenAIInfo model;
+  // ignore: avoid_init_to_null
+  static OpenAIInfo? model = null;
 
   static setModel(OpenAIInfo model) {
     GlobalModel.model = model;

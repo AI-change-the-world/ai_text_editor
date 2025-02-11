@@ -1,7 +1,3 @@
 {
-    "tag": "text-model",
-    "llm-base": "https://",
-    "llm-model-name": "(gpt-4o)",
-    "llm-sk": "sk-",
     "app-name": "云笺妙笔"
 }

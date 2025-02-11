@@ -2,8 +2,12 @@ import 'dart:io';
 
 import 'package:ai_text_editor/components/editor.dart';
 import 'package:ai_text_editor/components/faded_text.dart';
+import 'package:ai_text_editor/components/model_settings_widget.dart';
 import 'package:ai_text_editor/components/position_widget.dart';
+import 'package:ai_text_editor/components/spell_check_view.dart';
+import 'package:ai_text_editor/models/ai_model.dart';
 import 'package:ai_text_editor/notifiers/editor_state.dart';
+import 'package:ai_text_editor/notifiers/models_notifier.dart';
 import 'package:ai_text_editor/src/rust/api/converter_api.dart';
 import 'package:ai_text_editor/src/rust/messages.dart';
 import 'package:ai_text_editor/utils/file_utils.dart';
@@ -72,6 +76,14 @@ class _HomeState extends ConsumerState<Home> {
         );
       }
     });
+    final model = ref.read(modelsProvider.notifier).getCurrent();
+    if (model != null) {
+      GlobalModel.setModel(
+          OpenAIInfo(model.baseUrl, model.sk, model.modelName));
+      logger.i("Model found, set model ${model.modelName}");
+    } else {
+      logger.i("Model not found, should set model first");
+    }
   }
 
   @override
@@ -120,6 +132,9 @@ class _HomeState extends ConsumerState<Home> {
                             ref
                                 .read(editorNotifierProvider.notifier)
                                 .loadFromFile(f);
+                            ref
+                                .read(editorNotifierProvider.notifier)
+                                .setCurrentFilePath(f.path);
                           });
                         },
                         shortcut: SingleActivator(LogicalKeyboardKey.keyO,
@@ -146,6 +161,8 @@ class _HomeState extends ConsumerState<Home> {
 
                         if (ref.read(editorNotifierProvider).currentFilePath !=
                             null) {
+                          logger.d(
+                              "save file to ${ref.read(editorNotifierProvider).currentFilePath}");
                           FileUtils.updateJsonFile(
                                   j,
                                   ref
@@ -200,7 +217,7 @@ class _HomeState extends ConsumerState<Home> {
                                     child: Icon(
                                       Icons.info_outline,
                                       color: Colors.grey,
-                                      size: 15,
+                                      size: Styles.menuBarIconSize,
                                     ),
                                   )
                                 ],
@@ -256,7 +273,7 @@ class _HomeState extends ConsumerState<Home> {
                                   child: Icon(
                                     Icons.info_outline,
                                     color: Colors.grey,
-                                    size: 15,
+                                    size: Styles.menuBarIconSize,
                                   ),
                                 )
                               ],
@@ -264,6 +281,10 @@ class _HomeState extends ConsumerState<Home> {
                           ),
                           MenuButton(
                             onTap: () {
+                              ref
+                                  .read(editorNotifierProvider.notifier)
+                                  .changeToolbarPosition(ToolbarPosition.none);
+
                               ref
                                   .read(editorNotifierProvider.notifier)
                                   .getImage()
@@ -309,7 +330,7 @@ class _HomeState extends ConsumerState<Home> {
                                   child: Icon(
                                     Icons.info_outline,
                                     color: Colors.grey,
-                                    size: 15,
+                                    size: Styles.menuBarIconSize,
                                   ),
                                 )
                               ],
@@ -355,9 +376,16 @@ class _HomeState extends ConsumerState<Home> {
                         control: true,
                       ),
                       onTap: () {
-                        ref
-                            .read(editorNotifierProvider.notifier)
-                            .changeToolbarPosition(ToolbarPosition.top);
+                        if (ref.read(editorNotifierProvider).toolbarPosition ==
+                            ToolbarPosition.none) {
+                          ref
+                              .read(editorNotifierProvider.notifier)
+                              .changeToolbarPosition(ToolbarPosition.top);
+                        } else {
+                          ref
+                              .read(editorNotifierProvider.notifier)
+                              .changeToolbarPosition(ToolbarPosition.none);
+                        }
                       },
                     ),
                     MenuButton(
@@ -367,6 +395,54 @@ class _HomeState extends ConsumerState<Home> {
                             open: !ref.read(editorNotifierProvider).showAI);
                       },
                     )
+                  ])),
+              BarButton(
+                  text: Center(
+                    child: Text("Tools"),
+                  ),
+                  submenu: SubMenu(menuItems: [
+                    MenuButton(
+                      text: Row(
+                        spacing: 5,
+                        children: [
+                          Icon(
+                            Icons.spellcheck,
+                            size: Styles.menuBarIconSize,
+                          ),
+                          Text("Spell check")
+                        ],
+                      ),
+                      onTap: () async {
+                        ref.read(editorNotifierProvider.notifier).spellCheck();
+                      },
+                    ),
+                  ])),
+              BarButton(
+                  text: Padding(
+                    padding: EdgeInsets.only(left: 10, right: 10),
+                    child: Text("Settings"),
+                  ),
+                  submenu: SubMenu(menuItems: [
+                    MenuButton(
+                      onTap: () {
+                        showGeneralDialog(
+                            barrierColor: Colors.transparent,
+                            context: context,
+                            pageBuilder: (c, _, __) {
+                              return ModelSettingsWidget();
+                            });
+                      },
+                      text: Row(
+                        spacing: 10,
+                        children: [
+                          Icon(
+                            Icons.desktop_mac,
+                            size: Styles.menuBarIconSize,
+                          ),
+                          Text("Models")
+                        ],
+                      ),
+                    ),
                   ]))
             ],
             child: Scaffold(
@@ -383,7 +459,8 @@ class _HomeState extends ConsumerState<Home> {
                         );
                       }),
                   Expanded(child: Editor()),
-                  AiWidget()
+                  AiWidget(),
+                  SpellCheckView()
                 ],
               ),
             ),

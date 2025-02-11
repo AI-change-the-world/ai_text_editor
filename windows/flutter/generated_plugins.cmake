@@ -4,7 +4,7 @@
 
 list(APPEND FLUTTER_PLUGIN_LIST
   file_selector_windows
-  isar_flutter_libs
+  objectbox_flutter_libs
   screen_retriever_windows
   url_launcher_windows
   window_manager
