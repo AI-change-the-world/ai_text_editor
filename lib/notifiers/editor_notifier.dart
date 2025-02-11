@@ -11,13 +11,13 @@ import 'package:ai_text_editor/embeds/image/image_embed.dart';
 import 'package:ai_text_editor/embeds/roll/roll_embed.dart';
 import 'package:ai_text_editor/embeds/table/table_embed.dart';
 import 'package:ai_text_editor/init.dart';
-import 'package:ai_text_editor/isar/database.dart';
-import 'package:ai_text_editor/isar/recent_files.dart';
 import 'package:ai_text_editor/models/ai_model.dart';
 import 'package:ai_text_editor/models/json_error_model.dart';
+import 'package:ai_text_editor/objectbox.g.dart';
+import 'package:ai_text_editor/objectbox/database.dart';
+import 'package:ai_text_editor/objectbox/recent_files.dart';
 import 'package:ai_text_editor/utils/logger.dart';
 import 'package:ai_text_editor/utils/toast_utils.dart';
-import 'package:isar/isar.dart';
 import 'package:listview_screenshot/listview_screenshot.dart';
 import 'package:meta/meta.dart';
 import 'package:flutter/material.dart';
@@ -92,7 +92,7 @@ class EditorNotifier extends Notifier<EditorState> {
   late final _mdDocument = md.Document(encodeHtml: false);
   late final _mdToDelta = MarkdownToDelta(markdownDocument: _mdDocument);
   late final FocusNode focusNode = FocusNode();
-  late final IsarDatabase database = IsarDatabase();
+  late final ObxDatabase database = ObxDatabase.db;
   StreamController<String> quillTextChangeController =
       StreamController<String>();
 
@@ -263,28 +263,23 @@ class EditorNotifier extends Notifier<EditorState> {
 
   /// 新建文件
   Future newDoc(String filepath) async {
-    RecentFiles recentFiles = RecentFiles()
-      ..path = filepath
+    RecentFiles recentFiles = RecentFiles(path: filepath)
       ..createdAt = DateTime.now().millisecondsSinceEpoch
       ..lastEdited = DateTime.now().millisecondsSinceEpoch;
 
-    database.isar!.writeTxn(() async {
-      await database.isar!.recentFiles.put(recentFiles);
-    });
+    await database.recentFilesBox.putAsync(recentFiles);
   }
 
   /// 更新文件
   Future updateDoc(String filepath) async {
-    database.isar!.writeTxn(() async {
-      final recentFiles = await database.isar!.recentFiles
-          .filter()
-          .pathEqualTo(filepath)
-          .findFirst();
-      if (recentFiles != null) {
-        recentFiles.lastEdited = DateTime.now().millisecondsSinceEpoch;
-        await database.isar!.recentFiles.put(recentFiles);
-      }
-    });
+    final query = database.recentFilesBox
+        .query(RecentFiles_.path.equals(filepath))
+        .build();
+    final files = query.find();
+    if (files.isNotEmpty) {
+      files.first.lastEdited = DateTime.now().millisecondsSinceEpoch;
+      await database.recentFilesBox.putAsync(files.first);
+    }
   }
 
   /// 获取组件高度

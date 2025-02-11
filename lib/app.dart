@@ -79,7 +79,7 @@ class _HomeState extends ConsumerState<Home> {
     final model = ref.read(modelsProvider.notifier).getCurrent();
     if (model != null) {
       GlobalModel.setModel(
-          OpenAIInfo(model.baseUrl!, model.sk!, model.modelName!));
+          OpenAIInfo(model.baseUrl, model.sk, model.modelName));
       logger.i("Model found, set model ${model.modelName}");
     } else {
       logger.i("Model not found, should set model first");

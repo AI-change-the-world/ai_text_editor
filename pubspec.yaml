@@ -2,7 +2,7 @@ name: ai_text_editor
 description: "A new Flutter project."
 publish_to: 'none' 
 
-version: 1.0.0-dev.5
+version: 1.0.0-dev.6
 
 environment:
   sdk: ^3.6.1
@@ -22,14 +22,14 @@ dependencies:
   flutter_rust_bridge: 2.7.0
   gpt_markdown: ^1.0.6
   he: ^0.0.2+1
-  isar: ^3.1.0+1
-  isar_flutter_libs: ^3.1.0+1
   langchain: ^0.7.7+2
   langchain_openai: ^0.7.3
   listview_screenshot: ^3.2.0
   logger: ^2.5.0
   markdown_quill: ^4.2.0
   menu_bar: ^0.5.3
+  objectbox: ^4.1.0
+  objectbox_flutter_libs: any
   riverpod: ^2.6.1
   rust_lib_ai_text_editor:
     path: rust_builder
@@ -42,10 +42,10 @@ dev_dependencies:
   flutter_launcher_icons: "^0.14.3"
 
   flutter_lints: ^5.0.0
-  isar_generator: ^3.1.0+1
   build_runner: ^2.4.13
   integration_test:
     sdk: flutter
+  objectbox_generator: any
 
 flutter:
   uses-material-design: true

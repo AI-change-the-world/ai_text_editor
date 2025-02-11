@@ -2,8 +2,10 @@ PODS:
   - file_selector_macos (0.0.1):
     - FlutterMacOS
   - FlutterMacOS (1.0.0)
-  - isar_flutter_libs (1.0.0):
+  - ObjectBox (4.1.0)
+  - objectbox_flutter_libs (0.0.1):
     - FlutterMacOS
+    - ObjectBox (= 4.1.0)
   - path_provider_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
@@ -21,7 +23,7 @@ PODS:
 DEPENDENCIES:
   - file_selector_macos (from `Flutter/ephemeral/.symlinks/plugins/file_selector_macos/macos`)
   - FlutterMacOS (from `Flutter/ephemeral`)
-  - isar_flutter_libs (from `Flutter/ephemeral/.symlinks/plugins/isar_flutter_libs/macos`)
+  - objectbox_flutter_libs (from `Flutter/ephemeral/.symlinks/plugins/objectbox_flutter_libs/macos`)
   - path_provider_foundation (from `Flutter/ephemeral/.symlinks/plugins/path_provider_foundation/darwin`)
   - quill_native_bridge_macos (from `Flutter/ephemeral/.symlinks/plugins/quill_native_bridge_macos/macos`)
   - rust_lib_ai_text_editor (from `Flutter/ephemeral/.symlinks/plugins/rust_lib_ai_text_editor/macos`)
@@ -29,13 +31,17 @@ DEPENDENCIES:
   - url_launcher_macos (from `Flutter/ephemeral/.symlinks/plugins/url_launcher_macos/macos`)
   - window_manager (from `Flutter/ephemeral/.symlinks/plugins/window_manager/macos`)
 
+SPEC REPOS:
+  https://mirrors.tuna.tsinghua.edu.cn/git/CocoaPods/Specs.git:
+    - ObjectBox
+
 EXTERNAL SOURCES:
   file_selector_macos:
     :path: Flutter/ephemeral/.symlinks/plugins/file_selector_macos/macos
   FlutterMacOS:
     :path: Flutter/ephemeral
-  isar_flutter_libs:
-    :path: Flutter/ephemeral/.symlinks/plugins/isar_flutter_libs/macos
+  objectbox_flutter_libs:
+    :path: Flutter/ephemeral/.symlinks/plugins/objectbox_flutter_libs/macos
   path_provider_foundation:
     :path: Flutter/ephemeral/.symlinks/plugins/path_provider_foundation/darwin
   quill_native_bridge_macos:
@@ -52,7 +58,8 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   file_selector_macos: 6280b52b459ae6c590af5d78fc35c7267a3c4b31
   FlutterMacOS: 8f6f14fa908a6fb3fba0cd85dbd81ec4b251fb24
-  isar_flutter_libs: a65381780401f81ad6bf3f2e7cd0de5698fb98c4
+  ObjectBox: bf3d4b51075d52868422d5d1f2f2141b1d630d30
+  objectbox_flutter_libs: 947b3a4e371d88c3c5b59f6a2e95e108cc072e6b
   path_provider_foundation: 080d55be775b7414fd5a5ef3ac137b97b097e564
   quill_native_bridge_macos: 2b005cb56902bb740e0cd9620aa399dfac6b4882
   rust_lib_ai_text_editor: f3096a0998ae17a0a714809104756caabc9b1652
@@ -60,6 +67,6 @@ SPEC CHECKSUMS:
   url_launcher_macos: 0fba8ddabfc33ce0a9afe7c5fef5aab3d8d2d673
   window_manager: 1d01fa7ac65a6e6f83b965471b1a7fdd3f06166c
 
-PODFILE CHECKSUM: a1596ba39e9b3ce03e13d54e3993385e2048eca7
+PODFILE CHECKSUM: 2078b730bbe5b2003fa915443dd9bfe1e35c3c46
 
 COCOAPODS: 1.16.2

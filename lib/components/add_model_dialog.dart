@@ -1,4 +1,4 @@
-import 'package:ai_text_editor/isar/model.dart';
+import 'package:ai_text_editor/objectbox/model.dart';
 import 'package:flutter/material.dart';
 
 class AddModelDialog extends StatelessWidget {
@@ -90,11 +90,11 @@ class AddModelDialog extends StatelessWidget {
                     TextButton(
                       onPressed: () {
                         if (_formKey.currentState!.validate()) {
-                          Model model = Model()
-                            ..baseUrl = _baseUrlController.text
-                            ..modelName = _modelNameController.text
-                            ..sk = _skController.text
-                            ..tag = _tagController.text;
+                          Model model = Model(
+                              baseUrl: _baseUrlController.text,
+                              modelName: _modelNameController.text,
+                              sk: _skController.text,
+                              tag: _tagController.text);
                           Navigator.of(context).pop(model);
                         }
                       },
