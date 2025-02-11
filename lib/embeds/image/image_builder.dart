@@ -17,11 +17,11 @@ class CustomImageEmbedBuilder extends EmbedBuilder {
         File(m['url']),
         width: 600,
         height: 400,
-        fit: BoxFit.cover,
+        fit: BoxFit.contain,
       );
     } else {
       return ExtendedImage.network(m['url'],
-          fit: BoxFit.cover,
+          fit: BoxFit.contain,
           cache: true,
           width: 600,
           height: 400, loadStateChanged: (ExtendedImageState state) {
