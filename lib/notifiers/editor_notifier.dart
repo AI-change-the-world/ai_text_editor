@@ -8,6 +8,7 @@ import 'dart:typed_data';
 
 import 'package:ai_packages_core/ai_packages_core.dart' as core;
 import 'package:ai_text_editor/embeds/image/image_embed.dart';
+import 'package:ai_text_editor/embeds/ref/ref_embed.dart';
 import 'package:ai_text_editor/embeds/roll/roll_embed.dart';
 import 'package:ai_text_editor/embeds/table/table_embed.dart';
 import 'package:ai_text_editor/init.dart';
@@ -88,6 +89,7 @@ class EditorNotifier extends Notifier<EditorState> {
     customTableEmbedType: customTableEmbedToMarkdown,
     customRollEmbedType: customRollEmbedToMarkdown,
     customImageEmbedType: customImageEmbedToMarkdown,
+    customRefEmbedType: customImageEmbedToMarkdown
   });
   late final _mdDocument = md.Document(encodeHtml: false);
   late final _mdToDelta = MarkdownToDelta(markdownDocument: _mdDocument);

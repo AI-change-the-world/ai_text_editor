@@ -2,7 +2,14 @@ import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 
 class SelectOrInputFileUrlDialog extends StatefulWidget {
-  const SelectOrInputFileUrlDialog({super.key});
+  const SelectOrInputFileUrlDialog(
+      {super.key,
+      this.label = "images",
+      this.extensions = const ['jpg', 'png', 'jpeg', 'gif'],
+      this.showDescriptionInput = false});
+  final List<String> extensions;
+  final String label;
+  final bool showDescriptionInput;
 
   @override
   State<SelectOrInputFileUrlDialog> createState() =>
@@ -12,11 +19,12 @@ class SelectOrInputFileUrlDialog extends StatefulWidget {
 class _SelectOrInputFileUrlDialogState
     extends State<SelectOrInputFileUrlDialog> {
   final TextEditingController _urlController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
   String _selectedOption = 'url';
 
-  Future<void> _pickImage() async {
+  Future<void> _pickFile() async {
     final XTypeGroup typeGroup =
-        XTypeGroup(label: 'images', extensions: ['jpg', 'png', 'jpeg', 'gif']);
+        XTypeGroup(label: widget.label, extensions: widget.extensions);
     final XFile? file = await openFile(acceptedTypeGroups: [typeGroup]);
     if (file != null) {
       _urlController.text = file.path;
@@ -26,6 +34,7 @@ class _SelectOrInputFileUrlDialogState
   @override
   void dispose() {
     _urlController.dispose();
+    _descriptionController.dispose();
     super.dispose();
   }
 
@@ -41,7 +50,7 @@ class _SelectOrInputFileUrlDialogState
           color: Colors.white,
         ),
         width: 500,
-        height: 140,
+        height: widget.showDescriptionInput ? 270 : 140,
         child: Column(
           spacing: 20,
           children: [
@@ -53,7 +62,7 @@ class _SelectOrInputFileUrlDialogState
                   enabled: _selectedOption == 'url',
                   controller: _urlController,
                   decoration: InputDecoration(
-                    labelText: _selectedOption == 'url' ? '输入图片 URL' : null,
+                    labelText: _selectedOption == 'url' ? '输入 URL' : null,
                     border: OutlineInputBorder(),
                   ),
                 )),
@@ -70,12 +79,21 @@ class _SelectOrInputFileUrlDialogState
                       _selectedOption = newValue!;
                     });
                     if (_selectedOption == 'local') {
-                      _pickImage();
+                      _pickFile();
                     }
                   },
                 ),
               ],
             ),
+            if (widget.showDescriptionInput)
+              TextField(
+                controller: _descriptionController,
+                maxLines: 3,
+                decoration: InputDecoration(
+                  labelText: '输入描述',
+                  border: OutlineInputBorder(),
+                ),
+              ),
             SizedBox(
               height: 30,
               child: Row(
@@ -105,13 +123,14 @@ class _SelectOrInputFileUrlDialogState
                       onPressed: () {
                         Navigator.of(context).pop({
                           'url': _urlController.text,
-                          'type': _selectedOption
+                          'type': _selectedOption,
+                          'description': _descriptionController.text
                         });
                       },
                       child: Text("确定"))
                 ],
               ),
-            )
+            ),
           ],
         ),
       ),

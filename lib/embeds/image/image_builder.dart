@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:ai_text_editor/embeds/image/image_embed.dart';
+import 'package:ai_text_editor/embeds/models/models.dart';
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
@@ -11,16 +12,17 @@ class CustomImageEmbedBuilder extends EmbedBuilder {
   Widget build(BuildContext context, QuillController controller, Embed node,
       bool readOnly, bool inline, TextStyle textStyle) {
     /// {"url":string,"type":local/web,"uuid":string}
-    final m = jsonDecode(node.value.data);
-    if (m['type'] == 'local') {
+    final m = FileModel.fromJson(jsonDecode(node.value.data));
+    assert(m.validate());
+    if (m.type == 'local') {
       return ExtendedImage.file(
-        File(m['url']),
+        File(m.url!),
         width: 600,
         height: 400,
         fit: BoxFit.contain,
       );
     } else {
-      return ExtendedImage.network(m['url'],
+      return ExtendedImage.network(m.url!,
           fit: BoxFit.contain,
           cache: true,
           width: 600,
