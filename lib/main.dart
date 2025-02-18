@@ -28,5 +28,7 @@ void main() async {
   });
   await ObxDatabase.create();
 
-  runApp(const App());
+  runApp(App(
+    title: APPConfig.appName,
+  ));
 }

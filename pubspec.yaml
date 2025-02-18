@@ -11,6 +11,10 @@ environment:
 dependencies:
   ai_packages_core: ^0.0.1+1
   auto_size_text: ^3.0.0
+  cards:
+    git:
+      url: https://github.com/guchengxi1994/cards.git
+      ref: cc4ccbd6b3d3954f7bd5ffcb4b76a862c794359b
   cupertino_icons: ^1.0.8
   extended_image: ^9.1.0
   file_selector: ^1.0.3
