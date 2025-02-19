@@ -1,6 +1,7 @@
 import 'package:ai_text_editor/app.dart';
 import 'package:ai_text_editor/init.dart';
 import 'package:ai_text_editor/objectbox/database.dart';
+import 'package:ai_text_editor/utils/logger.dart';
 import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:ai_text_editor/src/rust/frb_generated.dart';
@@ -13,6 +14,7 @@ void main() async {
   final FontsLoader loader = FontsLoader();
   await loader.loadFonts();
   final _ = await APPConfig.init();
+  logger.d("config loaded, with ${APPConfig.words.length} sentenses");
 
   await windowManager.ensureInitialized();
   WindowOptions windowOptions = WindowOptions(

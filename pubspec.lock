@@ -274,6 +274,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.3.2"
+  daynightbanner:
+    dependency: "direct main"
+    description:
+      name: daynightbanner
+      sha256: "28aeb7947e38ea41eb8af4ce2c4e01d40c570e1006dfff8acbd273cb6a2a12c9"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.2"
   diff_match_patch:
     dependency: transitive
     description:

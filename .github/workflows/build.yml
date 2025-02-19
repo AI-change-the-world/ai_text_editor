@@ -37,9 +37,9 @@ jobs:
         run: |
           flutter pub global activate cider
 
-      - name: rename config
-        run: |
-          mv assets/config.json.bak assets/config.json
+      # - name: rename config
+      #   run: |
+      #     mv assets/config.json.bak assets/config.json
 
       - name: Build windows
         run: |
