@@ -13,18 +13,21 @@ class AppTitle extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(appTitleProvider);
-    return SizedBox(
-      height: 200,
+    return Container(
+      padding: EdgeInsets.all(10),
+      height: 190,
       child: Row(
-        spacing: 20,
+        spacing: 10,
         children: [
-          Container(
-            padding: EdgeInsets.all(10),
-            width: 400,
-            height: 200,
+          SizedBox(
+            width: 200,
+            height: 190,
             child: Stack(
               children: [
                 DayNightBanner(
+                  widthOfSunMoon: 50,
+                  bannerHeight: 190,
+                  backgroundImageHeight: 190,
                   decoration:
                       BoxDecoration(borderRadius: BorderRadius.circular(1)),
                   hour: state.current.hour,
@@ -39,7 +42,7 @@ class AppTitle extends ConsumerWidget {
                         borderRadius: BorderRadius.circular(10),
                         color: hourlyColors[state.current.hour]),
                     child: Text(
-                      "${state.current.hour} : ${state.current.minute}",
+                      "${_formatHours(state.current.hour)} : ${_formatMinutes(state.current.minute)}",
                       style: TextStyle(
                         fontSize: 20,
                         color: hourlyTextColors[state.current.hour],
@@ -56,6 +59,22 @@ class AppTitle extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  String _formatMinutes(int minutes) {
+    if (minutes < 10) {
+      return "0$minutes";
+    } else {
+      return "$minutes";
+    }
+  }
+
+  String _formatHours(int hours) {
+    if (hours < 10) {
+      return "0$hours";
+    } else {
+      return "$hours";
+    }
   }
 
   List<Color> generateHourlyColors() {

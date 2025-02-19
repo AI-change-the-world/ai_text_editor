@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:toastification/toastification.dart';
 
+import 'components/app_body.dart';
 import 'components/app_title.dart';
 
 class App extends StatelessWidget {
@@ -29,7 +30,7 @@ class Home extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Column(
-        children: [AppTitle()],
+        children: [AppTitle(), Expanded(child: AppBody())],
       ),
     );
   }
