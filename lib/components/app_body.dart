@@ -1,3 +1,4 @@
+import 'package:ai_text_editor/components/select_recent_file_dialog.dart';
 import 'package:ai_text_editor/init.dart';
 import 'package:ai_text_editor/notifiers/app_body_notifier.dart';
 import 'package:ai_text_editor/utils/logger.dart';
@@ -6,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+/// TODO refresh after navigate
 class AppBody extends ConsumerWidget {
   const AppBody({super.key});
 
@@ -63,7 +65,20 @@ class AppBody extends ConsumerWidget {
                   MouseRegion(
                     cursor: SystemMouseCursors.click,
                     child: GestureDetector(
-                      onTap: () {},
+                      onTap: () {
+                        showGeneralDialog(
+                            barrierLabel: "select-recent-file-dialog",
+                            barrierColor: Colors.transparent,
+                            barrierDismissible: true,
+                            context: context,
+                            pageBuilder: (c, _, __) {
+                              return Center(
+                                child: SelectRecentFileDialog(
+                                  files: files,
+                                ),
+                              );
+                            });
+                      },
                       child: Row(
                         spacing: 10,
                         children: [
@@ -104,10 +119,14 @@ class AppBody extends ConsumerWidget {
                                 size: Styles.menuBarIconSize,
                                 color: Styles.textButtonColor,
                               ),
-                              Text(
+                              Expanded(
+                                  child: Text(
                                 e.path,
+                                maxLines: 1,
+                                softWrap: true,
+                                overflow: TextOverflow.ellipsis,
                                 style: TextStyle(color: Styles.textButtonColor),
-                              )
+                              ))
                             ],
                           ),
                         ),

@@ -615,6 +615,14 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  get_time_ago:
+    dependency: "direct main"
+    description:
+      name: get_time_ago
+      sha256: "1bf7bebe32e070e2a5aa9a84ee401c88895de337e9e168e70416ec3373771243"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.2.0"
   glob:
     dependency: transitive
     description:
