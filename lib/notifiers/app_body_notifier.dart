@@ -2,9 +2,12 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:ai_text_editor/init.dart';
+import 'package:ai_text_editor/objectbox.g.dart';
+import 'package:ai_text_editor/objectbox/database.dart';
+import 'package:ai_text_editor/objectbox/recent_files.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class AppTitleState {
+class AppBodyState {
   final String word;
   final String region;
   final String from;
@@ -12,7 +15,7 @@ class AppTitleState {
 
   final DateTime current;
 
-  AppTitleState({
+  AppBodyState({
     required this.word,
     required this.region,
     required this.from,
@@ -20,13 +23,13 @@ class AppTitleState {
     this.isLoading = false,
   });
 
-  AppTitleState copyWith({
+  AppBodyState copyWith({
     String? word,
     String? region,
     String? from,
     bool? isLoading,
   }) {
-    return AppTitleState(
+    return AppBodyState(
       word: word ?? this.word,
       region: region ?? this.region,
       from: from ?? this.from,
@@ -36,13 +39,13 @@ class AppTitleState {
   }
 }
 
-class AppTitleNotifier extends Notifier<AppTitleState> {
+class AppBodyNotifier extends Notifier<AppBodyState> {
   final random = Random();
 
   late final Timer timer;
 
   @override
-  AppTitleState build() {
+  AppBodyState build() {
     timer = Timer.periodic(Duration(seconds: 60), (timer) async {
       state = state.copyWith(
         isLoading: true,
@@ -68,7 +71,7 @@ class AppTitleNotifier extends Notifier<AppTitleState> {
     });
     final words = APPConfig.words;
     if (words.isEmpty) {
-      return AppTitleState(
+      return AppBodyState(
         word: "",
         region: "",
         from: "",
@@ -76,7 +79,7 @@ class AppTitleNotifier extends Notifier<AppTitleState> {
       );
     } else {
       final word = words[random.nextInt(words.length)];
-      return AppTitleState(
+      return AppBodyState(
         word: word.text ?? "",
         region: word.region ?? "",
         from: word.from ?? "",
@@ -86,5 +89,31 @@ class AppTitleNotifier extends Notifier<AppTitleState> {
   }
 }
 
-final appTitleProvider =
-    NotifierProvider<AppTitleNotifier, AppTitleState>(AppTitleNotifier.new);
+final appBodyProvider =
+    NotifierProvider<AppBodyNotifier, AppBodyState>(AppBodyNotifier.new);
+
+class RecentFilesNotifier extends Notifier<List<RecentFiles>> {
+  @override
+  List<RecentFiles> build() {
+    final filesQuery = ObxDatabase.db.recentFilesBox
+        .query()
+        .order(RecentFiles_.createdAt, flags: Order.descending)
+        .build();
+    filesQuery.limit = 5;
+
+    final result = filesQuery.find();
+    return result;
+  }
+
+  void add(RecentFiles file) {
+    state = [...state, file];
+  }
+
+  void remove(RecentFiles file) {
+    state = state.where((element) => element.id != file.id).toList();
+  }
+}
+
+final recentFilesProvider =
+    NotifierProvider<RecentFilesNotifier, List<RecentFiles>>(
+        RecentFilesNotifier.new);

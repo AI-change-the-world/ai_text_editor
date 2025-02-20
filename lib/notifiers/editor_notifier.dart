@@ -96,7 +96,7 @@ class EditorNotifier extends Notifier<EditorState> {
   late final FocusNode focusNode = FocusNode();
   late final ObxDatabase database = ObxDatabase.db;
   StreamController<String> quillTextChangeController =
-      StreamController<String>();
+      StreamController<String>.broadcast();
 
   Stream<String> get quillTextChangeStream => quillTextChangeController.stream;
 

@@ -9,7 +9,6 @@ import 'package:ai_text_editor/models/ai_model.dart';
 import 'package:ai_text_editor/notifiers/editor_state.dart';
 import 'package:ai_text_editor/notifiers/models_notifier.dart';
 import 'package:ai_text_editor/src/rust/api/converter_api.dart';
-import 'package:ai_text_editor/src/rust/messages.dart';
 import 'package:ai_text_editor/utils/file_utils.dart';
 import 'package:ai_text_editor/utils/logger.dart';
 import 'package:ai_text_editor/utils/markdown_util.dart';
@@ -20,12 +19,12 @@ import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:menu_bar/menu_bar.dart';
 import 'package:he/he.dart';
 
 import 'components/ai_widget.dart';
 import 'components/file_structure_view.dart';
-import 'src/rust/api/message_api.dart';
 
 const XTypeGroup typeGroup = XTypeGroup(
   label: 'delta',
@@ -40,25 +39,10 @@ class EditorHome extends ConsumerStatefulWidget {
 }
 
 class _EditorHomeState extends ConsumerState<EditorHome> {
-  late final stream = normalMessageStream();
   @override
   void initState() {
     super.initState();
-    stream.listen((v) {
-      if (v.$2 == MessageType.error) {
-        ToastUtils.error(
-          null,
-          title: "Error",
-          description: v.$1,
-        );
-      } else {
-        ToastUtils.sucess(
-          null,
-          title: "AI Response",
-          description: v.$1,
-        );
-      }
-    });
+
     final model = ref.read(modelsProvider.notifier).getCurrent();
     if (model != null) {
       GlobalModel.setModel(
@@ -320,6 +304,12 @@ class _EditorHomeState extends ConsumerState<EditorHome> {
                             ),
                           ),
                         ])),
+                    MenuButton(
+                      text: Text("Back to main"),
+                      onTap: () {
+                        context.go('/');
+                      },
+                    ),
                     MenuButton(
                       text: Text("Exit"),
                       shortcutText: "Ctrl+E",

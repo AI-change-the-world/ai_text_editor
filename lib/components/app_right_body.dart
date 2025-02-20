@@ -1,26 +1,26 @@
-import 'package:ai_text_editor/notifiers/app_title_notifier.dart';
+import 'package:ai_text_editor/notifiers/app_body_notifier.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:daynightbanner/daynightbanner.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class AppTitle extends ConsumerWidget {
-  AppTitle({super.key});
+class AppRightBody extends ConsumerWidget {
+  AppRightBody({super.key});
 
   late final List<Color> hourlyColors = generateHourlyColors();
   late final List<Color> hourlyTextColors = generateHourlyTextColors();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(appTitleProvider);
+    final state = ref.watch(appBodyProvider);
     return Container(
       padding: EdgeInsets.all(10),
-      height: 190,
-      child: Row(
+      width: 300,
+      child: Column(
         spacing: 10,
         children: [
           SizedBox(
-            width: 200,
+            width: 280,
             height: 190,
             child: Stack(
               children: [
@@ -114,16 +114,16 @@ class AppTitle extends ConsumerWidget {
     return colors;
   }
 
-  Widget _buildTitle(AppTitleState state) {
+  Widget _buildTitle(AppBodyState state) {
     return AnimatedOpacity(
       opacity: state.isLoading ? 0 : 1,
       duration: Duration(seconds: 1),
       child: Padding(
-        padding: EdgeInsets.all(20),
+        padding: EdgeInsets.all(10),
         child: Column(
             spacing: 10,
             crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.start,
             children: [
               AutoSizeText(
                 state.word,
