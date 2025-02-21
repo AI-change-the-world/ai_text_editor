@@ -105,6 +105,16 @@ class RecentFilesNotifier extends Notifier<List<RecentFiles>> {
     return result;
   }
 
+  refresh() {
+    final filesQuery = ObxDatabase.db.recentFilesBox
+        .query()
+        .order(RecentFiles_.createdAt, flags: Order.descending)
+        .build();
+    filesQuery.limit = 5;
+
+    state = filesQuery.find();
+  }
+
   void add(RecentFiles file) {
     state = [...state, file];
   }

@@ -20,6 +20,9 @@ class AppRightBody extends ConsumerWidget {
         spacing: 10,
         children: [
           SizedBox(
+            height: 50,
+          ),
+          SizedBox(
             width: 280,
             height: 190,
             child: Stack(

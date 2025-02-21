@@ -6,6 +6,7 @@ import 'package:ai_text_editor/components/model_settings_widget.dart';
 import 'package:ai_text_editor/components/position_widget.dart';
 import 'package:ai_text_editor/components/spell_check_view.dart';
 import 'package:ai_text_editor/models/ai_model.dart';
+import 'package:ai_text_editor/notifiers/app_body_notifier.dart';
 import 'package:ai_text_editor/notifiers/editor_state.dart';
 import 'package:ai_text_editor/notifiers/models_notifier.dart';
 import 'package:ai_text_editor/src/rust/api/converter_api.dart';
@@ -166,6 +167,8 @@ class _EditorHomeState extends ConsumerState<EditorHome> {
                                 .setLoading(false);
                           });
                         }
+
+                        ref.read(recentFilesProvider.notifier).refresh();
 
                         ref
                             .read(editorNotifierProvider.notifier)

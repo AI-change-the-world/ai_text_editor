@@ -40,11 +40,17 @@ class _HomeState extends ConsumerState<Home> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Row(
-        children: [
-          Expanded(child: AppBody()),
-          AppRightBody(),
-        ],
+      body: Center(
+        child: SizedBox(
+          width: 800,
+          height: 600,
+          child: Row(
+            children: [
+              Expanded(child: AppBody()),
+              AppRightBody(),
+            ],
+          ),
+        ),
       ),
     );
   }
