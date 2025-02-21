@@ -1,7 +1,11 @@
-import 'package:ai_text_editor/app.dart';
 import 'package:ai_text_editor/init.dart';
 import 'package:ai_text_editor/objectbox/database.dart';
+import 'package:ai_text_editor/routers.dart';
+import 'package:ai_text_editor/utils/logger.dart';
+import 'package:ai_text_editor/utils/styles.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:toastification/toastification.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:ai_text_editor/src/rust/frb_generated.dart';
 
@@ -13,6 +17,7 @@ void main() async {
   final FontsLoader loader = FontsLoader();
   await loader.loadFonts();
   final _ = await APPConfig.init();
+  logger.d("config loaded, with ${APPConfig.words.length} sentenses");
 
   await windowManager.ensureInitialized();
   WindowOptions windowOptions = WindowOptions(
@@ -28,5 +33,24 @@ void main() async {
   });
   await ObxDatabase.create();
 
-  runApp(const App());
+  runApp(App(
+    title: APPConfig.appName,
+  ));
+}
+
+class App extends StatelessWidget {
+  const App({super.key, this.title = 'AI Text Editor'});
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    return ToastificationWrapper(
+        child: ProviderScope(
+            child: MaterialApp.router(
+      debugShowCheckedModeBanner: false,
+      theme: Styles.lightTheme,
+      title: title,
+      routerConfig: router,
+    )));
+  }
 }

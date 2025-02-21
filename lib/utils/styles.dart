@@ -8,6 +8,8 @@ class Styles {
   static double structureWidth = 200;
   static double toolbarMinSize = 110;
 
+  static Color textButtonColor = Colors.blue;
+
   static ThemeData lightTheme = ThemeData(
     brightness: Brightness.light,
     primaryColor: Colors.blue,
