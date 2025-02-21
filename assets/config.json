@@ -1,0 +1,155 @@
+{
+    "app-name": "云笺妙笔",
+    "words": [
+        {
+            "text": "学而不思则罔，思而不学则殆。",
+            "from": "孔子",
+            "region": "中国"
+        },
+        {
+            "text": "黑发不知勤学早，白首方悔读书迟。",
+            "from": "颜真卿",
+            "region": "中国"
+        },
+        {
+            "text": "业精于勤，荒于嬉；行成于思，毁于随。",
+            "from": "韩愈",
+            "region": "中国"
+        },
+        {
+            "text": "千里之行，始于足下。",
+            "from": "老子",
+            "region": "中国"
+        },
+        {
+            "text": "书山有路勤为径，学海无涯苦作舟。",
+            "from": "韩愈（后人总结）",
+            "region": "中国"
+        },
+        {
+            "text": "敏而好学，不耻下问。",
+            "from": "孔子",
+            "region": "中国"
+        },
+        {
+            "text": "一日不书，百事荒芜。",
+            "from": "李诩",
+            "region": "中国"
+        },
+        {
+            "text": "志当存高远。",
+            "from": "诸葛亮",
+            "region": "中国"
+        },
+        {
+            "text": "博学之，审问之，慎思之，明辨之，笃行之。",
+            "from": "《礼记》",
+            "region": "中国"
+        },
+        {
+            "text": "少壮不努力，老大徒伤悲。",
+            "from": "《汉乐府·长歌行》",
+            "region": "中国"
+        },
+        {
+            "text": "吾生也有涯，而知也无涯。",
+            "from": "庄子",
+            "region": "中国"
+        },
+        {
+            "text": "路漫漫其修远兮，吾将上下而求索。",
+            "from": "屈原",
+            "region": "中国"
+        },
+        {
+            "text": "聪明出于勤奋，天才在于积累。",
+            "from": "华罗庚",
+            "region": "中国"
+        },
+        {
+            "text": "不积跬步，无以至千里；不积小流，无以成江海。",
+            "from": "荀子",
+            "region": "中国"
+        },
+        {
+            "text": "读书破万卷，下笔如有神。",
+            "from": "杜甫",
+            "region": "中国"
+        },
+        {
+            "text": "天行健，君子以自强不息。",
+            "from": "《周易》",
+            "region": "中国"
+        },
+        {
+            "text": "好学近乎知，力行近乎仁，知耻近乎勇。",
+            "from": "《中庸》",
+            "region": "中国"
+        },
+        {
+            "text": "立身以立学为先，立学以读书为本。",
+            "from": "欧阳修",
+            "region": "中国"
+        },
+        {
+            "text": "书到用时方恨少，事非经过不知难。",
+            "from": "陆游",
+            "region": "中国"
+        },
+        {
+            "text": "发奋识遍天下字，立志读尽人间书。",
+            "from": "苏轼",
+            "region": "中国"
+        },
+        {
+            "text": "Genius is one percent inspiration and ninety-nine percent perspiration.",
+            "from": "Thomas Edison",
+            "region": "美国"
+        },
+        {
+            "text": "The roots of education are bitter, but the fruit is sweet.",
+            "from": "Aristotle",
+            "region": "希腊"
+        },
+        {
+            "text": "There is no substitute for hard work.",
+            "from": "Thomas Edison",
+            "region": "美国"
+        },
+        {
+            "text": "Live as if you were to die tomorrow. Learn as if you were to live forever.",
+            "from": "Mahatma Gandhi",
+            "region": "印度"
+        },
+        {
+            "text": "It always seems impossible until it's done.",
+            "from": "Nelson Mandela",
+            "region": "南非"
+        },
+        {
+            "text": "Education is the most powerful weapon which you can use to change the world.",
+            "from": "Nelson Mandela",
+            "region": "南非"
+        },
+        {
+            "text": "The only way to do great work is to love what you do.",
+            "from": "Steve Jobs",
+            "region": "美国"
+        },
+        {
+            "text": "An investment in knowledge pays the best interest.",
+            "from": "Benjamin Franklin",
+            "region": "美国"
+        },
+        {
+            "text": "Success is no accident. It is hard work, perseverance, learning, studying, sacrifice and most of all, love of what you are doing.",
+            "from": "Pelé",
+            "region": "巴西"
+        },
+        {
+            "text": "Education is not the learning of facts, but the training of the mind to think.",
+            "from": "Albert Einstein",
+            "region": "德国"
+        }
+    ]
+}
