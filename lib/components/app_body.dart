@@ -1,12 +1,17 @@
 import 'dart:io';
 
+import 'package:ai_text_editor/components/add_model_dialog.dart';
+import 'package:ai_text_editor/components/animated_text.dart';
 import 'package:ai_text_editor/components/select_recent_file_dialog.dart';
 import 'package:ai_text_editor/init.dart';
 import 'package:ai_text_editor/notifiers/app_body_notifier.dart';
 import 'package:ai_text_editor/notifiers/editor_notifier.dart';
+import 'package:ai_text_editor/notifiers/models_notifier.dart';
+import 'package:ai_text_editor/objectbox/model.dart';
 import 'package:ai_text_editor/utils/logger.dart';
 import 'package:ai_text_editor/utils/styles.dart';
 import 'package:ai_text_editor/utils/toast_utils.dart';
+import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -21,12 +26,14 @@ class AppBody extends ConsumerStatefulWidget {
 }
 
 class _AppBodyState extends ConsumerState<AppBody> {
-  bool showFullPath = true;
+  static List<String> items = ["fullpath", "basename"];
+  String selectedItem = items.first;
 
   @override
   Widget build(BuildContext context) {
     final files = ref.watch(recentFilesProvider);
-    logger.d("find files: ${files.length}");
+    final models = ref.watch(modelsProvider);
+    logger.d("find files: ${files.length} ,current model ${models.current}");
     return Padding(
       padding: EdgeInsets.all(20),
       child: Column(
@@ -43,7 +50,7 @@ class _AppBodyState extends ConsumerState<AppBody> {
                         TextStyle(fontSize: 20, fontWeight: FontWeight.normal))
               ])),
           Expanded(
-              flex: 2,
+              flex: 1,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 spacing: 10,
@@ -120,7 +127,7 @@ class _AppBodyState extends ConsumerState<AppBody> {
                 ],
               )),
           Expanded(
-              flex: 4,
+              flex: 1,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 spacing: 10,
@@ -132,27 +139,80 @@ class _AppBodyState extends ConsumerState<AppBody> {
                         style: TextStyle(fontSize: 24),
                       ),
                       SizedBox(
-                        width: 30,
+                        width: 20,
                       ),
-                      Container(
-                        padding: EdgeInsets.all(1),
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(4),
-                            color: Colors.blueAccent),
-                        child: Text(
-                          showFullPath ? "fullpath" : "basename",
-                          style: TextStyle(color: Colors.white),
+                      SizedBox(
+                        width: 125,
+                        height: 30,
+                        child: DropdownButtonFormField2<String>(
+                          isExpanded: true,
+                          decoration: InputDecoration(
+                            contentPadding: const EdgeInsets.all(0),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            // Add more decoration..
+                          ),
+                          customButton: SizedBox(
+                            width: 100,
+                            height: 30,
+                            child: Center(
+                              child: Row(
+                                spacing: 5,
+                                children: [
+                                  SizedBox(
+                                    width: 5,
+                                  ),
+                                  Text(selectedItem),
+                                  Spacer(),
+                                  Icon(
+                                    Icons.arrow_drop_down,
+                                    color: Colors.black45,
+                                  )
+                                ],
+                              ),
+                            ),
+                          ),
+                          value: selectedItem,
+                          items: items
+                              .map((item) => DropdownMenuItem<String>(
+                                    value: item,
+                                    child: Text(
+                                      item,
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ))
+                              .toList(),
+                          onChanged: (value) {
+                            if (value == null || value == selectedItem) {
+                              return;
+                            }
+                            setState(() {
+                              selectedItem = value.toString();
+                            });
+                          },
+                          buttonStyleData: const ButtonStyleData(
+                            padding: EdgeInsets.only(right: 8),
+                          ),
+                          iconStyleData: const IconStyleData(
+                            icon: Icon(
+                              Icons.arrow_drop_down,
+                              color: Colors.black45,
+                            ),
+                            iconSize: 16,
+                          ),
+                          dropdownStyleData: DropdownStyleData(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                          ),
+                          menuItemStyleData: const MenuItemStyleData(
+                            padding: EdgeInsets.symmetric(horizontal: 16),
+                          ),
                         ),
-                      ),
-                      Transform.scale(
-                        scale: 0.7,
-                        child: Switch(
-                            value: showFullPath,
-                            onChanged: (s) {
-                              setState(() {
-                                showFullPath = s;
-                              });
-                            }),
                       )
                     ],
                   ),
@@ -185,7 +245,9 @@ class _AppBodyState extends ConsumerState<AppBody> {
                               ),
                               Expanded(
                                   child: Text(
-                                showFullPath ? e.path : path.basename(e.path),
+                                selectedItem == "fullpath"
+                                    ? e.path
+                                    : path.basename(e.path),
                                 maxLines: 1,
                                 softWrap: true,
                                 overflow: TextOverflow.ellipsis,
@@ -195,6 +257,66 @@ class _AppBodyState extends ConsumerState<AppBody> {
                           ),
                         ),
                       ))
+                ],
+              )),
+          Expanded(
+              flex: 1,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                spacing: 10,
+                children: [
+                  Row(
+                    spacing: 10,
+                    children: [
+                      Text(
+                        "Models",
+                        style: TextStyle(fontSize: 24),
+                      ),
+                      InkWell(
+                        onTap: () async {
+                          showGeneralDialog(
+                              barrierColor: Colors.white.withValues(alpha: 0.5),
+                              context: context,
+                              pageBuilder: (c, _, __) {
+                                return Center(
+                                  child: AddModelDialog(),
+                                );
+                              }).then((v) {
+                            if (v == null) {
+                              return;
+                            }
+                            ref
+                                .read(modelsProvider.notifier)
+                                .addModel(v as Model);
+                          });
+                        },
+                        child: Icon(
+                          Icons.add_box,
+                          color: Colors.green,
+                        ),
+                      )
+                    ],
+                  ),
+                  Expanded(
+                      child: SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      spacing: 10,
+                      children: [
+                        ...models.models.map((e) => AnimatedText(
+                              text: e.modelName +
+                                  (models.current == e.tag ? " (in use)" : ""),
+                              onTap: () {
+                                if (models.current != e.tag) {
+                                  ref
+                                      .read(modelsProvider.notifier)
+                                      .addChangeHistory(e);
+                                }
+                              },
+                            ))
+                      ],
+                    ),
+                  ))
                 ],
               ))
         ],
