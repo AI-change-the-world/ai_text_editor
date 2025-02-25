@@ -87,6 +87,8 @@ class FileUtils {
     return file.path;
   }
 
+  static Future<String> get savePath => _localPath;
+
   static Future updateJsonFile(String content, String filepath) async {
     final file = File(filepath);
     await file.writeAsString(content);

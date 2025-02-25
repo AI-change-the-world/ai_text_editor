@@ -2,7 +2,7 @@
 
 import 'dart:convert';
 
-import 'package:ai_text_editor/components/select_or_input_file_url_dialog.dart';
+import 'package:ai_text_editor/components/dialogs/select_or_input_file_url_dialog.dart';
 import 'package:ai_text_editor/embeds/image/image_embed.dart';
 import 'package:ai_text_editor/embeds/ref/ref_embed.dart';
 import 'package:ai_text_editor/embeds/roll/roll_embed.dart';

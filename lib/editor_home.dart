@@ -1,10 +1,11 @@
 import 'dart:io';
 
-import 'package:ai_text_editor/components/editor.dart';
-import 'package:ai_text_editor/components/faded_text.dart';
-import 'package:ai_text_editor/components/model_settings_widget.dart';
-import 'package:ai_text_editor/components/position_widget.dart';
-import 'package:ai_text_editor/components/spell_check_view.dart';
+import 'package:ai_text_editor/components/dialogs/new_file_dialog.dart';
+import 'package:ai_text_editor/components/structures/editor.dart';
+import 'package:ai_text_editor/components/others/faded_text.dart';
+import 'package:ai_text_editor/components/others/model_settings_widget.dart';
+import 'package:ai_text_editor/components/others/position_widget.dart';
+import 'package:ai_text_editor/components/structures/spell_check_view.dart';
 import 'package:ai_text_editor/models/ai_model.dart';
 import 'package:ai_text_editor/notifiers/app_body_notifier.dart';
 import 'package:ai_text_editor/notifiers/editor_state.dart';
@@ -24,8 +25,8 @@ import 'package:go_router/go_router.dart';
 import 'package:menu_bar/menu_bar.dart';
 import 'package:he/he.dart';
 
-import 'components/ai_widget.dart';
-import 'components/file_structure_view.dart';
+import 'components/structures/ai_widget.dart';
+import 'components/structures/file_structure_view.dart';
 
 const XTypeGroup typeGroup = XTypeGroup(
   label: 'delta',
@@ -115,7 +116,7 @@ class _EditorHomeState extends ConsumerState<EditorHome> {
                         LogicalKeyboardKey.keyS,
                         control: true,
                       ),
-                      onTap: () {
+                      onTap: () async {
                         final j =
                             ref.read(editorNotifierProvider.notifier).getJson();
                         if (j.isEmpty) {
@@ -150,21 +151,38 @@ class _EditorHomeState extends ConsumerState<EditorHome> {
                                 .setLoading(false);
                           });
                         } else {
-                          final filename = "${DateTime.now()}.json";
-                          FileUtils.saveFileToJson(j, filename: filename)
-                              .then((p) {
-                            ToastUtils.sucess(
-                              null,
-                              title: "File Saved",
-                              description: "check $p",
-                            );
-                            ref
-                                .read(editorNotifierProvider.notifier)
-                                .setCurrentFilePath(p);
-                            ref.read(editorNotifierProvider.notifier).newDoc(p);
-                            ref
-                                .read(editorNotifierProvider.notifier)
-                                .setLoading(false);
+                          await showGeneralDialog(
+                              context: context,
+                              barrierColor: Colors.transparent,
+                              barrierDismissible: true,
+                              barrierLabel: "new-file-dialog",
+                              pageBuilder: (c, _, __) {
+                                return Center(
+                                  child: NewFileDialog(),
+                                );
+                              }).then((v) {
+                            if (v == null) {
+                              return;
+                            }
+
+                            final filename = "$v.json";
+                            FileUtils.saveFileToJson(j, filename: filename)
+                                .then((p) {
+                              ToastUtils.sucess(
+                                null,
+                                title: "File Saved",
+                                description: "check $p",
+                              );
+                              ref
+                                  .read(editorNotifierProvider.notifier)
+                                  .setCurrentFilePath(p);
+                              ref
+                                  .read(editorNotifierProvider.notifier)
+                                  .newDoc(p);
+                              ref
+                                  .read(editorNotifierProvider.notifier)
+                                  .setLoading(false);
+                            });
                           });
                         }
 
@@ -204,35 +222,72 @@ class _EditorHomeState extends ConsumerState<EditorHome> {
                                   );
                                   return;
                                 }
-                                FileUtils.saveFileToMarkdown(mdString)
-                                    .then((p) {
-                                  ToastUtils.sucess(
-                                    null,
-                                    title: "File Saved",
-                                    description: "check $p",
-                                  );
+
+                                await showGeneralDialog(
+                                    context: context,
+                                    barrierColor: Colors.transparent,
+                                    barrierDismissible: true,
+                                    barrierLabel: "new-file-dialog",
+                                    pageBuilder: (c, _, __) {
+                                      return Center(
+                                        child: NewFileDialog(
+                                          ext: ".md",
+                                        ),
+                                      );
+                                    }).then((v) {
+                                  if (v == null) {
+                                    return;
+                                  }
+                                  FileUtils.saveFileToMarkdown(mdString,
+                                          filename: "$v.md")
+                                      .then((p) {
+                                    ToastUtils.sucess(
+                                      null,
+                                      title: "File Saved",
+                                      description: "check $p",
+                                    );
+                                  });
                                 });
                               }),
                           MenuButton(
-                            onTap: () {
-                              FileUtils.saveFileToPdf(ref
-                                      .read(editorNotifierProvider.notifier)
-                                      .quillController
-                                      .document)
-                                  .then((v) {
-                                if (v.toString().isNotEmpty) {
-                                  ToastUtils.sucess(
-                                    null,
-                                    title: "File Saved",
-                                    description: "check $v",
-                                  );
-                                } else {
-                                  ToastUtils.error(
-                                    null,
-                                    title: "Error",
-                                    description: "Failed to save file",
-                                  );
+                            onTap: () async {
+                              await showGeneralDialog(
+                                  context: context,
+                                  barrierColor: Colors.transparent,
+                                  barrierDismissible: true,
+                                  barrierLabel: "new-file-dialog",
+                                  pageBuilder: (c, _, __) {
+                                    return Center(
+                                      child: NewFileDialog(
+                                        ext: ".pdf",
+                                      ),
+                                    );
+                                  }).then((v) {
+                                if (v == null) {
+                                  return;
                                 }
+                                FileUtils.saveFileToPdf(
+                                        ref
+                                            .read(
+                                                editorNotifierProvider.notifier)
+                                            .quillController
+                                            .document,
+                                        filename: "$v.pdf")
+                                    .then((v) {
+                                  if (v.toString().isNotEmpty) {
+                                    ToastUtils.sucess(
+                                      null,
+                                      title: "File Saved",
+                                      description: "check $v",
+                                    );
+                                  } else {
+                                    ToastUtils.error(
+                                      null,
+                                      title: "Error",
+                                      description: "Failed to save file",
+                                    );
+                                  }
+                                });
                               });
                             },
                             text: Row(
@@ -250,30 +305,48 @@ class _EditorHomeState extends ConsumerState<EditorHome> {
                             ),
                           ),
                           MenuButton(
-                            onTap: () {
+                            onTap: () async {
                               ref
                                   .read(editorNotifierProvider.notifier)
                                   .changeToolbarPosition(ToolbarPosition.none);
 
-                              ref
-                                  .read(editorNotifierProvider.notifier)
-                                  .getImage()
-                                  .then((v) {
-                                if (v == null) {
-                                  ToastUtils.error(
-                                    null,
-                                    title: "Error",
-                                    description: "Convert failed",
-                                  );
-                                } else {
-                                  FileUtils.saveFileToImage(v).then((p) {
-                                    ToastUtils.sucess(
-                                      null,
-                                      title: "File Saved",
-                                      description: "check $p",
+                              await showGeneralDialog(
+                                  context: context,
+                                  barrierColor: Colors.transparent,
+                                  barrierDismissible: true,
+                                  barrierLabel: "new-file-dialog",
+                                  pageBuilder: (c, _, __) {
+                                    return Center(
+                                      child: NewFileDialog(
+                                        ext: ".png",
+                                      ),
                                     );
-                                  });
+                                  }).then((v1) {
+                                if (v1 == null) {
+                                  return;
                                 }
+                                ref
+                                    .read(editorNotifierProvider.notifier)
+                                    .getImage()
+                                    .then((v) {
+                                  if (v == null) {
+                                    ToastUtils.error(
+                                      null,
+                                      title: "Error",
+                                      description: "Convert failed",
+                                    );
+                                  } else {
+                                    FileUtils.saveFileToImage(v,
+                                            filename: "$v1.png")
+                                        .then((p) {
+                                      ToastUtils.sucess(
+                                        null,
+                                        title: "File Saved",
+                                        description: "check $p",
+                                      );
+                                    });
+                                  }
+                                });
                               });
                             },
                             text: Row(
@@ -284,13 +357,30 @@ class _EditorHomeState extends ConsumerState<EditorHome> {
                           ),
                           MenuButton(
                             onTap: () async {
-                              final filePath =
-                                  await FileUtils.getDocxFilepath();
-                              final mdString = ref
-                                  .read(editorNotifierProvider.notifier)
-                                  .getText();
-                              markdownToDocx(
-                                  markdownText: mdString, filepath: filePath);
+                              await showGeneralDialog(
+                                  context: context,
+                                  barrierColor: Colors.transparent,
+                                  barrierDismissible: true,
+                                  barrierLabel: "new-file-dialog",
+                                  pageBuilder: (c, _, __) {
+                                    return Center(
+                                      child: NewFileDialog(
+                                        ext: ".docx",
+                                      ),
+                                    );
+                                  }).then((v) async {
+                                if (v == null) {
+                                  return;
+                                }
+                                final filePath =
+                                    await FileUtils.getDocxFilepath(
+                                        filename: "$v.docx");
+                                final mdString = ref
+                                    .read(editorNotifierProvider.notifier)
+                                    .getText();
+                                markdownToDocx(
+                                    markdownText: mdString, filepath: filePath);
+                              });
                             },
                             text: Row(
                               children: [
@@ -448,7 +538,7 @@ class _EditorHomeState extends ConsumerState<EditorHome> {
             right: 10,
             child: AnimatedEightTrigrams(size: 50),
           ),
-        if (ref.watch(savedNotifierProvider))
+        if (!ref.watch(savedNotifierProvider))
           Positioned(
             top: 0,
             right: 10,
