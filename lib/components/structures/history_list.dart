@@ -1,4 +1,4 @@
-import 'package:ai_text_editor/components/history_item_widget.dart';
+import 'package:ai_text_editor/components/structures/history_item_widget.dart';
 import 'package:ai_text_editor/notifiers/editor_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

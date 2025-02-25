@@ -4,7 +4,7 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'add_model_dialog.dart';
+import '../dialogs/add_model_dialog.dart';
 
 class ModelChip extends ConsumerStatefulWidget {
   const ModelChip({super.key, required this.model});

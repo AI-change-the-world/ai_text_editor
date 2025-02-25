@@ -1,8 +1,8 @@
 import 'dart:io';
 
-import 'package:ai_text_editor/components/add_model_dialog.dart';
-import 'package:ai_text_editor/components/animated_text.dart';
-import 'package:ai_text_editor/components/select_recent_file_dialog.dart';
+import 'package:ai_text_editor/components/dialogs/add_model_dialog.dart';
+import 'package:ai_text_editor/components/others/animated_text.dart';
+import 'package:ai_text_editor/components/dialogs/select_recent_file_dialog.dart';
 import 'package:ai_text_editor/init.dart';
 import 'package:ai_text_editor/notifiers/app_body_notifier.dart';
 import 'package:ai_text_editor/notifiers/editor_notifier.dart';
