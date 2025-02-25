@@ -216,47 +216,58 @@ class _AppBodyState extends ConsumerState<AppBody> {
                       )
                     ],
                   ),
-                  ...files.map((e) => MouseRegion(
-                        cursor: SystemMouseCursors.click,
-                        child: GestureDetector(
-                          onTap: () {
-                            File f = File(e.path);
-                            if (f.existsSync()) {
-                              ref
-                                  .read(editorNotifierProvider.notifier)
-                                  .loadFromFile(f)
-                                  .then((_) {
-                                // ignore: use_build_context_synchronously
-                                context.go('/editor');
-                              });
-                            } else {
-                              ToastUtils.error(context,
-                                  title: "File Not Exists");
-                              logger.e("file not exists: ${e.path}");
-                            }
-                          },
-                          child: Row(
-                            spacing: 10,
-                            children: [
-                              Icon(
-                                Icons.file_open,
-                                size: Styles.menuBarIconSize,
-                                color: Styles.textButtonColor,
+                  Expanded(
+                    child: ListView.builder(
+                      itemBuilder: (c, i) {
+                        return MouseRegion(
+                          cursor: SystemMouseCursors.click,
+                          child: GestureDetector(
+                            onTap: () {
+                              File f = File(files[i].path);
+                              if (f.existsSync()) {
+                                ref
+                                    .read(editorNotifierProvider.notifier)
+                                    .loadFromFile(f)
+                                    .then((_) {
+                                  // ignore: use_build_context_synchronously
+                                  context.go('/editor');
+                                });
+                              } else {
+                                ToastUtils.error(context,
+                                    title: "File Not Exists");
+                                logger.e("file not exists: ${files[i].path}");
+                              }
+                            },
+                            child: Container(
+                              margin: EdgeInsets.only(top: 5, bottom: 5),
+                              child: Row(
+                                spacing: 10,
+                                children: [
+                                  Icon(
+                                    Icons.file_open,
+                                    size: Styles.menuBarIconSize,
+                                    color: Styles.textButtonColor,
+                                  ),
+                                  Expanded(
+                                      child: Text(
+                                    selectedItem == "fullpath"
+                                        ? files[i].path
+                                        : path.basename(files[i].path),
+                                    maxLines: 1,
+                                    softWrap: true,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                        color: Styles.textButtonColor),
+                                  ))
+                                ],
                               ),
-                              Expanded(
-                                  child: Text(
-                                selectedItem == "fullpath"
-                                    ? e.path
-                                    : path.basename(e.path),
-                                maxLines: 1,
-                                softWrap: true,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(color: Styles.textButtonColor),
-                              ))
-                            ],
+                            ),
                           ),
-                        ),
-                      ))
+                        );
+                      },
+                      itemCount: files.length,
+                    ),
+                  ),
                 ],
               )),
           Expanded(
