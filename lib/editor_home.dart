@@ -214,7 +214,7 @@ class _EditorHomeState extends ConsumerState<EditorHome> {
                                 final mdString = ref
                                     .read(editorNotifierProvider.notifier)
                                     .getText();
-                                if (mdString.isEmpty) {
+                                if (mdString.trim().isEmpty) {
                                   ToastUtils.error(
                                     null,
                                     title: "Error",
@@ -224,6 +224,7 @@ class _EditorHomeState extends ConsumerState<EditorHome> {
                                 }
 
                                 await showGeneralDialog(
+                                    // ignore: use_build_context_synchronously
                                     context: context,
                                     barrierColor: Colors.transparent,
                                     barrierDismissible: true,

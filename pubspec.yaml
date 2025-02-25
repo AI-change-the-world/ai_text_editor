@@ -37,6 +37,7 @@ dependencies:
   riverpod: ^2.6.1
   rust_lib_ai_text_editor:
     path: rust_builder
+  screenshot: ^3.0.0
   toastification: ^2.3.0
   window_manager: ^0.4.3
 

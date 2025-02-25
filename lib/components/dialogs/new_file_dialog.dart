@@ -80,6 +80,7 @@ class _NewFileDialogState extends State<NewFileDialog> {
                     if (_nameController.text.isEmpty) {
                       return;
                     }
+
                     final savePath = await FileUtils.savePath;
                     File file = File("$savePath/${_nameController.text}.json");
                     if (file.existsSync()) {

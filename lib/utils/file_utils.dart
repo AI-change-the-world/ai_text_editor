@@ -17,6 +17,7 @@ class FileUtils {
     return directory.path;
   }
 
+  @Deprecated("unused")
   static Future<String> get _downloadPath async {
     Directory directory;
     try {
@@ -31,14 +32,14 @@ class FileUtils {
 
   static Future<String> getDocxFilepath(
       {String filename = "example.docx"}) async {
-    return "${await _downloadPath}/$filename";
+    return "${await _localPath}/$filename";
   }
 
   static final FontsLoader loader = FontsLoader();
 
   static Future saveFileToPdf(Document document,
       {String filename = "example.pdf"}) async {
-    final path = await _downloadPath;
+    final path = await _localPath;
     final file = File('$path/$filename');
     PDFConverter pdfConverter = PDFConverter(
       backMatterDelta: null,
@@ -73,7 +74,7 @@ class FileUtils {
 
   static Future saveFileToMarkdown(String content,
       {String filename = "example.md"}) async {
-    final path = await _downloadPath;
+    final path = await _localPath;
     final file = File('$path/$filename');
     await file.writeAsString(content);
     return file.path;
@@ -96,7 +97,7 @@ class FileUtils {
 
   static Future saveFileToImage(Uint8List content,
       {String filename = "example.png"}) async {
-    final path = await _downloadPath;
+    final path = await _localPath;
     final file = File('$path/$filename');
     await file.writeAsBytes(content);
     return file.path;
