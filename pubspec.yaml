@@ -2,7 +2,7 @@ name: ai_text_editor
 description: "A new Flutter project."
 publish_to: 'none' 
 
-version: 1.1.0
+version: 1.1.2
 
 environment:
   sdk: ^3.6.1
@@ -13,6 +13,7 @@ dependencies:
   auto_size_text: ^3.0.0
   cupertino_icons: ^1.0.8
   daynightbanner: ^0.0.2
+  dropdown_button2: ^2.3.9
   extended_image: ^9.1.0
   file_selector: ^1.0.3
   flutter:
@@ -36,6 +37,7 @@ dependencies:
   riverpod: ^2.6.1
   rust_lib_ai_text_editor:
     path: rust_builder
+  screenshot: ^3.0.0
   toastification: ^2.3.0
   window_manager: ^0.4.3
 

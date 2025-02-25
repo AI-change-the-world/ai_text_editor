@@ -4,8 +4,8 @@ import 'package:ai_text_editor/utils/toast_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'components/app_body.dart';
-import 'components/app_right_body.dart';
+import 'components/structures/app_body.dart';
+import 'components/structures/app_right_body.dart';
 
 class Home extends ConsumerStatefulWidget {
   const Home({super.key});

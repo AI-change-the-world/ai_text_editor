@@ -2,12 +2,13 @@
 
 import 'dart:convert';
 
-import 'package:ai_text_editor/components/select_or_input_file_url_dialog.dart';
+import 'package:ai_text_editor/components/dialogs/select_or_input_file_url_dialog.dart';
 import 'package:ai_text_editor/embeds/image/image_embed.dart';
 import 'package:ai_text_editor/embeds/ref/ref_embed.dart';
 import 'package:ai_text_editor/embeds/roll/roll_embed.dart';
 import 'package:ai_text_editor/embeds/table/table_builder.dart';
 import 'package:flutter/material.dart';
+import 'package:screenshot/screenshot.dart';
 import 'package:uuid/uuid.dart';
 import 'package:ai_packages_core/ai_packages_core.dart';
 import 'package:ai_text_editor/embeds/table/table_embed.dart';
@@ -74,6 +75,8 @@ class SomeShortcuts {
   static final RegExp rollReg = RegExp(r'^<roll>');
   static final RegExp imageReg = RegExp(r'^<image>');
   static final RegExp refReg = RegExp(r'^<ref>');
+
+  static ScreenshotController screenshotController = ScreenshotController();
 
   // ignore: unintended_html_in_doc_comment
   /// ai instruct:  <inst>something<
@@ -244,18 +247,50 @@ class SomeShortcuts {
         }
       });
     } else if (rollReg.hasMatch(subString)) {
-      final block = CustomRollEmbed(customRollEmbedType, "");
+      final uuid = Uuid().v4();
+      ref?.read(editorNotifierProvider.notifier).setLoading(true);
       controller.document.replace(lastCharIndex, subString.length, "");
       controller.updateSelection(
           controller.selection.copyWith(
               baseOffset: lastCharIndex + 1, extentOffset: lastCharIndex + 1),
           ChangeSource.local);
+      final block =
+          CustomRollEmbed(customRollEmbedType, jsonEncode({"uuid": uuid}));
       controller.replaceText(controller.selection.baseOffset, 0, block, null);
-      controller.updateSelection(
-          controller.selection.copyWith(
-              baseOffset: controller.selection.baseOffset + 1,
-              extentOffset: controller.selection.baseOffset + 1),
-          ChangeSource.local);
+
+      Future.microtask(
+        () async {
+          await screenshotController
+              .captureFromWidget(
+                  SizedBox(
+                    width: 150,
+                    height: 150,
+                    child: Dice(
+                      uuid: uuid,
+                    ),
+                  ),
+                  delay: Duration(milliseconds: 300))
+              .then((v) {
+            // {"image": base64Encode(v)..replaceAll("\n", "")};
+            final block = CustomRollEmbed(
+                customRollEmbedType,
+                jsonEncode({
+                  "image": base64Encode(v)..replaceAll("\n", ""),
+                  "uuid": uuid
+                }));
+
+            controller.replaceText(
+                controller.selection.baseOffset, 1, block, null);
+            controller.updateSelection(
+                controller.selection.copyWith(
+                  baseOffset: controller.selection.baseOffset + 1,
+                ),
+                ChangeSource.local);
+          });
+          ref?.read(editorNotifierProvider.notifier).setLoading(false);
+        },
+      );
+
       return true;
     } else if (imageReg.hasMatch(subString)) {
       ref?.read(editorNotifierProvider.notifier).insertDataToEditor(

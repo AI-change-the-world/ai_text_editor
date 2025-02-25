@@ -7,8 +7,8 @@ import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:listview_screenshot/listview_screenshot.dart';
 
-import '../configs/quill_config.dart';
-import '../configs/quill_toolbar_config.dart';
+import '../../configs/quill_config.dart';
+import '../../configs/quill_toolbar_config.dart';
 
 class Editor extends ConsumerStatefulWidget {
   const Editor({super.key});

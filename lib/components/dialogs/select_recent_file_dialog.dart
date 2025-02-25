@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 // ignore: depend_on_referenced_packages
 import 'package:path/path.dart' as path;
 
-import '../utils/logger.dart';
+import '../../utils/logger.dart';
 
 class SelectRecentFileDialog extends StatefulWidget {
   const SelectRecentFileDialog({super.key, required this.files});

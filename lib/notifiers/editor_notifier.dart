@@ -119,7 +119,7 @@ class EditorNotifier extends Notifier<EditorState> {
         ref.read(selectedNotifierProvider.notifier).changeSelectedString("");
       }
     };
-    quillController.document.changes.listen((event) {
+    quillController.document.changes.listen((event) async {
       // ref.read(editorNotifierProvider.notifier).getText();
       quillTextChangeController.add(getText());
       changeSavedStatus(true);
@@ -244,6 +244,25 @@ class EditorNotifier extends Notifier<EditorState> {
           quillController.selection.baseOffset,
           1,
           CustomTableEmbed(customTableEmbedType, jsonEncode(data)),
+          quillController.selection);
+
+      quillController.updateSelection(
+        TextSelection.collapsed(
+            offset: quillController.selection.baseOffset + 1),
+        ChangeSource.local,
+      );
+    } catch (e) {
+      logger.e("更新失败 $e");
+    }
+  }
+
+  /// change dice
+  void changeDice(Map data) {
+    try {
+      quillController.replaceText(
+          quillController.selection.baseOffset,
+          1,
+          CustomRollEmbed(customRollEmbedType, jsonEncode(data)),
           quillController.selection);
 
       quillController.updateSelection(
