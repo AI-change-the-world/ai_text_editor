@@ -76,6 +76,8 @@ class SomeShortcuts {
   static final RegExp imageReg = RegExp(r'^<image>');
   static final RegExp refReg = RegExp(r'^<ref>');
 
+  static ScreenshotController screenshotController = ScreenshotController();
+
   // ignore: unintended_html_in_doc_comment
   /// ai instruct:  <inst>something<
   static bool handleInstruct(
@@ -245,34 +247,47 @@ class SomeShortcuts {
         }
       });
     } else if (rollReg.hasMatch(subString)) {
-      /// FIXME
-      final ScreenshotController screenshotController = ScreenshotController();
+      final uuid = Uuid().v4();
+      ref?.read(editorNotifierProvider.notifier).setLoading(true);
+      controller.document.replace(lastCharIndex, subString.length, "");
+      controller.updateSelection(
+          controller.selection.copyWith(
+              baseOffset: lastCharIndex + 1, extentOffset: lastCharIndex + 1),
+          ChangeSource.local);
+      final block =
+          CustomRollEmbed(customRollEmbedType, jsonEncode({"uuid": uuid}));
+      controller.replaceText(controller.selection.baseOffset, 0, block, null);
+
       Future.microtask(
         () async {
           await screenshotController
-              .captureFromWidget(SizedBox(
-            width: 150,
-            height: 150,
-            child: Dice(),
-          ))
+              .captureFromWidget(
+                  SizedBox(
+                    width: 150,
+                    height: 150,
+                    child: Dice(
+                      uuid: uuid,
+                    ),
+                  ),
+                  delay: Duration(milliseconds: 300))
               .then((v) {
             // {"image": base64Encode(v)..replaceAll("\n", "")};
-            final block = CustomRollEmbed(customRollEmbedType,
-                jsonEncode({"image": base64Encode(v)..replaceAll("\n", "")}));
-            controller.document.replace(lastCharIndex, subString.length, "");
-            controller.updateSelection(
-                controller.selection.copyWith(
-                    baseOffset: lastCharIndex + 1,
-                    extentOffset: lastCharIndex + 1),
-                ChangeSource.local);
+            final block = CustomRollEmbed(
+                customRollEmbedType,
+                jsonEncode({
+                  "image": base64Encode(v)..replaceAll("\n", ""),
+                  "uuid": uuid
+                }));
+
             controller.replaceText(
-                controller.selection.baseOffset, 0, block, null);
+                controller.selection.baseOffset, 1, block, null);
             controller.updateSelection(
                 controller.selection.copyWith(
-                    baseOffset: controller.selection.baseOffset + 1,
-                    extentOffset: controller.selection.baseOffset + 1),
+                  baseOffset: controller.selection.baseOffset + 1,
+                ),
                 ChangeSource.local);
           });
+          ref?.read(editorNotifierProvider.notifier).setLoading(false);
         },
       );
 

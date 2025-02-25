@@ -256,6 +256,25 @@ class EditorNotifier extends Notifier<EditorState> {
     }
   }
 
+  /// change dice
+  void changeDice(Map data) {
+    try {
+      quillController.replaceText(
+          quillController.selection.baseOffset,
+          1,
+          CustomRollEmbed(customRollEmbedType, jsonEncode(data)),
+          quillController.selection);
+
+      quillController.updateSelection(
+        TextSelection.collapsed(
+            offset: quillController.selection.baseOffset + 1),
+        ChangeSource.local,
+      );
+    } catch (e) {
+      logger.e("更新失败 $e");
+    }
+  }
+
   /// 设置当前文件路径
   void setCurrentFilePath(String? path) {
     if (path != state.currentFilePath) {

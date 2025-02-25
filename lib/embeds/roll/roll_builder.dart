@@ -4,28 +4,40 @@ class CustomRollEmbedBuilder extends EmbedBuilder {
   @override
   Widget build(BuildContext context, QuillController controller, Embed node,
       bool readOnly, bool inline, TextStyle textStyle) {
+    final m = jsonDecode(node.value.data);
     return SizedBox(
       width: 150,
       height: 150,
-      child: Dice(),
+      child: Dice(
+        uuid: m['uuid'],
+      ),
     );
   }
 
   @override
   String get key => customRollEmbedType;
-}
-
-class Dice extends StatefulWidget {
-  const Dice({super.key});
 
   @override
-  State<Dice> createState() => _DiceScreenState();
+  String toPlainText(Embed node) {
+    final m = jsonDecode(node.value.data);
+    return m['uuid'];
+  }
 }
 
-class _DiceScreenState extends State<Dice> with SingleTickerProviderStateMixin {
+class Dice extends ConsumerStatefulWidget {
+  const Dice({super.key, required this.uuid});
+  final String uuid;
+
+  @override
+  ConsumerState<Dice> createState() => _DiceScreenState();
+}
+
+class _DiceScreenState extends ConsumerState<Dice>
+    with SingleTickerProviderStateMixin {
   int diceNumber = 1;
   double rotation = 0;
   late AnimationController _controller;
+  final ScreenshotController screenshotController = ScreenshotController();
 
   @override
   void initState() {
@@ -41,28 +53,41 @@ class _DiceScreenState extends State<Dice> with SingleTickerProviderStateMixin {
       diceNumber = Random().nextInt(6) + 1;
       rotation += pi * 2; // 旋转 360 度
     });
-    _controller.forward(from: 0);
+    _controller.forward(from: 0).then((v) {
+      screenshotController.capture().then((v) {
+        if (v != null) {
+          ref.read(editorNotifierProvider.notifier).onEmbedTrigger(widget.uuid);
+          Map<String, dynamic> m = {
+            'uuid': widget.uuid,
+            "image": base64Encode(v)..replaceAll("\n", "")
+          };
+          ref.read(editorNotifierProvider.notifier).changeDice(m);
+        }
+      });
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-        child: GestureDetector(
-      onTap: rollDice,
-      child: AnimatedBuilder(
-        animation: _controller,
-        builder: (context, child) {
-          return Transform.rotate(
-            angle: rotation * _controller.value,
-            child: child,
-          );
-        },
-        child: CustomPaint(
-          size: const Size(150, 150),
-          painter: DicePainter(diceNumber),
-        ),
-      ),
-    ));
+    return Screenshot(
+        controller: screenshotController,
+        child: Center(
+            child: GestureDetector(
+          onTap: rollDice,
+          child: AnimatedBuilder(
+            animation: _controller,
+            builder: (context, child) {
+              return Transform.rotate(
+                angle: rotation * _controller.value,
+                child: child,
+              );
+            },
+            child: CustomPaint(
+              size: const Size(150, 150),
+              painter: DicePainter(diceNumber),
+            ),
+          ),
+        )));
   }
 
   @override
