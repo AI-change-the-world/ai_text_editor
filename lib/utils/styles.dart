@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 
 class Styles {
@@ -9,6 +11,16 @@ class Styles {
   static double toolbarMinSize = 110;
 
   static Color textButtonColor = Colors.blue;
+
+  static final Size _macOSSize = Size(800, 600);
+  static final Size _windowsSize = Size(1280, 720);
+  static final Size _linuxSize = Size(1280, 720);
+
+  static Size get size => Platform.isMacOS
+      ? _macOSSize
+      : Platform.isWindows
+          ? _windowsSize
+          : _linuxSize;
 
   static ThemeData lightTheme = ThemeData(
     brightness: Brightness.light,

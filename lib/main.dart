@@ -22,8 +22,8 @@ void main() async {
   await windowManager.ensureInitialized();
   WindowOptions windowOptions = WindowOptions(
     title: APPConfig.appName,
-    size: Size(800, 600),
-    minimumSize: Size(800, 600),
+    size: Styles.size,
+    minimumSize: Styles.size,
     backgroundColor: Colors.white,
     skipTaskbar: false,
   );
