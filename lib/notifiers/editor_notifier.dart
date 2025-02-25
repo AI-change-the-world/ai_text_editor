@@ -119,7 +119,7 @@ class EditorNotifier extends Notifier<EditorState> {
         ref.read(selectedNotifierProvider.notifier).changeSelectedString("");
       }
     };
-    quillController.document.changes.listen((event) {
+    quillController.document.changes.listen((event) async {
       // ref.read(editorNotifierProvider.notifier).getText();
       quillTextChangeController.add(getText());
       changeSavedStatus(true);

@@ -1,8 +1,4 @@
-import 'dart:math';
-
-import 'package:ai_text_editor/embeds/roll/roll_embed.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_quill/flutter_quill.dart';
+part of 'roll_embed.dart';
 
 class CustomRollEmbedBuilder extends EmbedBuilder {
   @override

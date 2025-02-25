@@ -8,6 +8,7 @@ import 'package:ai_text_editor/embeds/ref/ref_embed.dart';
 import 'package:ai_text_editor/embeds/roll/roll_embed.dart';
 import 'package:ai_text_editor/embeds/table/table_builder.dart';
 import 'package:flutter/material.dart';
+import 'package:screenshot/screenshot.dart';
 import 'package:uuid/uuid.dart';
 import 'package:ai_packages_core/ai_packages_core.dart';
 import 'package:ai_text_editor/embeds/table/table_embed.dart';
@@ -244,18 +245,37 @@ class SomeShortcuts {
         }
       });
     } else if (rollReg.hasMatch(subString)) {
-      final block = CustomRollEmbed(customRollEmbedType, "");
-      controller.document.replace(lastCharIndex, subString.length, "");
-      controller.updateSelection(
-          controller.selection.copyWith(
-              baseOffset: lastCharIndex + 1, extentOffset: lastCharIndex + 1),
-          ChangeSource.local);
-      controller.replaceText(controller.selection.baseOffset, 0, block, null);
-      controller.updateSelection(
-          controller.selection.copyWith(
-              baseOffset: controller.selection.baseOffset + 1,
-              extentOffset: controller.selection.baseOffset + 1),
-          ChangeSource.local);
+      /// FIXME
+      final ScreenshotController screenshotController = ScreenshotController();
+      Future.microtask(
+        () async {
+          await screenshotController
+              .captureFromWidget(SizedBox(
+            width: 150,
+            height: 150,
+            child: Dice(),
+          ))
+              .then((v) {
+            // {"image": base64Encode(v)..replaceAll("\n", "")};
+            final block = CustomRollEmbed(customRollEmbedType,
+                jsonEncode({"image": base64Encode(v)..replaceAll("\n", "")}));
+            controller.document.replace(lastCharIndex, subString.length, "");
+            controller.updateSelection(
+                controller.selection.copyWith(
+                    baseOffset: lastCharIndex + 1,
+                    extentOffset: lastCharIndex + 1),
+                ChangeSource.local);
+            controller.replaceText(
+                controller.selection.baseOffset, 0, block, null);
+            controller.updateSelection(
+                controller.selection.copyWith(
+                    baseOffset: controller.selection.baseOffset + 1,
+                    extentOffset: controller.selection.baseOffset + 1),
+                ChangeSource.local);
+          });
+        },
+      );
+
       return true;
     } else if (imageReg.hasMatch(subString)) {
       ref?.read(editorNotifierProvider.notifier).insertDataToEditor(
