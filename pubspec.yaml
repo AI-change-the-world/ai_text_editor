@@ -19,7 +19,6 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_quill: ^10.8.5
-  flutter_quill_to_pdf: ^2.2.7
   flutter_riverpod: ^2.6.1
   flutter_rust_bridge: 2.7.0
   get_time_ago: ^2.2.0
@@ -34,7 +33,7 @@ dependencies:
   markdown_to_pdf:
     git:
       url: https://github.com/guchengxi1994/markdown_to_pdf.git
-      ref: main
+      ref: df5832370fa6f460c335a498566a150fcc9895bc
   menu_bar: ^0.5.3
   objectbox: ^4.1.0
   objectbox_flutter_libs: any

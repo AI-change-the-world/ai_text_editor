@@ -1,21 +1,27 @@
 import 'package:ai_text_editor/init.dart';
 import 'package:ai_text_editor/objectbox/database.dart';
 import 'package:ai_text_editor/routers.dart';
+import 'package:ai_text_editor/utils/file_utils.dart';
 import 'package:ai_text_editor/utils/logger.dart';
 import 'package:ai_text_editor/utils/styles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:markdown_to_pdf/markdown_to_pdf.dart';
 import 'package:toastification/toastification.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:ai_text_editor/src/rust/frb_generated.dart';
 
-import 'utils/font_loader.dart';
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await RustLib.init();
-  final FontsLoader loader = FontsLoader();
-  await loader.loadFonts();
+  final regular =
+      await FileUtils.loadAsset("assets/fonts/SourceHanSansCN-Regular.ttf");
+  final bold =
+      await FileUtils.loadAsset("assets/fonts/SourceHanSansCN-Bold.ttf");
+
+  Converter.loadFontFromBytes(regular, (f) => Converter.regularFont = f);
+  Converter.loadFontFromBytes(bold, (f) => Converter.boldFont = f);
+
   final _ = await APPConfig.init();
   logger.d("config loaded, with ${APPConfig.words.length} sentenses");
 

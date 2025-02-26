@@ -271,8 +271,7 @@ class _EditorHomeState extends ConsumerState<EditorHome> {
                                         ref
                                             .read(
                                                 editorNotifierProvider.notifier)
-                                            .quillController
-                                            .document,
+                                            .getText(),
                                         filename: "$v.pdf")
                                     .then((v) {
                                   if (v.toString().isNotEmpty) {
