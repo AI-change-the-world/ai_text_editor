@@ -1,4 +1,4 @@
-use docx_converter::convert_markdown_to_docx;
+use converter::convert_markdown_to_docx;
 
 use crate::messages::send_message;
 

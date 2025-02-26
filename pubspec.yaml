@@ -31,6 +31,10 @@ dependencies:
   listview_screenshot: ^3.2.0
   logger: ^2.5.0
   markdown_quill: ^4.2.0
+  markdown_to_pdf:
+    git:
+      url: https://github.com/guchengxi1994/markdown_to_pdf.git
+      ref: main
   menu_bar: ^0.5.3
   objectbox: ^4.1.0
   objectbox_flutter_libs: any
