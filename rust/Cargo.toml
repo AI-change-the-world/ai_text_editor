@@ -12,4 +12,4 @@ unexpected_cfgs = { level = "warn", check-cfg = ['cfg(frb_expand)'] }
 [dependencies]
 anyhow = "1"
 flutter_rust_bridge = "=2.7.0"
-docx-converter = {version = "0.1.0", path = "../plugins/docx-converter"}
+converter = { version = "0.1.0", path = "../plugins/converter" }

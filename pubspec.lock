@@ -884,6 +884,15 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.2.0"
+  markdown_to_pdf:
+    dependency: "direct main"
+    description:
+      path: "."
+      ref: main
+      resolved-ref: "2d8bd9d01f3f6972d20bf8387f725cc17e42f02b"
+      url: "https://github.com/guchengxi1994/markdown_to_pdf.git"
+    source: git
+    version: "0.0.1"
   matcher:
     dependency: transitive
     description:
@@ -1056,10 +1065,10 @@ packages:
     dependency: transitive
     description:
       name: pdf
-      sha256: adbdec5bc84d20e6c8d67f9c64270aa64d1e9e1ed529f0fef7e7bc7e9400f894
+      sha256: "28eacad99bffcce2e05bba24e50153890ad0255294f4dd78a17075a2ba5c8416"
       url: "https://pub.dev"
     source: hosted
-    version: "3.11.2"
+    version: "3.11.3"
   petitparser:
     dependency: transitive
     description:
