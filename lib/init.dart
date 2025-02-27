@@ -12,6 +12,10 @@ class APPConfig {
 
   static List<_Word> words = [];
 
+  static const List<String> supportFormats = [
+    "csv",
+  ];
+
   static Future<void> init() async {
     late Map<String, dynamic> config = {};
     try {
