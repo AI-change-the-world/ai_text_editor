@@ -10,3 +10,7 @@ Future<void> markdownToDocx(
         {required String markdownText, required String filepath}) =>
     RustLib.instance.api.crateApiConverterApiMarkdownToDocx(
         markdownText: markdownText, filepath: filepath);
+
+Future<String?> otherTypeToMarkdown({required String filePath}) =>
+    RustLib.instance.api
+        .crateApiConverterApiOtherTypeToMarkdown(filePath: filePath);
