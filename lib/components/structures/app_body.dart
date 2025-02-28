@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:ai_text_editor/components/dialogs/add_model_dialog.dart';
+import 'package:ai_text_editor/components/dialogs/confirm_dialog.dart';
 import 'package:ai_text_editor/components/others/animated_text.dart';
 import 'package:ai_text_editor/components/dialogs/select_recent_file_dialog.dart';
 import 'package:ai_text_editor/init.dart';
@@ -12,11 +13,17 @@ import 'package:ai_text_editor/utils/logger.dart';
 import 'package:ai_text_editor/utils/styles.dart';
 import 'package:ai_text_editor/utils/toast_utils.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
+import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 // ignore: depend_on_referenced_packages
 import 'package:path/path.dart' as path;
+
+const XTypeGroup typeGroup = XTypeGroup(
+  label: 'files',
+  extensions: APPConfig.supportFormats,
+);
 
 class AppBody extends ConsumerStatefulWidget {
   const AppBody({super.key});
@@ -118,6 +125,50 @@ class _AppBodyState extends ConsumerState<AppBody> {
                           ),
                           Text(
                             "Open file ...",
+                            style: TextStyle(color: Styles.textButtonColor),
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
+                  MouseRegion(
+                    cursor: SystemMouseCursors.click,
+                    child: GestureDetector(
+                      onTap: () {
+                        showGeneralDialog(
+                            barrierColor: Colors.white.withValues(alpha: 0.1),
+                            barrierDismissible: true,
+                            barrierLabel: "confirm dialog",
+                            context: context,
+                            pageBuilder: (c, _, __) {
+                              return Center(
+                                child: ConfirmDialog(
+                                    content:
+                                        "⚠️ This feature is not stable, may cause some problems. Currently support file types: \n${APPConfig.supportFormats.join(", ")}."),
+                              );
+                            }).then((v) {
+                          if (v == true) {
+                            openFile(acceptedTypeGroups: [typeGroup])
+                                .then((f) async {
+                              if (f != null) {
+                                // final s =
+                                //     await otherTypeToMarkdown(filePath: f.path);
+                                // print(s);
+                              }
+                            });
+                          }
+                        });
+                      },
+                      child: Row(
+                        spacing: 10,
+                        children: [
+                          Icon(
+                            Icons.import_export,
+                            size: Styles.menuBarIconSize,
+                            color: Styles.textButtonColor,
+                          ),
+                          Text(
+                            "Load from ... (experimental)",
                             style: TextStyle(color: Styles.textButtonColor),
                           )
                         ],

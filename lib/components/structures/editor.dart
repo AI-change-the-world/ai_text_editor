@@ -1,3 +1,6 @@
+// ignore_for_file: use_build_context_synchronously
+
+import 'package:ai_text_editor/components/dialogs/confirm_dialog.dart';
 import 'package:ai_text_editor/notifiers/editor_notifier.dart';
 import 'package:ai_text_editor/notifiers/editor_state.dart';
 import 'package:ai_text_editor/utils/some_shortcuts.dart';
@@ -6,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:listview_screenshot/listview_screenshot.dart';
+import 'package:window_manager/window_manager.dart';
 
 import '../../configs/quill_config.dart';
 import '../../configs/quill_toolbar_config.dart';
@@ -17,7 +21,7 @@ class Editor extends ConsumerStatefulWidget {
   ConsumerState<Editor> createState() => _EditorState();
 }
 
-class _EditorState extends ConsumerState<Editor> {
+class _EditorState extends ConsumerState<Editor> with WindowListener {
   // final FocusNode focusNode = FocusNode();
   late Color containerColor = Colors.transparent;
   bool dragging = false;
@@ -26,6 +30,45 @@ class _EditorState extends ConsumerState<Editor> {
   void initState() {
     super.initState();
     SomeShortcuts.setRef(ref);
+    windowManager.addListener(this);
+    Future.microtask(() async {
+      await windowManager.setPreventClose(true);
+    });
+  }
+
+  @override
+  void onWindowClose() async {
+    if (ref.read(savedNotifierProvider)) {
+      await windowManager.destroy();
+    }
+
+    bool isPreventClose = await windowManager.isPreventClose();
+    if (isPreventClose && !ref.read(savedNotifierProvider)) {
+      showGeneralDialog(
+        barrierColor: Colors.white.withValues(alpha: 0.1),
+        barrierLabel: "confirm exit dialog",
+        context: context,
+        pageBuilder: (_, a, __) {
+          return Center(
+            child: ConfirmDialog(
+                height: 100,
+                content: 'This file is not saved. Do you want to quit?'),
+          );
+        },
+      ).then((v) async {
+        if (v == true) {
+          Navigator.of(context).pop();
+          await windowManager.destroy();
+        }
+      });
+    }
+    super.onWindowClose();
+  }
+
+  @override
+  void dispose() {
+    windowManager.removeListener(this);
+    super.dispose();
   }
 
   @override

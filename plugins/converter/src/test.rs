@@ -129,4 +129,14 @@ mod tests {
 
         Ok(())
     }
+
+    #[test]
+    fn test_doc() -> anyhow::Result<()> {
+        let doc = crate::from_other_file::convert_to_markdown(
+            "/Users/guchengxi/Desktop/projects/ai_text_editor/plugins/converter/style.docx"
+                .to_string(),
+        )?;
+        println!("{}", doc);
+        anyhow::Ok(())
+    }
 }
