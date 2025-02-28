@@ -86,3 +86,27 @@ pub fn new_graph_chart(
         }
     }
 }
+
+pub fn new_mind_graph_chart(
+    value: String,
+    title: Option<String>,
+    width: Option<u32>,
+    height: Option<u32>,
+) -> Option<Vec<u8>> {
+    let r = compose(
+        "mind_graph".to_owned(),
+        title.unwrap_or("".to_owned()),
+        GraphChartData { data: value },
+        width,
+        height,
+        Some(OutputFormat::Png),
+    );
+
+    match r {
+        Ok(_r) => Some(_r),
+        Err(_e) => {
+            println!("Error: {}", _e);
+            None
+        }
+    }
+}

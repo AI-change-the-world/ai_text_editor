@@ -9,6 +9,8 @@ class APPConfig {
   static String appName = "AI Text Editor";
   static String spellCheckPrompt =
       "Please correct the spelling mistakes in the following text: {text}";
+  static String mindGraphPrompt =
+      "Please generate a mind map for the following text: {text}";
 
   static List<_Word> words = [];
 
@@ -31,9 +33,13 @@ class APPConfig {
       }
       final String _spellCheck =
           await rootBundle.loadString("assets/prompts/spell-check-prompt.txt");
-      // return APPConfig(appName: appName, spellCheckPrompt: spellCheck);
+
+      final String _mindGraph =
+          await rootBundle.loadString("assets/prompts/mind-graph-prompt.txt");
+
       appName = _appName;
       spellCheckPrompt = _spellCheck;
+      mindGraphPrompt = _mindGraph;
     } catch (e) {
       logger.e("Error loading config.json: $e");
     }

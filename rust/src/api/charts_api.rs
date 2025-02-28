@@ -26,3 +26,12 @@ pub fn new_graph_chart(
 ) -> Option<Vec<u8>> {
     crate::charts::new_graph_chart(value, title, width, height)
 }
+
+pub fn new_mind_graph_chart(
+    value: String,
+    title: Option<String>,
+    width: Option<u32>,
+    height: Option<u32>,
+) -> Option<Vec<u8>> {
+    crate::charts::new_mind_graph_chart(value, title, width, height)
+}

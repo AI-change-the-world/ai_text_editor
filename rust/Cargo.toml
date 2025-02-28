@@ -14,4 +14,4 @@ anyhow = "1"
 flutter_rust_bridge = "=2.8.0"
 converter = { version = "0.1.0", path = "../plugins/converter" }
 miniz_oxide = "=0.7.2"
-chart_core = { git = "https://github.com/guchengxi1994/frb_charming.git", package = "chart_core", rev = "1452c3639f58e3989200605ee9e04c8575c62535" }
+chart_core = { git = "https://github.com/guchengxi1994/frb_charming.git", package = "chart_core", rev = "dc064ade9cc9dc673a6294fe37bc9e8bc99d1b32" }

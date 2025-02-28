@@ -72,7 +72,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   String get codegenVersion => '2.8.0';
 
   @override
-  int get rustContentHash => -851931131;
+  int get rustContentHash => -2127545036;
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
@@ -106,6 +106,9 @@ abstract class RustLibApi extends BaseApi {
       String? title,
       int? width,
       int? height});
+
+  Future<Uint8List?> crateApiChartsApiNewMindGraphChart(
+      {required String value, String? title, int? width, int? height});
 
   Stream<(String, MessageType)> crateApiMessageApiNormalMessageStream();
 
@@ -292,13 +295,42 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
+  Future<Uint8List?> crateApiChartsApiNewMindGraphChart(
+      {required String value, String? title, int? width, int? height}) {
+    return handler.executeNormal(NormalTask(
+      callFfi: (port_) {
+        final serializer = SseSerializer(generalizedFrbRustBinding);
+        sse_encode_String(value, serializer);
+        sse_encode_opt_String(title, serializer);
+        sse_encode_opt_box_autoadd_u_32(width, serializer);
+        sse_encode_opt_box_autoadd_u_32(height, serializer);
+        pdeCallFfi(generalizedFrbRustBinding, serializer,
+            funcId: 7, port: port_);
+      },
+      codec: SseCodec(
+        decodeSuccessData: sse_decode_opt_list_prim_u_8_strict,
+        decodeErrorData: null,
+      ),
+      constMeta: kCrateApiChartsApiNewMindGraphChartConstMeta,
+      argValues: [value, title, width, height],
+      apiImpl: this,
+    ));
+  }
+
+  TaskConstMeta get kCrateApiChartsApiNewMindGraphChartConstMeta =>
+      const TaskConstMeta(
+        debugName: "new_mind_graph_chart",
+        argNames: ["value", "title", "width", "height"],
+      );
+
+  @override
   Stream<(String, MessageType)> crateApiMessageApiNormalMessageStream() {
     final s = RustStreamSink<(String, MessageType)>();
     handler.executeSync(SyncTask(
       callFfi: () {
         final serializer = SseSerializer(generalizedFrbRustBinding);
         sse_encode_StreamSink_record_string_message_type_Sse(s, serializer);
-        return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 7)!;
+        return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 8)!;
       },
       codec: SseCodec(
         decodeSuccessData: sse_decode_unit,
@@ -325,7 +357,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         final serializer = SseSerializer(generalizedFrbRustBinding);
         sse_encode_String(filePath, serializer);
         pdeCallFfi(generalizedFrbRustBinding, serializer,
-            funcId: 8, port: port_);
+            funcId: 9, port: port_);
       },
       codec: SseCodec(
         decodeSuccessData: sse_decode_opt_String,

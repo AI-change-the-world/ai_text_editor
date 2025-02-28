@@ -36,3 +36,8 @@ Future<Uint8List?> newGraphChart(
         {required String value, String? title, int? width, int? height}) =>
     RustLib.instance.api.crateApiChartsApiNewGraphChart(
         value: value, title: title, width: width, height: height);
+
+Future<Uint8List?> newMindGraphChart(
+        {required String value, String? title, int? width, int? height}) =>
+    RustLib.instance.api.crateApiChartsApiNewMindGraphChart(
+        value: value, title: title, width: width, height: height);

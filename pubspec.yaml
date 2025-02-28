@@ -21,6 +21,7 @@ dependencies:
   flutter_quill: ^10.8.5
   flutter_riverpod: ^2.6.1
   flutter_rust_bridge: 2.8.0
+  flutter_svg: ^2.0.17
   get_time_ago: ^2.2.0
   go_router: ^14.8.0
   gpt_markdown: ^1.0.11
@@ -62,6 +63,7 @@ flutter:
   assets:
     - assets/config.json
     - assets/prompts/spell-check-prompt.txt
+    - assets/prompts/mind-graph-prompt.txt
 
   fonts:
     - family: HanSansCN
