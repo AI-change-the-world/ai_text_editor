@@ -122,7 +122,7 @@ class EditorNotifier extends Notifier<EditorState> {
     quillController.document.changes.listen((event) async {
       // ref.read(editorNotifierProvider.notifier).getText();
       quillTextChangeController.add(getText());
-      changeSavedStatus(true);
+      changeSavedStatus(false);
     });
     scrollController.addListener(() {
       final h = _getEditorHeight();
