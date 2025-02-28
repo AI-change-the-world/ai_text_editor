@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 
 class ConfirmDialog extends StatelessWidget {
-  const ConfirmDialog({super.key, required this.content});
+  const ConfirmDialog({super.key, required this.content, this.height = 150});
   final String content;
+  final double height;
 
   @override
   Widget build(BuildContext context) {
@@ -13,7 +14,7 @@ class ConfirmDialog extends StatelessWidget {
       child: Container(
         padding: EdgeInsets.all(10),
         width: 300,
-        height: 150,
+        height: height,
         decoration: BoxDecoration(borderRadius: BorderRadius.circular(5)),
         child: Column(
           children: [

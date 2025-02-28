@@ -1,10 +1,10 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'package:ai_text_editor/components/dialogs/confirm_dialog.dart';
 import 'package:ai_text_editor/notifiers/editor_notifier.dart';
 import 'package:ai_text_editor/notifiers/editor_state.dart';
 import 'package:ai_text_editor/utils/some_shortcuts.dart';
 import 'package:ai_text_editor/utils/styles.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -44,37 +44,23 @@ class _EditorState extends ConsumerState<Editor> with WindowListener {
 
     bool isPreventClose = await windowManager.isPreventClose();
     if (isPreventClose && !ref.read(savedNotifierProvider)) {
-      showDialog(
-        // barrierColor: Colors.white.withValues(alpha: 0.1),
+      showGeneralDialog(
+        barrierColor: Colors.white.withValues(alpha: 0.1),
         barrierLabel: "confirm exit dialog",
         context: context,
-        builder: (_) {
-          return CupertinoAlertDialog(
-            title: Text('This file is not saved.\nDo you want to quit?'),
-            actions: [
-              CupertinoActionSheetAction(
-                mouseCursor: SystemMouseCursors.click,
-                isDefaultAction: true,
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: SizedBox(height: 30, child: Text('No')),
-              ),
-              CupertinoActionSheetAction(
-                mouseCursor: SystemMouseCursors.click,
-                child: SizedBox(
-                  height: 30,
-                  child: Text('Yes'),
-                ),
-                onPressed: () async {
-                  Navigator.of(context).pop();
-                  await windowManager.destroy();
-                },
-              ),
-            ],
+        pageBuilder: (_, a, __) {
+          return Center(
+            child: ConfirmDialog(
+                height: 100,
+                content: 'This file is not saved. Do you want to quit?'),
           );
         },
-      );
+      ).then((v) async {
+        if (v == true) {
+          Navigator.of(context).pop();
+          await windowManager.destroy();
+        }
+      });
     }
     super.onWindowClose();
   }
