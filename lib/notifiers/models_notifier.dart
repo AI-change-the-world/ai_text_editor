@@ -67,6 +67,14 @@ class ModelsNotifier extends AutoDisposeNotifier<ModelsState> {
     state = state.copyWith(models: [...state.models, model]);
   }
 
+  Future<void> updateModel(Model model) async {
+    database.modelBox.put(model);
+    state = state.copyWith(models: [
+      for (final m in state.models)
+        if (m.tag == model.tag) model else m
+    ]);
+  }
+
   Future<void> deleteModel(Model model) async {
     if (model.tag == state.current) {
       ToastUtils.error(null, title: "Cannot delete current model");

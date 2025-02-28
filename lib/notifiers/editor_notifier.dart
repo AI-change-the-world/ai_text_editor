@@ -17,6 +17,7 @@ import 'package:ai_text_editor/models/json_error_model.dart';
 import 'package:ai_text_editor/objectbox.g.dart';
 import 'package:ai_text_editor/objectbox/database.dart';
 import 'package:ai_text_editor/objectbox/recent_files.dart';
+import 'package:ai_text_editor/src/rust/api/charts_api.dart';
 import 'package:ai_text_editor/utils/logger.dart';
 import 'package:ai_text_editor/utils/toast_utils.dart';
 import 'package:listview_screenshot/listview_screenshot.dart';
@@ -122,7 +123,7 @@ class EditorNotifier extends Notifier<EditorState> {
     quillController.document.changes.listen((event) async {
       // ref.read(editorNotifierProvider.notifier).getText();
       quillTextChangeController.add(getText());
-      changeSavedStatus(true);
+      changeSavedStatus(false);
     });
     scrollController.addListener(() {
       final h = _getEditorHeight();
@@ -566,6 +567,61 @@ class EditorNotifier extends Notifier<EditorState> {
     }
 
     return length;
+  }
+
+  /// mind graph
+  Future mindGraph(BuildContext context) async {
+    String text = quillController.getPlainText();
+    if (text.trim().length < 20 && text.trim().isNotEmpty) {
+      ToastUtils.info(context, title: "Text too short");
+      return;
+    }
+
+    if (text.trim().isEmpty) {
+      text = quillController.document.toPlainText();
+      if (text.trim().length < 20) {
+        ToastUtils.info(context, title: "Text too short");
+        return;
+      }
+    }
+    setLoading(true);
+
+    final prompt = APPConfig.mindGraphPrompt.replaceAll("{text}", text);
+    core.ChatMessage message = core.ChatMessage(
+        role: "user",
+        content: prompt,
+        createAt: DateTime.now().millisecondsSinceEpoch);
+
+    final res = await GlobalModel.model!.chat([message]);
+    logger.d("res: $res");
+    setLoading(false);
+    try {
+      final r = res.replaceFirst("```json", "").replaceAll("```", "");
+      final _ = jsonDecode(r);
+
+      final img = await newMindGraphChart(value: r, width: 1080, height: 720);
+      if (img != null) {
+        showGeneralDialog(
+            barrierDismissible: true,
+            barrierLabel: "Close",
+            // ignore: use_build_context_synchronously
+            context: context,
+            pageBuilder: (c, _, __) {
+              return Center(
+                child: AlertDialog(
+                  title: Text("Mind Graph"),
+                  content: SizedBox(
+                    width: 600,
+                    height: 400,
+                    child: Image.memory(img),
+                  ),
+                ),
+              );
+            });
+      }
+    } catch (_) {
+      ToastUtils.error(null, title: "generate error");
+    }
   }
 }
 

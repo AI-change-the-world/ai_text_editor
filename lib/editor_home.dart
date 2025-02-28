@@ -271,8 +271,7 @@ class _EditorHomeState extends ConsumerState<EditorHome> {
                                         ref
                                             .read(
                                                 editorNotifierProvider.notifier)
-                                            .quillController
-                                            .document,
+                                            .getText(),
                                         filename: "$v.pdf")
                                     .then((v) {
                                   if (v.toString().isNotEmpty) {
@@ -483,6 +482,23 @@ class _EditorHomeState extends ConsumerState<EditorHome> {
                         ref.read(editorNotifierProvider.notifier).spellCheck();
                       },
                     ),
+                    MenuButton(
+                      text: Row(
+                        spacing: 5,
+                        children: [
+                          Icon(
+                            Icons.auto_graph,
+                            size: Styles.menuBarIconSize,
+                          ),
+                          Text("Generate mind graph")
+                        ],
+                      ),
+                      onTap: () async {
+                        ref
+                            .read(editorNotifierProvider.notifier)
+                            .mindGraph(context);
+                      },
+                    )
                   ])),
               BarButton(
                   text: Padding(

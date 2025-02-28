@@ -281,22 +281,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.4.1"
-  dio:
-    dependency: transitive
-    description:
-      name: dio
-      sha256: "253a18bbd4851fecba42f7343a1df3a9a4c1d31a2c1b37e221086b4fa8c8dbc9"
-      url: "https://pub.dev"
-    source: hosted
-    version: "5.8.0+1"
-  dio_web_adapter:
-    dependency: transitive
-    description:
-      name: dio_web_adapter
-      sha256: e485c7a39ff2b384fa1d7e09b4e25f755804de8384358049124830b04fc4f93a
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.1.0"
   dropdown_button2:
     dependency: "direct main"
     description:
@@ -544,14 +528,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "10.8.5"
-  flutter_quill_delta_easy_parser:
-    dependency: transitive
-    description:
-      name: flutter_quill_delta_easy_parser
-      sha256: fb255ccf4fc79d70b248e14d243da27b9de5f7b52137c4aadcc6610cc53c322c
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.4"
   flutter_quill_delta_from_html:
     dependency: transitive
     description:
@@ -560,14 +536,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.5.0"
-  flutter_quill_to_pdf:
-    dependency: "direct main"
-    description:
-      name: flutter_quill_to_pdf
-      sha256: "193c57bf12a2830949c0bc4ea0c136a3b53bfefca325d4cd33d450a41113fb04"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.2.7"
   flutter_riverpod:
     dependency: "direct main"
     description:
@@ -580,12 +548,12 @@ packages:
     dependency: "direct main"
     description:
       name: flutter_rust_bridge
-      sha256: "35c257fc7f98e34c1314d6c145e5ed54e7c94e8a9f469947e31c9298177d546f"
+      sha256: "39804d78730d41ecddbe97e38c7dd6c2b43f76e91ef7bbd329f98f9b0bd19e56"
       url: "https://pub.dev"
     source: hosted
-    version: "2.7.0"
+    version: "2.8.0"
   flutter_svg:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: flutter_svg
       sha256: c200fd79c918a40c5cd50ea0877fa13f81bdaf6f0a5d3dbcc2a13e3285d6aa1b
@@ -679,14 +647,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.15.5"
-  html_unescape:
-    dependency: transitive
-    description:
-      name: html_unescape
-      sha256: "15362d7a18f19d7b742ef8dcb811f5fd2a2df98db9f80ea393c075189e0b61e3"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.0.0"
   http:
     dependency: transitive
     description:
@@ -884,6 +844,15 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.2.0"
+  markdown_to_pdf:
+    dependency: "direct main"
+    description:
+      path: "."
+      ref: df5832370fa6f460c335a498566a150fcc9895bc
+      resolved-ref: df5832370fa6f460c335a498566a150fcc9895bc
+      url: "https://github.com/guchengxi1994/markdown_to_pdf.git"
+    source: git
+    version: "0.0.1"
   matcher:
     dependency: transitive
     description:
@@ -932,14 +901,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.0"
-  numerus:
-    dependency: transitive
-    description:
-      name: numerus
-      sha256: a17a3f34527497e89378696a76f382b40dc534c4a57b3778de246ebc1ce2ca99
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.3.0"
   objectbox:
     dependency: "direct main"
     description:
@@ -1056,10 +1017,10 @@ packages:
     dependency: transitive
     description:
       name: pdf
-      sha256: adbdec5bc84d20e6c8d67f9c64270aa64d1e9e1ed529f0fef7e7bc7e9400f894
+      sha256: "28eacad99bffcce2e05bba24e50153890ad0255294f4dd78a17075a2ba5c8416"
       url: "https://pub.dev"
     source: hosted
-    version: "3.11.2"
+    version: "3.11.3"
   petitparser:
     dependency: transitive
     description:
@@ -1432,22 +1393,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.4.0"
-  universal_html:
-    dependency: transitive
-    description:
-      name: universal_html
-      sha256: "56536254004e24d9d8cfdb7dbbf09b74cf8df96729f38a2f5c238163e3d58971"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.2.4"
-  universal_io:
-    dependency: transitive
-    description:
-      name: universal_io
-      sha256: "1722b2dcc462b4b2f3ee7d188dad008b6eb4c40bbd03a3de451d82c78bba9aad"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.2.2"
   url_launcher:
     dependency: transitive
     description:

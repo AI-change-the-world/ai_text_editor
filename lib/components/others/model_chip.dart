@@ -88,7 +88,26 @@ class _ModelChipState extends ConsumerState<ModelChip> {
                       )),
                       if (isHovering)
                         InkWell(
-                          onTap: () {},
+                          onTap: () {
+                            showGeneralDialog(
+                                barrierColor:
+                                    Colors.white.withValues(alpha: 0.5),
+                                context: context,
+                                pageBuilder: (c, _, __) {
+                                  return Center(
+                                    child: AddModelDialog(
+                                      model: widget.model,
+                                    ),
+                                  );
+                                }).then((v) {
+                              if (v == null) {
+                                return;
+                              }
+                              ref
+                                  .read(modelsProvider.notifier)
+                                  .updateModel(v as Model);
+                            });
+                          },
                           child: Icon(
                             Icons.edit,
                             size: 16,

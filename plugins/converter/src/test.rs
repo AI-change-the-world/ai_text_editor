@@ -1,15 +1,8 @@
 #[cfg(test)]
 mod tests {
-    use std::{fs::File, io::Read};
 
-    use docx_rs::{
-        AlignmentType, Docx, Paragraph, Run, Style, StyleType, Table, TableAlignmentType,
-        TableCell, TableRow,
-    };
     use serde::{Deserialize, Serialize};
     use serde_json::Value;
-
-    use crate::markdown_to_docx::markdown_to_docx;
 
     /// 表示每个 Delta 操作的 insert 字段，可以是一个字符串或一个对象（例如 divider）
     #[derive(Debug, Serialize, Deserialize)]
@@ -138,55 +131,12 @@ mod tests {
     }
 
     #[test]
-    fn test_markdown_to_docx() -> anyhow::Result<()> {
-        let mut f = File::open("src/test.md")?;
-        let mut buffer = String::new();
-        f.read_to_string(&mut buffer)?;
-
-        let docx = markdown_to_docx(&buffer)?;
-        let save = File::create("test.docx")?;
-        docx.build().pack(save)?;
-
-        Ok(())
-    }
-
-    #[test]
-    fn docx_test() -> anyhow::Result<()> {
-        let path = std::path::Path::new("style.docx");
-        let file = std::fs::File::create(path).unwrap();
-
-        let p1 = Paragraph::new()
-            .add_run(Run::new().add_text("Hello").style("Run1"))
-            .add_run(Run::new().add_text(" World"))
-            .style("Heading1")
-            .page_break_before(true);
-
-        let table =
-            Table::new(vec![TableRow::new(vec![TableCell::new().add_paragraph(
-                Paragraph::new().add_run(Run::new().add_text("Hello")),
-            )])])
-            .style("Table1");
-
-        let style1 = Style::new("Heading1", StyleType::Paragraph)
-            .name("Heading 1")
-            .align(AlignmentType::Center);
-
-        let style2 = Style::new("Run1", StyleType::Character)
-            .name("Run test")
-            .bold();
-
-        let style3 = Style::new("Table1", StyleType::Table)
-            .name("Table test")
-            .table_align(TableAlignmentType::Center);
-
-        Docx::new()
-            .add_style(style1)
-            .add_style(style2)
-            .add_style(style3)
-            .add_paragraph(p1)
-            .add_table(table)
-            .build()
-            .pack(file)?;
-        Ok(())
+    fn test_doc() -> anyhow::Result<()> {
+        let doc = crate::from_other_file::convert_to_markdown(
+            "/Users/guchengxi/Desktop/projects/ai_text_editor/plugins/converter/style.docx"
+                .to_string(),
+        )?;
+        println!("{}", doc);
+        anyhow::Ok(())
     }
 }
