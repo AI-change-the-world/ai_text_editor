@@ -1,3 +1,4 @@
+import 'package:ai_text_editor/embeds/formular/formular_builder.dart';
 import 'package:ai_text_editor/embeds/image/image_builder.dart';
 import 'package:ai_text_editor/embeds/ref/ref_builder.dart';
 import 'package:ai_text_editor/embeds/roll/roll_embed.dart';
@@ -22,7 +23,8 @@ class QuillConfig {
             CustomTableEmbedBuilder(),
             CustomRollEmbedBuilder(),
             CustomImageEmbedBuilder(),
-            CustomRefEmbedBuilder()
+            CustomRefEmbedBuilder(),
+            CustomFormularEmbedBuilder()
           ],
           searchConfigurations: const QuillSearchConfigurations(
             searchEmbedMode: SearchEmbedMode.plainText,

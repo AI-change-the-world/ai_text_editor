@@ -7,6 +7,7 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:ai_packages_core/ai_packages_core.dart' as core;
+import 'package:ai_text_editor/embeds/formular/formular_embed.dart';
 import 'package:ai_text_editor/embeds/image/image_embed.dart';
 import 'package:ai_text_editor/embeds/ref/ref_embed.dart';
 import 'package:ai_text_editor/embeds/roll/roll_embed.dart';
@@ -90,7 +91,8 @@ class EditorNotifier extends Notifier<EditorState> {
     customTableEmbedType: customTableEmbedToMarkdown,
     customRollEmbedType: customRollEmbedToMarkdown,
     customImageEmbedType: customImageEmbedToMarkdown,
-    customRefEmbedType: customImageEmbedToMarkdown
+    customRefEmbedType: customImageEmbedToMarkdown,
+    customFormularEmbedType: customFormularEmbedToMarkdown,
   });
   late final _mdDocument = md.Document(encodeHtml: false);
   late final _mdToDelta = MarkdownToDelta(markdownDocument: _mdDocument);
@@ -264,6 +266,25 @@ class EditorNotifier extends Notifier<EditorState> {
           quillController.selection.baseOffset,
           1,
           CustomRollEmbed(customRollEmbedType, jsonEncode(data)),
+          quillController.selection);
+
+      quillController.updateSelection(
+        TextSelection.collapsed(
+            offset: quillController.selection.baseOffset + 1),
+        ChangeSource.local,
+      );
+    } catch (e) {
+      logger.e("更新失败 $e");
+    }
+  }
+
+  /// change formular
+  void changeFormular(Map data) {
+    try {
+      quillController.replaceText(
+          quillController.selection.baseOffset,
+          1,
+          CustomFormularEmbed(customFormularEmbedType, jsonEncode(data)),
           quillController.selection);
 
       quillController.updateSelection(

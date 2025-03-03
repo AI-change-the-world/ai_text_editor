@@ -3,11 +3,14 @@
 import 'dart:convert';
 
 import 'package:ai_text_editor/components/dialogs/select_or_input_file_url_dialog.dart';
+import 'package:ai_text_editor/embeds/formular/formular_embed.dart';
 import 'package:ai_text_editor/embeds/image/image_embed.dart';
 import 'package:ai_text_editor/embeds/ref/ref_embed.dart';
 import 'package:ai_text_editor/embeds/roll/roll_embed.dart';
 import 'package:ai_text_editor/embeds/table/table_builder.dart';
+import 'package:ai_text_editor/init.dart';
 import 'package:flutter/material.dart';
+import 'package:gpt_markdown/gpt_markdown.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:uuid/uuid.dart';
 import 'package:ai_packages_core/ai_packages_core.dart';
@@ -75,6 +78,7 @@ class SomeShortcuts {
   static final RegExp rollReg = RegExp(r'^<roll>');
   static final RegExp imageReg = RegExp(r'^<image>');
   static final RegExp refReg = RegExp(r'^<ref>');
+  static final RegExp formularReg = RegExp(r'^<formular>');
 
   static ScreenshotController screenshotController = ScreenshotController();
 
@@ -368,6 +372,62 @@ class SomeShortcuts {
                     extentOffset: controller.selection.baseOffset + 1),
               );
           return true;
+        });
+      });
+    } else if (formularReg.hasMatch(subString)) {
+      ref?.read(editorNotifierProvider.notifier).insertDataToEditor(
+          "/formular>", controller.selection,
+          updateSelection: false);
+
+      Future.delayed(Duration(milliseconds: 300)).then((_) {
+        ref?.read(editorNotifierProvider.notifier).setLoading(true);
+        final inst = subString.replaceFirst("<formular>", "");
+        final uuid = Uuid().v4();
+        var m = {"uuid": uuid, "formular": "**Generating...**"};
+        controller.document.replace(
+            lastCharIndex, subString.length + "</formular>".length, "");
+        controller.updateSelection(
+            controller.selection.copyWith(baseOffset: lastCharIndex + 1),
+            ChangeSource.local);
+
+        if (inst.trim().isEmpty) {
+          return false;
+        }
+
+        final block =
+            CustomFormularEmbed(customFormularEmbedType, jsonEncode(m));
+
+        controller.replaceText(controller.selection.baseOffset, 0, block, null);
+
+        GlobalModel.model!.chat([
+          ChatMessage(
+              role: "user",
+              content: APPConfig.formularPrompt.replaceAll("{text}", inst),
+              createAt: DateTime.now().millisecondsSinceEpoch)
+        ]).then((v) {
+          screenshotController
+              .captureFromWidget(FittedBox(
+            child: Material(
+              child: Center(
+                child: GptMarkdown(v),
+              ),
+            ),
+          ))
+              .then((img) {
+            ref?.read(editorNotifierProvider.notifier).setLoading(false);
+            final block = CustomFormularEmbed(
+                customFormularEmbedType,
+                jsonEncode(
+                    {"formular": v, "uuid": uuid, "image": base64Encode(img)}));
+
+            controller.replaceText(
+                controller.selection.baseOffset, 1, block, null);
+            controller.updateSelection(
+                controller.selection.copyWith(
+                  baseOffset: controller.selection.baseOffset + 1,
+                ),
+                ChangeSource.local);
+          });
         });
       });
     }

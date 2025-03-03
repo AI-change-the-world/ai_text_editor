@@ -64,6 +64,7 @@ flutter:
     - assets/config.json
     - assets/prompts/spell-check-prompt.txt
     - assets/prompts/mind-graph-prompt.txt
+    - assets/prompts/formular-prompt.txt
 
   fonts:
     - family: HanSansCN
