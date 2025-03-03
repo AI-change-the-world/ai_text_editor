@@ -391,7 +391,14 @@ class SomeShortcuts {
             ChangeSource.local);
 
         if (inst.trim().isEmpty) {
-          return false;
+          m["formular"] = "## This formular is empty, you can edit it later.";
+          final block =
+              CustomFormularEmbed(customFormularEmbedType, jsonEncode(m));
+
+          controller.replaceText(
+              controller.selection.baseOffset, 0, block, null);
+          ref?.read(editorNotifierProvider.notifier).setLoading(false);
+          return true;
         }
 
         final block =
