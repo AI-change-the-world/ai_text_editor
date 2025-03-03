@@ -11,6 +11,8 @@ class APPConfig {
       "Please correct the spelling mistakes in the following text: {text}";
   static String mindGraphPrompt =
       "Please generate a mind map for the following text: {text}";
+  static String formularPrompt =
+      "Please generate a formula for the following text: {text}";
 
   static List<_Word> words = [];
 
@@ -37,9 +39,13 @@ class APPConfig {
       final String _mindGraph =
           await rootBundle.loadString("assets/prompts/mind-graph-prompt.txt");
 
+      final String _formular =
+          await rootBundle.loadString("assets/prompts/formular-prompt.txt");
+
       appName = _appName;
       spellCheckPrompt = _spellCheck;
       mindGraphPrompt = _mindGraph;
+      formularPrompt = _formular;
     } catch (e) {
       logger.e("Error loading config.json: $e");
     }
