@@ -209,8 +209,8 @@ class SomeShortcuts {
             ref?.read(editorNotifierProvider.notifier).insertDataToEditor(
                   "\n",
                   controller.selection.copyWith(
-                      baseOffset: controller.selection.baseOffset + 1,
-                      extentOffset: controller.selection.baseOffset + 1),
+                    baseOffset: controller.selection.baseOffset + 1,
+                  ),
                 );
             return true;
           });
@@ -244,8 +244,8 @@ class SomeShortcuts {
           ref?.read(editorNotifierProvider.notifier).insertDataToEditor(
                 "\n",
                 controller.selection.copyWith(
-                    baseOffset: controller.selection.baseOffset + 1,
-                    extentOffset: controller.selection.baseOffset + 1),
+                  baseOffset: controller.selection.baseOffset + 1,
+                ),
               );
           return true;
         }
@@ -327,8 +327,8 @@ class SomeShortcuts {
           ref?.read(editorNotifierProvider.notifier).insertDataToEditor(
                 "\n",
                 controller.selection.copyWith(
-                    baseOffset: controller.selection.baseOffset + 1,
-                    extentOffset: controller.selection.baseOffset + 1),
+                  baseOffset: controller.selection.baseOffset + 1,
+                ),
               );
           return true;
         });
@@ -368,8 +368,8 @@ class SomeShortcuts {
           ref?.read(editorNotifierProvider.notifier).insertDataToEditor(
                 "\n",
                 controller.selection.copyWith(
-                    baseOffset: controller.selection.baseOffset + 1,
-                    extentOffset: controller.selection.baseOffset + 1),
+                  baseOffset: controller.selection.baseOffset + 1,
+                ),
               );
           return true;
         });
@@ -405,14 +405,17 @@ class SomeShortcuts {
               content: APPConfig.formularPrompt.replaceAll("{text}", inst),
               createAt: DateTime.now().millisecondsSinceEpoch)
         ]).then((v) {
+          logger.d("$inst :$v");
           screenshotController
-              .captureFromWidget(FittedBox(
-            child: Material(
-              child: Center(
-                child: GptMarkdown(v),
-              ),
-            ),
-          ))
+              .captureFromWidget(
+                  FittedBox(
+                    child: Material(
+                      child: Center(
+                        child: GptMarkdown(v),
+                      ),
+                    ),
+                  ),
+                  delay: Duration(milliseconds: 300))
               .then((img) {
             ref?.read(editorNotifierProvider.notifier).setLoading(false);
             final block = CustomFormularEmbed(

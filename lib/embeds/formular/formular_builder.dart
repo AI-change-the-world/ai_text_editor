@@ -38,10 +38,10 @@ class _FormularWidget extends ConsumerStatefulWidget {
 
 class __FormularWidgetState extends ConsumerState<_FormularWidget> {
   final ScreenshotController screenshotController = ScreenshotController();
-  late String data = widget.data;
 
   @override
   Widget build(BuildContext context) {
+    String data = widget.data;
     return MouseRegion(
       cursor: SystemMouseCursors.click,
       child: GestureDetector(
@@ -59,9 +59,6 @@ class __FormularWidgetState extends ConsumerState<_FormularWidget> {
                 );
               }).then((v) {
             if (v != null) {
-              setState(() {
-                data = v.toString();
-              });
               screenshotController.capture().then((img) {
                 if (img != null) {
                   ref
@@ -69,11 +66,13 @@ class __FormularWidgetState extends ConsumerState<_FormularWidget> {
                       .onEmbedTrigger(widget.uuid);
                   Map<String, dynamic> m = {
                     'uuid': widget.uuid,
-                    'formular': data,
+                    'formular': v,
                     "image": base64Encode(img)..replaceAll("\n", "")
                   };
                   ref.read(editorNotifierProvider.notifier).changeFormular(m);
                 }
+              }).then((_) {
+                setState(() {});
               });
             }
           });
