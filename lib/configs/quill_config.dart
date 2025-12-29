@@ -13,7 +13,8 @@ class QuillConfig {
   static QuillEditorConfig get config => QuillEditorConfig(
           characterShortcutEvents: [
             ...standardCharactersShortcutEvents,
-            SomeShortcuts.aiInstEvent
+            SomeShortcuts.aiInstEvent,
+            SomeShortcuts.slashCommandEvent,
           ],
           spaceShortcutEvents: [
             ...standardSpaceShorcutEvents,

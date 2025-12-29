@@ -3,6 +3,7 @@
 import 'dart:convert';
 
 import 'package:ai_text_editor/components/dialogs/select_or_input_file_url_dialog.dart';
+import 'package:ai_text_editor/components/slash_command/slash_command_handler.dart';
 import 'package:ai_text_editor/embeds/formular/formular_embed.dart';
 import 'package:ai_text_editor/embeds/image/image_embed.dart';
 import 'package:ai_text_editor/embeds/ref/ref_embed.dart';
@@ -27,11 +28,27 @@ class SomeShortcuts {
 
   static const String aiShowUpCharacter = "ai>";
   static const String instruct = "<";
+  static const String slashCommand = "/";
 
   static WidgetRef? ref;
+  static BuildContext? context;
+
   static setRef(WidgetRef r) {
     ref = r;
+    SlashCommandHandler.setRef(r);
   }
+
+  static setContext(BuildContext c) {
+    context = c;
+  }
+
+  /// 斜杠命令快捷键
+  static final CharacterShortcutEvent slashCommandEvent =
+      CharacterShortcutEvent(
+    key: "slash command",
+    character: slashCommand,
+    handler: (controller) => handleSlashCommand(controller: controller),
+  );
 
   static final SpaceShortcutEvent aiShowUp = SpaceShortcutEvent(
     character: aiShowUpCharacter,
@@ -49,6 +66,72 @@ class SomeShortcuts {
       character: instruct,
     ),
   );
+
+  /// 处理斜杠命令
+  static bool handleSlashCommand({required QuillController controller}) {
+    if (context == null) return false;
+
+    final selection = controller.selection;
+    if (!selection.isCollapsed) return false;
+
+    // 检查是否在行首或前面是空格/换行
+    final plainText = controller.document.toPlainText();
+    final pos = selection.baseOffset;
+
+    // 允许在行首或空格后触发
+    if (pos > 0) {
+      final prevChar = plainText[pos - 1];
+      if (prevChar != '\n' && prevChar != ' ') {
+        return false; // 不在行首或空格后，不触发菜单
+      }
+    }
+
+    // 计算光标的大致屏幕位置
+    final cursorOffset = _estimateCursorPosition(plainText, pos);
+
+    SlashCommandHandler.show(
+      context: context!,
+      controller: controller,
+      position: cursorOffset,
+      slashPosition: pos,
+    );
+
+    return false; // 返回 false 让 "/" 字符正常插入
+  }
+
+  /// 估算光标位置
+  static Offset _estimateCursorPosition(String plainText, int pos) {
+    // 计算当前在第几行
+    int lineCount = 0;
+    int lastNewlineIndex = -1;
+    for (int i = 0; i < pos && i < plainText.length; i++) {
+      if (plainText[i] == '\n') {
+        lineCount++;
+        lastNewlineIndex = i;
+      }
+    }
+
+    // 当前行的字符位置
+    int charInLine = pos - lastNewlineIndex - 1;
+
+    // 获取编辑器的位置
+    final renderBox = context!.findRenderObject() as RenderBox?;
+    if (renderBox == null) {
+      return const Offset(100, 100);
+    }
+
+    final editorPos = renderBox.localToGlobal(Offset.zero);
+
+    // 估算位置（假设每行高度约 24px，每字符宽度约 8px）
+    const lineHeight = 24.0;
+    const charWidth = 10.0;
+    const padding = 10.0;
+
+    final x = editorPos.dx + padding + (charInLine * charWidth);
+    final y = editorPos.dy + padding + (lineCount * lineHeight);
+
+    return Offset(x.clamp(50, 500), y.clamp(50, 800));
+  }
 
   static bool handleAiShowUp({
     required QuillController controller,

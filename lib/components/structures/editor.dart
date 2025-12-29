@@ -1,17 +1,19 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'package:ai_text_editor/components/dialogs/confirm_dialog.dart';
+import 'package:ai_text_editor/components/slash_command/slash_command_handler.dart';
+import 'package:ai_text_editor/configs/quill_config.dart';
 import 'package:ai_text_editor/notifiers/editor_notifier.dart';
 import 'package:ai_text_editor/notifiers/editor_state.dart';
 import 'package:ai_text_editor/utils/some_shortcuts.dart';
 import 'package:ai_text_editor/utils/styles.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:listview_screenshot/listview_screenshot.dart';
 import 'package:window_manager/window_manager.dart';
 
-import '../../configs/quill_config.dart';
 import '../../configs/quill_toolbar_config.dart';
 
 class Editor extends ConsumerStatefulWidget {
@@ -22,9 +24,9 @@ class Editor extends ConsumerStatefulWidget {
 }
 
 class _EditorState extends ConsumerState<Editor> with WindowListener {
-  // final FocusNode focusNode = FocusNode();
   late Color containerColor = Colors.transparent;
   bool dragging = false;
+  final FocusNode _keyboardFocusNode = FocusNode();
 
   @override
   void initState() {
@@ -34,6 +36,54 @@ class _EditorState extends ConsumerState<Editor> with WindowListener {
     Future.microtask(() async {
       await windowManager.setPreventClose(true);
     });
+
+    // 监听文档变化，用于更新斜杠命令过滤
+    final controller =
+        ref.read(editorNotifierProvider.notifier).quillController;
+    controller.document.changes.listen((_) {
+      _handleDocumentChange(controller);
+    });
+  }
+
+  void _handleDocumentChange(QuillController controller) {
+    if (!SlashCommandHandler.isShowing) return;
+
+    final slashPos = SlashCommandHandler.slashPosition;
+    if (slashPos < 0) return;
+
+    final plainText = controller.document.toPlainText();
+    final currentPos = controller.selection.baseOffset;
+
+    // 检查斜杠是否还存在
+    if (slashPos >= plainText.length || plainText[slashPos] != '/') {
+      SlashCommandHandler.hide();
+      return;
+    }
+
+    // 如果光标移到斜杠之前，关闭菜单
+    if (currentPos <= slashPos) {
+      SlashCommandHandler.hide();
+      return;
+    }
+
+    // 获取斜杠后的过滤文本
+    final filterText = plainText.substring(slashPos + 1, currentPos);
+
+    // 如果包含空格或换行，关闭菜单
+    if (filterText.contains(' ') || filterText.contains('\n')) {
+      SlashCommandHandler.hide();
+      return;
+    }
+
+    SlashCommandHandler.updateFilter(filterText);
+  }
+
+  KeyEventResult _handleKeyEvent(FocusNode node, KeyEvent event) {
+    // 让斜杠命令处理器先处理
+    if (SlashCommandHandler.handleKeyEvent(event)) {
+      return KeyEventResult.handled;
+    }
+    return KeyEventResult.ignored;
   }
 
   @override
@@ -68,11 +118,14 @@ class _EditorState extends ConsumerState<Editor> with WindowListener {
   @override
   void dispose() {
     windowManager.removeListener(this);
+    _keyboardFocusNode.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    // 设置 context 供斜杠命令使用
+    SomeShortcuts.setContext(context);
     double width = MediaQuery.of(context).size.width;
     double height = MediaQuery.of(context).size.height;
     final state = ref.watch(editorNotifierProvider);
@@ -107,16 +160,20 @@ class _EditorState extends ConsumerState<Editor> with WindowListener {
                     ref.read(editorNotifierProvider.notifier).scrollController,
                 child: Padding(
                   padding: padding,
-                  child: QuillEditor(
-                    // configurations: QuillConfig.config,
-                    controller: ref
-                        .read(editorNotifierProvider.notifier)
-                        .quillController,
-                    focusNode:
-                        ref.read(editorNotifierProvider.notifier).focusNode,
-                    scrollController: ref
-                        .read(editorNotifierProvider.notifier)
-                        .scrollController,
+                  child: Focus(
+                    focusNode: _keyboardFocusNode,
+                    onKeyEvent: _handleKeyEvent,
+                    child: QuillEditor(
+                      config: QuillConfig.config,
+                      controller: ref
+                          .read(editorNotifierProvider.notifier)
+                          .quillController,
+                      focusNode:
+                          ref.read(editorNotifierProvider.notifier).focusNode,
+                      scrollController: ref
+                          .read(editorNotifierProvider.notifier)
+                          .scrollController,
+                    ),
                   ),
                 ),
               )),
