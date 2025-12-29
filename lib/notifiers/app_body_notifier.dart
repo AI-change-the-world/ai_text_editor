@@ -3,7 +3,7 @@ import 'dart:math';
 
 import 'package:ai_text_editor/init.dart';
 import 'package:ai_text_editor/objectbox.g.dart';
-import 'package:ai_text_editor/objectbox/database.dart';
+import 'package:ai_text_editor/data/datasources/objectbox/database.dart';
 import 'package:ai_text_editor/objectbox/recent_files.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

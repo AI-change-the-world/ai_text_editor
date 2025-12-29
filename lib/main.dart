@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:ai_text_editor/init.dart';
 import 'package:ai_text_editor/data/datasources/objectbox/database.dart';
 import 'package:ai_text_editor/routers.dart';
@@ -31,7 +33,7 @@ void main() async {
     title: APPConfig.appName,
     size: Styles.size,
     minimumSize: Styles.size,
-    backgroundColor: Colors.white,
+    backgroundColor: Platform.isWindows ? null : Colors.white,
     skipTaskbar: false,
   );
   windowManager.waitUntilReadyToShow(windowOptions, () async {

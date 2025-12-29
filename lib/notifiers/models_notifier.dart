@@ -1,6 +1,6 @@
 import 'package:ai_text_editor/models/ai_model.dart';
 import 'package:ai_text_editor/objectbox.g.dart';
-import 'package:ai_text_editor/objectbox/database.dart';
+import 'package:ai_text_editor/data/datasources/objectbox/database.dart';
 import 'package:ai_text_editor/objectbox/model.dart';
 import 'package:ai_text_editor/utils/toast_utils.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

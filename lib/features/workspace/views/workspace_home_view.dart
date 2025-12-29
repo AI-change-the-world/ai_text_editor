@@ -571,15 +571,17 @@ class _WorkspaceHomeViewState extends ConsumerState<WorkspaceHomeView> {
               const SizedBox(height: 20),
               Row(
                 children: [
-                  Expanded(
+                  Spacer(),
+                  SizedBox(
+                    width: 80,
                     child: TextButton(
                       onPressed: () => Navigator.pop(context),
                       child: const Text('取消'),
                     ),
                   ),
                   const SizedBox(width: 12),
-                  Expanded(
-                    flex: 2,
+                  SizedBox(
+                    width: 80,
                     child: ElevatedButton(
                       onPressed: onConfirm,
                       style: ElevatedButton.styleFrom(

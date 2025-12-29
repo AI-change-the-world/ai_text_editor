@@ -4,7 +4,7 @@ import 'package:crypto/crypto.dart';
 import 'package:uuid/uuid.dart';
 
 import '../data/datasources/objectbox/entities/model_profile.dart';
-import '../objectbox/database.dart';
+import '../data/datasources/objectbox/database.dart';
 import '../objectbox.g.dart';
 
 /// AI 提供商枚举

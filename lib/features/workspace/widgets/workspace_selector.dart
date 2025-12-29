@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../settings/views/settings_page.dart';
 import '../notifiers/workspace_notifier.dart';
 import 'workspace_card.dart';
 
@@ -187,9 +188,38 @@ class WorkspaceSelector extends ConsumerWidget {
   }
 
   Widget _buildFooter(BuildContext context, WidgetRef ref) {
-    // 底部区域已简化，创建工作空间入口只保留顶部的 + 按钮
-    // AI 助手入口只保留右下角悬浮按钮
-    return const SizedBox.shrink();
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        border: Border(
+          top: BorderSide(color: Colors.grey.shade200),
+        ),
+      ),
+      child: InkWell(
+        onTap: () => showSettingsPage(context),
+        borderRadius: BorderRadius.circular(8),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+          child: Row(
+            children: [
+              Icon(
+                Icons.settings_outlined,
+                size: 20,
+                color: Colors.grey.shade600,
+              ),
+              const SizedBox(width: 10),
+              Text(
+                '设置',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey.shade700,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   void _onWorkspaceTap(WidgetRef ref, String workspaceId) {

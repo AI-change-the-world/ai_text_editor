@@ -43,7 +43,8 @@ class WorkspaceNotifier extends Notifier<WorkspaceState> {
   @override
   WorkspaceState build() {
     _service = WorkspaceService.instance;
-    _loadWorkspaces();
+    // 使用 Future.microtask 延迟加载，确保 state 已初始化
+    Future.microtask(() => _loadWorkspaces());
     return const WorkspaceState(isLoading: true);
   }
 

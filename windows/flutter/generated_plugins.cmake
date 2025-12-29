@@ -5,7 +5,6 @@
 list(APPEND FLUTTER_PLUGIN_LIST
   file_selector_windows
   objectbox_flutter_libs
-  quill_native_bridge_windows
   screen_retriever_windows
   url_launcher_windows
   webview_windows

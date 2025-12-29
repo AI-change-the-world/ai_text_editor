@@ -80,13 +80,17 @@ class DocumentTreeNotifier extends Notifier<DocumentTreeState> {
 
     // 监听工作空间变化
     ref.listen(workspaceProvider, (previous, next) {
-      if (previous?.currentWorkspace?.uuid != next.currentWorkspace?.uuid) {
+      // 当 workspace 从 loading 变为 loaded，或者切换了 workspace 时重新加载
+      if (previous?.isLoading == true && next.isLoading == false) {
+        loadDocuments();
+      } else if (previous?.currentWorkspace?.uuid !=
+          next.currentWorkspace?.uuid) {
         loadDocuments();
       }
     });
 
-    // 初始加载
-    loadDocuments();
+    // 使用 Future.microtask 延迟加载，确保 state 已初始化
+    Future.microtask(() => loadDocuments());
     return const DocumentTreeState(isLoading: true);
   }
 

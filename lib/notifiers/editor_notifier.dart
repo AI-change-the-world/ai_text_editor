@@ -17,7 +17,7 @@ import 'package:ai_text_editor/init.dart';
 import 'package:ai_text_editor/models/ai_model.dart';
 import 'package:ai_text_editor/models/json_error_model.dart';
 import 'package:ai_text_editor/objectbox.g.dart';
-import 'package:ai_text_editor/objectbox/database.dart';
+import 'package:ai_text_editor/data/datasources/objectbox/database.dart';
 import 'package:ai_text_editor/objectbox/recent_files.dart';
 import 'package:ai_text_editor/src/rust/api/charts_api.dart';
 import 'package:ai_text_editor/utils/logger.dart';

@@ -36,8 +36,12 @@ class _AIModelSettingsState extends ConsumerState<AIModelSettings> {
         // 模型列表
         profilesAsync.when(
           data: (profiles) => _buildModelList(profiles),
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, stack) => Center(
+          loading: () => const Padding(
+            padding: EdgeInsets.only(top: 24),
+            child: CircularProgressIndicator(),
+          ),
+          error: (error, stack) => Padding(
+            padding: const EdgeInsets.only(top: 24),
             child: Text('加载失败: $error'),
           ),
         ),
@@ -153,6 +157,7 @@ class _AIModelSettingsState extends ConsumerState<AIModelSettings> {
         border: Border.all(color: Colors.grey.shade200),
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Icon(
             Icons.smart_toy_outlined,
