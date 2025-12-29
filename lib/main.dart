@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:ai_text_editor/init.dart';
 import 'package:ai_text_editor/data/datasources/objectbox/database.dart';
+import 'package:ai_text_editor/features/settings/notifiers/settings_notifier.dart';
 import 'package:ai_text_editor/routers.dart';
 import 'package:ai_text_editor/utils/file_utils.dart';
 import 'package:ai_text_editor/utils/logger.dart';
@@ -45,27 +46,37 @@ void main() async {
   await ObxDatabase.create();
   logger.d("Database initialized");
 
-  runApp(App(
-    title: APPConfig.appName,
-  ));
+  runApp(const ProviderScope(child: App()));
 }
 
-class App extends StatelessWidget {
-  const App({super.key, this.title = 'AI Text Editor'});
-  final String title;
+class App extends ConsumerWidget {
+  const App({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final settings = ref.watch(settingsProvider);
+    final fontFamily = Styles.getFontFamily(settings.fontFamily);
+    logger.d("fontfamily: $fontFamily");
+
     return ToastificationWrapper(
-        child: ProviderScope(
-            child: MaterialApp.router(
-      localizationsDelegates: [
-        FlutterQuillLocalizations.delegate,
-      ],
-      debugShowCheckedModeBanner: false,
-      theme: Styles.lightTheme,
-      title: title,
-      routerConfig: router,
-    )));
+      child: MaterialApp.router(
+        localizationsDelegates: [
+          FlutterQuillLocalizations.delegate,
+        ],
+        debugShowCheckedModeBanner: false,
+        theme: _applyFontToTheme(Styles.lightTheme, fontFamily),
+        darkTheme: _applyFontToTheme(Styles.darkTheme, fontFamily),
+        themeMode: settings.themeMode,
+        title: APPConfig.appName,
+        routerConfig: router,
+      ),
+    );
+  }
+
+  ThemeData _applyFontToTheme(ThemeData theme, String? fontFamily) {
+    if (fontFamily == null) return theme;
+    return theme.copyWith(
+      textTheme: theme.textTheme.apply(fontFamily: fontFamily),
+    );
   }
 }

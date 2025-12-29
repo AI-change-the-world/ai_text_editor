@@ -7,6 +7,7 @@ import '../../../data/datasources/objectbox/entities/workspace.dart';
 import '../../editor/notifiers/document_tree_notifier.dart';
 import '../notifiers/workspace_notifier.dart';
 import '../widgets/create_workspace_dialog.dart';
+import '../widgets/welcome_dialog.dart';
 import '../widgets/workspace_selector.dart';
 import '../widgets/workspace_settings_dialog.dart';
 
@@ -22,6 +23,20 @@ class WorkspaceHomeView extends ConsumerStatefulWidget {
 }
 
 class _WorkspaceHomeViewState extends ConsumerState<WorkspaceHomeView> {
+  static bool _hasShownWelcome = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // 首次启动时显示欢迎弹窗
+    if (!_hasShownWelcome) {
+      _hasShownWelcome = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        showWelcomeDialog(context);
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final workspaceState = ref.watch(workspaceProvider);

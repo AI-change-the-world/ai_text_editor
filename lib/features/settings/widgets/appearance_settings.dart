@@ -188,12 +188,7 @@ class AppearanceSettings extends ConsumerWidget {
 
   Widget _buildFontFamilySelector(
       AppSettings settings, SettingsNotifier notifier) {
-    const fonts = [
-      ('System', '系统默认'),
-      ('SourceHanSansCN', '思源黑体'),
-      ('Roboto', 'Roboto'),
-      ('Noto Sans', 'Noto Sans'),
-    ];
+    const fonts = [('System', '系统默认'), ('HanSansCN', '思源黑体'), ('song', '手写体')];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
