@@ -4,6 +4,7 @@ import 'package:ai_text_editor/embeds/ref/ref_builder.dart';
 import 'package:ai_text_editor/embeds/roll/roll_embed.dart';
 
 import 'package:ai_text_editor/embeds/table/table_builder.dart';
+import 'package:ai_text_editor/features/editor/embeds/link/link_builder.dart';
 import 'package:ai_text_editor/utils/some_shortcuts.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 
@@ -25,7 +26,8 @@ class QuillConfig {
             CustomRollEmbedBuilder(),
             CustomImageEmbedBuilder(),
             CustomRefEmbedBuilder(),
-            CustomFormularEmbedBuilder()
+            CustomFormularEmbedBuilder(),
+            CustomLinkEmbedBuilder(),
           ],
           searchConfig: const QuillSearchConfig(
             searchEmbedMode: SearchEmbedMode.plainText,

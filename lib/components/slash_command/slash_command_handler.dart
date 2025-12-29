@@ -1,12 +1,15 @@
 import 'dart:convert';
 
+import 'package:ai_packages_core/ai_packages_core.dart';
 import 'package:ai_text_editor/components/dialogs/select_or_input_file_url_dialog.dart';
+import 'package:ai_text_editor/data/models/ai_model.dart';
 import 'package:ai_text_editor/embeds/formular/formular_embed.dart';
 import 'package:ai_text_editor/embeds/image/image_embed.dart';
 import 'package:ai_text_editor/embeds/ref/ref_embed.dart';
 import 'package:ai_text_editor/embeds/roll/roll_embed.dart';
 import 'package:ai_text_editor/embeds/table/table_embed.dart';
 import 'package:ai_text_editor/notifiers/editor_notifier.dart';
+import 'package:ai_text_editor/utils/toast_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_quill/flutter_quill.dart';
@@ -34,89 +37,164 @@ class SlashCommandHandler {
   static List<SlashCommandItem> _buildItems(
       BuildContext context, QuillController controller) {
     return [
+      // ========== AI Commands ==========
       SlashCommandItem(
         command: 'ai',
         description: 'Ask AI to help you write',
         icon: Icons.auto_awesome,
+        category: SlashCommandCategory.ai,
+        keywords: ['assistant', 'help', 'chat', '助手'],
         onSelect: () => _handleAi(context, controller),
       ),
       SlashCommandItem(
-        command: 'table',
-        description: 'Insert a table',
-        icon: Icons.table_chart,
-        onSelect: () => _handleTable(context, controller),
+        command: 'rewrite',
+        description: 'Rewrite selected text with AI',
+        icon: Icons.edit_note,
+        category: SlashCommandCategory.ai,
+        keywords: ['改写', 'rephrase', 'modify', '重写'],
+        onSelect: () => _handleRewrite(context, controller),
       ),
       SlashCommandItem(
-        command: 'image',
-        description: 'Insert an image',
-        icon: Icons.image,
-        onSelect: () => _handleImage(context, controller),
+        command: 'expand',
+        description: 'Expand and elaborate on selected text',
+        icon: Icons.expand,
+        category: SlashCommandCategory.ai,
+        keywords: ['扩展', 'elaborate', 'extend', '扩写'],
+        onSelect: () => _handleExpand(context, controller),
       ),
       SlashCommandItem(
-        command: 'ref',
-        description: 'Insert a reference link',
-        icon: Icons.link,
-        onSelect: () => _handleRef(context, controller),
+        command: 'summarize',
+        description: 'Summarize selected text',
+        icon: Icons.summarize,
+        category: SlashCommandCategory.ai,
+        keywords: ['摘要', 'summary', 'brief', '总结'],
+        onSelect: () => _handleSummarize(context, controller),
       ),
       SlashCommandItem(
-        command: 'formular',
-        description: 'Insert a math formula',
-        icon: Icons.functions,
-        onSelect: () => _handleFormular(context, controller),
+        command: 'translate',
+        description: 'Translate selected text',
+        icon: Icons.translate,
+        category: SlashCommandCategory.ai,
+        keywords: ['翻译', 'translation', '中文', 'english'],
+        onSelect: () => _handleTranslate(context, controller),
       ),
-      SlashCommandItem(
-        command: 'roll',
-        description: 'Insert a dice roll',
-        icon: Icons.casino,
-        onSelect: () => _handleRoll(context, controller),
-      ),
+
+      // ========== Format Commands ==========
       SlashCommandItem(
         command: 'h1',
         description: 'Heading 1',
         icon: Icons.title,
+        category: SlashCommandCategory.format,
+        keywords: ['heading', 'title', '标题'],
         onSelect: () => _handleHeading(controller, 1),
       ),
       SlashCommandItem(
         command: 'h2',
         description: 'Heading 2',
         icon: Icons.title,
+        category: SlashCommandCategory.format,
+        keywords: ['heading', 'subtitle', '标题'],
         onSelect: () => _handleHeading(controller, 2),
       ),
       SlashCommandItem(
         command: 'h3',
         description: 'Heading 3',
         icon: Icons.title,
+        category: SlashCommandCategory.format,
+        keywords: ['heading', '标题'],
         onSelect: () => _handleHeading(controller, 3),
-      ),
-      SlashCommandItem(
-        command: 'bullet',
-        description: 'Bullet list',
-        icon: Icons.format_list_bulleted,
-        onSelect: () => _handleList(controller, Attribute.ul),
-      ),
-      SlashCommandItem(
-        command: 'number',
-        description: 'Numbered list',
-        icon: Icons.format_list_numbered,
-        onSelect: () => _handleList(controller, Attribute.ol),
       ),
       SlashCommandItem(
         command: 'quote',
         description: 'Block quote',
         icon: Icons.format_quote,
+        category: SlashCommandCategory.format,
+        keywords: ['blockquote', '引用', 'citation'],
         onSelect: () => _handleBlockQuote(controller),
       ),
       SlashCommandItem(
         command: 'code',
         description: 'Code block',
         icon: Icons.code,
+        category: SlashCommandCategory.format,
+        keywords: ['codeblock', '代码', 'programming'],
         onSelect: () => _handleCodeBlock(controller),
       ),
       SlashCommandItem(
         command: 'divider',
         description: 'Horizontal divider',
         icon: Icons.horizontal_rule,
+        category: SlashCommandCategory.format,
+        keywords: ['line', 'separator', '分割线'],
         onSelect: () => _handleDivider(controller),
+      ),
+
+      // ========== Insert Commands ==========
+      SlashCommandItem(
+        command: 'table',
+        description: 'Insert a table',
+        icon: Icons.table_chart,
+        category: SlashCommandCategory.insert,
+        keywords: ['grid', '表格', 'spreadsheet'],
+        onSelect: () => _handleTable(context, controller),
+      ),
+      SlashCommandItem(
+        command: 'image',
+        description: 'Insert an image',
+        icon: Icons.image,
+        category: SlashCommandCategory.insert,
+        keywords: ['picture', 'photo', '图片', '图像'],
+        onSelect: () => _handleImage(context, controller),
+      ),
+      SlashCommandItem(
+        command: 'link',
+        description: 'Insert a reference link',
+        icon: Icons.link,
+        category: SlashCommandCategory.insert,
+        keywords: ['url', 'href', '链接', 'reference'],
+        onSelect: () => _handleRef(context, controller),
+      ),
+      SlashCommandItem(
+        command: 'formular',
+        description: 'Insert a math formula',
+        icon: Icons.functions,
+        category: SlashCommandCategory.insert,
+        keywords: ['math', 'equation', '公式', 'latex'],
+        onSelect: () => _handleFormular(context, controller),
+      ),
+      SlashCommandItem(
+        command: 'roll',
+        description: 'Insert a dice roll',
+        icon: Icons.casino,
+        category: SlashCommandCategory.insert,
+        keywords: ['dice', 'random', '骰子'],
+        onSelect: () => _handleRoll(context, controller),
+      ),
+
+      // ========== List Commands ==========
+      SlashCommandItem(
+        command: 'bullet',
+        description: 'Bullet list',
+        icon: Icons.format_list_bulleted,
+        category: SlashCommandCategory.list,
+        keywords: ['unordered', '无序列表', 'ul'],
+        onSelect: () => _handleList(controller, Attribute.ul),
+      ),
+      SlashCommandItem(
+        command: 'number',
+        description: 'Numbered list',
+        icon: Icons.format_list_numbered,
+        category: SlashCommandCategory.list,
+        keywords: ['ordered', '有序列表', 'ol'],
+        onSelect: () => _handleList(controller, Attribute.ol),
+      ),
+      SlashCommandItem(
+        command: 'checklist',
+        description: 'Checklist / Todo list',
+        icon: Icons.checklist,
+        category: SlashCommandCategory.list,
+        keywords: ['todo', 'checkbox', '待办', '清单'],
+        onSelect: () => _handleChecklist(controller),
       ),
     ];
   }
@@ -124,11 +202,12 @@ class SlashCommandHandler {
   /// 获取过滤后的项目
   static List<SlashCommandItem> get _filteredItems {
     final filter = _currentFilter.toLowerCase();
-    return _items
-        .where((item) =>
-            item.command.toLowerCase().contains(filter) ||
-            item.description.toLowerCase().contains(filter))
-        .toList();
+    if (filter.isEmpty) return _items;
+    return _items.where((item) {
+      return item.command.toLowerCase().contains(filter) ||
+          item.description.toLowerCase().contains(filter) ||
+          item.keywords.any((k) => k.toLowerCase().contains(filter));
+    }).toList();
   }
 
   /// 显示斜杠命令菜单
@@ -230,12 +309,183 @@ class SlashCommandHandler {
     hide();
   }
 
-  // ========== Command Handlers ==========
+  /// 获取选中的文本
+  static String _getSelectedText(QuillController controller) {
+    final selection = controller.selection;
+    if (selection.isCollapsed) return '';
+    return controller.document.getPlainText(
+      selection.start,
+      selection.end - selection.start,
+    );
+  }
+
+  // ========== AI Command Handlers ==========
 
   static void _handleAi(BuildContext context, QuillController controller) {
     _clearSlashCommand(controller);
     _ref?.read(editorNotifierProvider.notifier).toggleAi();
   }
+
+  static Future<void> _handleRewrite(
+      BuildContext context, QuillController controller) async {
+    _clearSlashCommand(controller);
+
+    final selectedText = _getSelectedText(controller);
+    if (selectedText.isEmpty) {
+      ToastUtils.info(context, title: '请先选择要改写的文本');
+      return;
+    }
+
+    await _processAICommand(
+      context: context,
+      controller: controller,
+      selectedText: selectedText,
+      prompt: '''请改写以下文本，保持原意但使用不同的表达方式，使其更加流畅自然：
+
+$selectedText
+
+请直接输出改写后的文本，不要添加任何解释。''',
+      operationName: '改写',
+    );
+  }
+
+  static Future<void> _handleExpand(
+      BuildContext context, QuillController controller) async {
+    _clearSlashCommand(controller);
+
+    final selectedText = _getSelectedText(controller);
+    if (selectedText.isEmpty) {
+      ToastUtils.info(context, title: '请先选择要扩展的文本');
+      return;
+    }
+
+    await _processAICommand(
+      context: context,
+      controller: controller,
+      selectedText: selectedText,
+      prompt: '''请扩展以下文本，添加更多细节、例子或解释，使内容更加丰富完整：
+
+$selectedText
+
+请直接输出扩展后的文本，不要添加任何解释。''',
+      operationName: '扩展',
+    );
+  }
+
+  static Future<void> _handleSummarize(
+      BuildContext context, QuillController controller) async {
+    _clearSlashCommand(controller);
+
+    final selectedText = _getSelectedText(controller);
+    if (selectedText.isEmpty) {
+      ToastUtils.info(context, title: '请先选择要总结的文本');
+      return;
+    }
+
+    await _processAICommand(
+      context: context,
+      controller: controller,
+      selectedText: selectedText,
+      prompt: '''请总结以下文本的核心内容，提取关键要点：
+
+$selectedText
+
+请直接输出摘要内容，不要添加任何解释。''',
+      operationName: '总结',
+      replaceSelection: false,
+    );
+  }
+
+  static Future<void> _handleTranslate(
+      BuildContext context, QuillController controller) async {
+    _clearSlashCommand(controller);
+
+    final selectedText = _getSelectedText(controller);
+    if (selectedText.isEmpty) {
+      ToastUtils.info(context, title: '请先选择要翻译的文本');
+      return;
+    }
+
+    // Show language selection dialog
+    final targetLanguage = await showDialog<String>(
+      context: context,
+      builder: (ctx) => _TranslateLanguageDialog(),
+    );
+
+    if (targetLanguage == null) return;
+
+    await _processAICommand(
+      context: context,
+      controller: controller,
+      selectedText: selectedText,
+      prompt: '''请将以下文本翻译成$targetLanguage，保持原文的语气和风格：
+
+$selectedText
+
+请直接输出翻译结果，不要添加任何解释。''',
+      operationName: '翻译',
+    );
+  }
+
+  /// 通用 AI 命令处理
+  static Future<void> _processAICommand({
+    required BuildContext context,
+    required QuillController controller,
+    required String selectedText,
+    required String prompt,
+    required String operationName,
+    bool replaceSelection = true,
+  }) async {
+    if (GlobalModel.model == null) {
+      ToastUtils.error(context, title: '请先配置 AI 模型');
+      return;
+    }
+
+    _ref?.read(editorNotifierProvider.notifier).setLoading(true);
+
+    try {
+      final now = DateTime.now().millisecondsSinceEpoch;
+      final messages = [
+        ChatMessage(
+          role: 'user',
+          content: prompt,
+          createAt: now,
+        ),
+      ];
+
+      final result = await GlobalModel.model!.chat(messages);
+
+      if (result.isNotEmpty) {
+        if (replaceSelection) {
+          // Replace selected text with AI result
+          final selection = controller.selection;
+          if (!selection.isCollapsed) {
+            controller.replaceText(
+              selection.start,
+              selection.end - selection.start,
+              result.trim(),
+              null,
+            );
+          }
+        } else {
+          // Insert after selection
+          final insertPosition = controller.selection.end;
+          controller.replaceText(
+            insertPosition,
+            0,
+            '\n\n${result.trim()}',
+            null,
+          );
+        }
+      }
+    } catch (e) {
+      ToastUtils.error(context, title: '$operationName失败: $e');
+    } finally {
+      _ref?.read(editorNotifierProvider.notifier).setLoading(false);
+    }
+  }
+
+  // ========== Insert Command Handlers ==========
 
   static void _handleTable(
       BuildContext context, QuillController controller) async {
@@ -338,6 +588,8 @@ class SlashCommandHandler {
     controller.replaceText(controller.selection.baseOffset, 0, block, null);
   }
 
+  // ========== Format Command Handlers ==========
+
   static void _handleHeading(QuillController controller, int level) {
     _clearSlashCommand(controller);
     final attr = Attribute.header;
@@ -347,6 +599,11 @@ class SlashCommandHandler {
   static void _handleList(QuillController controller, Attribute attr) {
     _clearSlashCommand(controller);
     controller.formatSelection(attr);
+  }
+
+  static void _handleChecklist(QuillController controller) {
+    _clearSlashCommand(controller);
+    controller.formatSelection(Attribute.unchecked);
   }
 
   static void _handleBlockQuote(QuillController controller) {
@@ -397,12 +654,12 @@ class _SlashCommandOverlayWidget extends StatelessWidget {
     double top = position.dy + 24;
 
     // 如果右边超出屏幕，向左调整
-    if (left + 280 > screenSize.width) {
-      left = screenSize.width - 290;
+    if (left + 310 > screenSize.width) {
+      left = screenSize.width - 320;
     }
     // 如果下边超出屏幕，向上显示
-    if (top + 300 > screenSize.height) {
-      top = position.dy - 310;
+    if (top + 370 > screenSize.height) {
+      top = position.dy - 380;
     }
 
     return Stack(
@@ -415,8 +672,8 @@ class _SlashCommandOverlayWidget extends StatelessWidget {
           ),
         ),
         Positioned(
-          left: left.clamp(10, screenSize.width - 290),
-          top: top.clamp(10, screenSize.height - 310),
+          left: left.clamp(10, screenSize.width - 320),
+          top: top.clamp(10, screenSize.height - 380),
           child: SlashCommandMenu(
             items: items,
             filterText: filter,
@@ -521,6 +778,54 @@ class _SimpleTableDialogState extends State<_SimpleTableDialog> {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// 翻译语言选择对话框
+class _TranslateLanguageDialog extends StatelessWidget {
+  final List<Map<String, String>> _languages = const [
+    {'code': '中文', 'name': '中文 (Chinese)'},
+    {'code': 'English', 'name': 'English'},
+    {'code': '日本語', 'name': '日本語 (Japanese)'},
+    {'code': '한국어', 'name': '한국어 (Korean)'},
+    {'code': 'Français', 'name': 'Français (French)'},
+    {'code': 'Deutsch', 'name': 'Deutsch (German)'},
+    {'code': 'Español', 'name': 'Español (Spanish)'},
+    {'code': 'Português', 'name': 'Português (Portuguese)'},
+    {'code': 'Русский', 'name': 'Русский (Russian)'},
+    {'code': 'Italiano', 'name': 'Italiano (Italian)'},
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('选择目标语言'),
+      content: SizedBox(
+        width: 280,
+        child: ListView.builder(
+          shrinkWrap: true,
+          itemCount: _languages.length,
+          itemBuilder: (context, index) {
+            final lang = _languages[index];
+            return ListTile(
+              title: Text(lang['name']!),
+              onTap: () => Navigator.pop(context, lang['code']),
+              dense: true,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              hoverColor: Colors.blue.withValues(alpha: 0.1),
+            );
+          },
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('取消'),
+        ),
+      ],
     );
   }
 }

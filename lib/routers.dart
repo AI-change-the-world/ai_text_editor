@@ -1,20 +1,27 @@
-import 'package:ai_text_editor/home.dart';
 import 'package:ai_text_editor/editor_home.dart';
+import 'package:ai_text_editor/features/workspace/workspace.dart';
+import 'package:ai_text_editor/features/ai_assistant/ai_assistant.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 final GoRouter router = GoRouter(routes: <RouteBase>[
   GoRoute(
-      path: '/',
-      builder: (BuildContext context, GoRouterState state) {
-        return Home();
-      },
-      routes: <RouteBase>[
-        GoRoute(
-          path: 'editor',
-          builder: (BuildContext context, GoRouterState state) {
-            return EditorHome();
-          },
-        ),
-      ])
+    path: '/',
+    builder: (BuildContext context, GoRouterState state) {
+      // 使用工作空间首页作为主页
+      // Requirements: 1.1 - 显示工作空间选择器
+      return const AIAssistantOverlay(
+        showFAB: true,
+        child: WorkspaceHomeView(),
+      );
+    },
+    routes: <RouteBase>[
+      GoRoute(
+        path: 'editor',
+        builder: (BuildContext context, GoRouterState state) {
+          return EditorHome();
+        },
+      ),
+    ],
+  )
 ]);

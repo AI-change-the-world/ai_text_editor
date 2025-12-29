@@ -1,10 +1,11 @@
 import 'package:ai_text_editor/init.dart';
-import 'package:ai_text_editor/objectbox/database.dart';
+import 'package:ai_text_editor/data/datasources/objectbox/database.dart';
 import 'package:ai_text_editor/routers.dart';
 import 'package:ai_text_editor/utils/file_utils.dart';
 import 'package:ai_text_editor/utils/logger.dart';
 import 'package:ai_text_editor/utils/styles.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:markdown_to_pdf/markdown_to_pdf.dart';
 import 'package:toastification/toastification.dart';
@@ -37,7 +38,10 @@ void main() async {
     await windowManager.show();
     await windowManager.focus();
   });
+
+  // 初始化数据库（服务会在首次访问时懒加载）
   await ObxDatabase.create();
+  logger.d("Database initialized");
 
   runApp(App(
     title: APPConfig.appName,
@@ -53,6 +57,9 @@ class App extends StatelessWidget {
     return ToastificationWrapper(
         child: ProviderScope(
             child: MaterialApp.router(
+      localizationsDelegates: [
+        FlutterQuillLocalizations.delegate,
+      ],
       debugShowCheckedModeBanner: false,
       theme: Styles.lightTheme,
       title: title,

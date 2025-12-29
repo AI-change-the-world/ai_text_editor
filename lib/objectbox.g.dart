@@ -14,6 +14,14 @@ import 'package:objectbox/internal.dart'
 import 'package:objectbox/objectbox.dart' as obx;
 import 'package:objectbox_flutter_libs/objectbox_flutter_libs.dart';
 
+import 'data/datasources/objectbox/entities/asset.dart';
+import 'data/datasources/objectbox/entities/chat_history.dart';
+import 'data/datasources/objectbox/entities/document_chunk.dart';
+import 'data/datasources/objectbox/entities/document_content.dart';
+import 'data/datasources/objectbox/entities/document_meta.dart';
+import 'data/datasources/objectbox/entities/embedding_cache.dart';
+import 'data/datasources/objectbox/entities/model_profile.dart';
+import 'data/datasources/objectbox/entities/workspace.dart';
 import 'objectbox/model.dart';
 import 'objectbox/recent_files.dart';
 
@@ -129,6 +137,658 @@ final _entities = <obx_int.ModelEntity>[
     relations: <obx_int.ModelRelation>[],
     backlinks: <obx_int.ModelBacklink>[],
   ),
+  obx_int.ModelEntity(
+    id: const obx_int.IdUid(4, 9068919854168403160),
+    name: 'Asset',
+    lastPropertyId: const obx_int.IdUid(12, 6131411295522399716),
+    flags: 0,
+    properties: <obx_int.ModelProperty>[
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(1, 3728984765723704363),
+        name: 'id',
+        type: 6,
+        flags: 1,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(2, 4584111391737956618),
+        name: 'uuid',
+        type: 9,
+        flags: 2080,
+        indexId: const obx_int.IdUid(2, 8927130644261718910),
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(3, 7957611955609585546),
+        name: 'workspaceId',
+        type: 9,
+        flags: 2048,
+        indexId: const obx_int.IdUid(3, 7511329989702049516),
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(4, 36095387771810427),
+        name: 'name',
+        type: 9,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(5, 3094987877493394466),
+        name: 'filePath',
+        type: 9,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(6, 4182258188394964942),
+        name: 'mimeType',
+        type: 9,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(7, 4837784998887902884),
+        name: 'fileSize',
+        type: 6,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(8, 6287735720639450963),
+        name: 'typeIndex',
+        type: 6,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(9, 3333246226110942792),
+        name: 'extractedText',
+        type: 9,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(10, 7535669164362804870),
+        name: 'thumbnailPath',
+        type: 9,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(11, 2910141197317434002),
+        name: 'createdAt',
+        type: 6,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(12, 6131411295522399716),
+        name: 'updatedAt',
+        type: 6,
+        flags: 0,
+      ),
+    ],
+    relations: <obx_int.ModelRelation>[],
+    backlinks: <obx_int.ModelBacklink>[],
+  ),
+  obx_int.ModelEntity(
+    id: const obx_int.IdUid(5, 1619647786118711097),
+    name: 'ChatHistory',
+    lastPropertyId: const obx_int.IdUid(7, 1542853983598591081),
+    flags: 0,
+    properties: <obx_int.ModelProperty>[
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(1, 7604013132749385750),
+        name: 'id',
+        type: 6,
+        flags: 1,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(2, 5001961421162874787),
+        name: 'uuid',
+        type: 9,
+        flags: 2080,
+        indexId: const obx_int.IdUid(4, 4040626252934061285),
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(3, 7846750002776428194),
+        name: 'workspaceId',
+        type: 9,
+        flags: 2048,
+        indexId: const obx_int.IdUid(5, 7546306773151805018),
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(4, 6520670742181537005),
+        name: 'documentId',
+        type: 9,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(5, 9085815318040141654),
+        name: 'title',
+        type: 9,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(6, 2774892768950865497),
+        name: 'createdAt',
+        type: 6,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(7, 1542853983598591081),
+        name: 'updatedAt',
+        type: 6,
+        flags: 0,
+      ),
+    ],
+    relations: <obx_int.ModelRelation>[],
+    backlinks: <obx_int.ModelBacklink>[],
+  ),
+  obx_int.ModelEntity(
+    id: const obx_int.IdUid(6, 8639209627874612152),
+    name: 'ChatMessage',
+    lastPropertyId: const obx_int.IdUid(7, 3928143956171259786),
+    flags: 0,
+    properties: <obx_int.ModelProperty>[
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(1, 1154528863011301508),
+        name: 'id',
+        type: 6,
+        flags: 1,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(2, 8220765889626608341),
+        name: 'chatHistoryId',
+        type: 9,
+        flags: 2048,
+        indexId: const obx_int.IdUid(6, 1591659640751478521),
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(3, 2641049319565591822),
+        name: 'role',
+        type: 9,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(4, 4712128770457647531),
+        name: 'content',
+        type: 9,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(5, 7568277611948802492),
+        name: 'citationsJson',
+        type: 9,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(6, 6006068571278450157),
+        name: 'createdAt',
+        type: 6,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(7, 3928143956171259786),
+        name: 'citations',
+        type: 30,
+        flags: 0,
+      ),
+    ],
+    relations: <obx_int.ModelRelation>[],
+    backlinks: <obx_int.ModelBacklink>[],
+  ),
+  obx_int.ModelEntity(
+    id: const obx_int.IdUid(7, 5040941673733397365),
+    name: 'DocumentChunk',
+    lastPropertyId: const obx_int.IdUid(7, 321839404174392171),
+    flags: 0,
+    properties: <obx_int.ModelProperty>[
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(1, 4126197016780744032),
+        name: 'id',
+        type: 6,
+        flags: 1,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(2, 8813433225816919360),
+        name: 'documentId',
+        type: 9,
+        flags: 2048,
+        indexId: const obx_int.IdUid(7, 8479283688421629399),
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(3, 366073979893937916),
+        name: 'workspaceId',
+        type: 9,
+        flags: 2048,
+        indexId: const obx_int.IdUid(8, 8969688259043325870),
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(4, 7973649330630685689),
+        name: 'chunkIndex',
+        type: 6,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(5, 2033650461687148637),
+        name: 'chunkText',
+        type: 9,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(6, 5803549946037156887),
+        name: 'embedding',
+        type: 28,
+        flags: 8,
+        indexId: const obx_int.IdUid(9, 6230542145143628394),
+        hnswParams: obx_int.ModelHnswParams(dimensions: 1536, distanceType: 2),
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(7, 321839404174392171),
+        name: 'createdAt',
+        type: 6,
+        flags: 0,
+      ),
+    ],
+    relations: <obx_int.ModelRelation>[],
+    backlinks: <obx_int.ModelBacklink>[],
+  ),
+  obx_int.ModelEntity(
+    id: const obx_int.IdUid(8, 7731205763927897001),
+    name: 'DocumentContent',
+    lastPropertyId: const obx_int.IdUid(8, 695218968146870614),
+    flags: 0,
+    properties: <obx_int.ModelProperty>[
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(1, 6026966194597155465),
+        name: 'id',
+        type: 6,
+        flags: 1,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(2, 2486314944667316118),
+        name: 'documentId',
+        type: 9,
+        flags: 2080,
+        indexId: const obx_int.IdUid(10, 5880179959591722855),
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(3, 8725393761413216422),
+        name: 'workspaceId',
+        type: 9,
+        flags: 2048,
+        indexId: const obx_int.IdUid(11, 5096556838237784616),
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(4, 3216627229154626845),
+        name: 'title',
+        type: 9,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(5, 3049040235490579374),
+        name: 'content',
+        type: 9,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(6, 4469760460732065550),
+        name: 'tagsJson',
+        type: 9,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(7, 4761433660956220379),
+        name: 'updatedAt',
+        type: 6,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(8, 695218968146870614),
+        name: 'tags',
+        type: 30,
+        flags: 0,
+      ),
+    ],
+    relations: <obx_int.ModelRelation>[],
+    backlinks: <obx_int.ModelBacklink>[],
+  ),
+  obx_int.ModelEntity(
+    id: const obx_int.IdUid(9, 260472266616584097),
+    name: 'DocumentMeta',
+    lastPropertyId: const obx_int.IdUid(14, 213484656741631323),
+    flags: 0,
+    properties: <obx_int.ModelProperty>[
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(1, 9207457308563688785),
+        name: 'id',
+        type: 6,
+        flags: 1,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(2, 6470812683993868063),
+        name: 'uuid',
+        type: 9,
+        flags: 2080,
+        indexId: const obx_int.IdUid(12, 1569733658249425458),
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(3, 1706044179789977633),
+        name: 'workspaceId',
+        type: 9,
+        flags: 2048,
+        indexId: const obx_int.IdUid(13, 3773364114640263247),
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(4, 1649831189002082065),
+        name: 'title',
+        type: 9,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(5, 8868613379057084068),
+        name: 'parentFolderId',
+        type: 9,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(6, 1744765373810439582),
+        name: 'filePath',
+        type: 9,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(7, 5008640028450380543),
+        name: 'wordCount',
+        type: 6,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(8, 527523115965839489),
+        name: 'characterCount',
+        type: 6,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(9, 5085752981311810497),
+        name: 'isFolder',
+        type: 1,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(10, 7635799838608365817),
+        name: 'sortOrder',
+        type: 6,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(11, 2678180019781204253),
+        name: 'tagsJson',
+        type: 9,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(12, 1934220895404204386),
+        name: 'createdAt',
+        type: 6,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(13, 5534565746313868940),
+        name: 'updatedAt',
+        type: 6,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(14, 213484656741631323),
+        name: 'tags',
+        type: 30,
+        flags: 0,
+      ),
+    ],
+    relations: <obx_int.ModelRelation>[],
+    backlinks: <obx_int.ModelBacklink>[],
+  ),
+  obx_int.ModelEntity(
+    id: const obx_int.IdUid(10, 3211147629157173471),
+    name: 'ModelProfile',
+    lastPropertyId: const obx_int.IdUid(14, 7004822937712181473),
+    flags: 0,
+    properties: <obx_int.ModelProperty>[
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(1, 4097403678914605159),
+        name: 'id',
+        type: 6,
+        flags: 1,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(2, 96167559054397929),
+        name: 'uuid',
+        type: 9,
+        flags: 2080,
+        indexId: const obx_int.IdUid(14, 6769329656789151727),
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(3, 2784909082387567982),
+        name: 'name',
+        type: 9,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(4, 4492891693278507628),
+        name: 'provider',
+        type: 9,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(5, 210565796573359879),
+        name: 'modelName',
+        type: 9,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(6, 4619718820821628965),
+        name: 'apiKey',
+        type: 9,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(7, 2305754707876991841),
+        name: 'baseUrl',
+        type: 9,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(8, 4819688609949368821),
+        name: 'taskTypeIndex',
+        type: 6,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(9, 786131763960782249),
+        name: 'isDefault',
+        type: 1,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(10, 192473409044803709),
+        name: 'temperature',
+        type: 8,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(11, 710098594498860009),
+        name: 'maxTokens',
+        type: 6,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(12, 9040684055765169960),
+        name: 'systemPrompt',
+        type: 9,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(13, 2343032036860097402),
+        name: 'createdAt',
+        type: 6,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(14, 7004822937712181473),
+        name: 'updatedAt',
+        type: 6,
+        flags: 0,
+      ),
+    ],
+    relations: <obx_int.ModelRelation>[],
+    backlinks: <obx_int.ModelBacklink>[],
+  ),
+  obx_int.ModelEntity(
+    id: const obx_int.IdUid(11, 7641838812094781864),
+    name: 'Workspace',
+    lastPropertyId: const obx_int.IdUid(12, 8940900853722303629),
+    flags: 0,
+    properties: <obx_int.ModelProperty>[
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(1, 1527243531176605515),
+        name: 'id',
+        type: 6,
+        flags: 1,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(2, 1430358001550897148),
+        name: 'uuid',
+        type: 9,
+        flags: 2080,
+        indexId: const obx_int.IdUid(15, 8553709553457483781),
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(3, 9039729746641497902),
+        name: 'name',
+        type: 9,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(4, 6896395371492121377),
+        name: 'description',
+        type: 9,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(5, 8846439503463298409),
+        name: 'icon',
+        type: 9,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(6, 3574485138167577616),
+        name: 'colorTheme',
+        type: 9,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(7, 912063114187925736),
+        name: 'category',
+        type: 9,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(8, 793031761275173241),
+        name: 'isPinned',
+        type: 1,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(9, 2592094153103896568),
+        name: 'isArchived',
+        type: 1,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(10, 6719660885034825320),
+        name: 'createdAt',
+        type: 6,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(11, 1822428850553491935),
+        name: 'updatedAt',
+        type: 6,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(12, 8940900853722303629),
+        name: 'lastAccessedAt',
+        type: 6,
+        flags: 0,
+      ),
+    ],
+    relations: <obx_int.ModelRelation>[],
+    backlinks: <obx_int.ModelBacklink>[],
+  ),
+  obx_int.ModelEntity(
+    id: const obx_int.IdUid(12, 3070220433303767270),
+    name: 'EmbeddingCache',
+    lastPropertyId: const obx_int.IdUid(10, 4637735030929895398),
+    flags: 0,
+    properties: <obx_int.ModelProperty>[
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(1, 2952179508543166134),
+        name: 'id',
+        type: 6,
+        flags: 1,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(2, 2614949479228295223),
+        name: 'textHash',
+        type: 9,
+        flags: 2080,
+        indexId: const obx_int.IdUid(16, 3176158605346804112),
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(3, 5726500300201482447),
+        name: 'text',
+        type: 9,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(4, 4524812180876979135),
+        name: 'embeddingJson',
+        type: 9,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(5, 7438185334894229121),
+        name: 'modelName',
+        type: 9,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(6, 3519715367272647625),
+        name: 'createdAt',
+        type: 6,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(7, 9212526723465648090),
+        name: 'expiresAt',
+        type: 6,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(8, 9070495085634828324),
+        name: 'accessCount',
+        type: 6,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(9, 4851034146376980611),
+        name: 'lastAccessedAt',
+        type: 6,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(10, 4637735030929895398),
+        name: 'embedding',
+        type: 29,
+        flags: 0,
+      ),
+    ],
+    relations: <obx_int.ModelRelation>[],
+    backlinks: <obx_int.ModelBacklink>[],
+  ),
 ];
 
 /// Shortcut for [obx.Store.new] that passes [getObjectBoxModel] and for Flutter
@@ -174,8 +834,8 @@ obx_int.ModelDefinition getObjectBoxModel() {
     // Typically, this is done with `dart run build_runner build`.
     generatorVersion: obx_int.GeneratorVersion.v2025_12_16,
     entities: _entities,
-    lastEntityId: const obx_int.IdUid(3, 2532242625166821128),
-    lastIndexId: const obx_int.IdUid(1, 1206263127548344179),
+    lastEntityId: const obx_int.IdUid(12, 3070220433303767270),
+    lastIndexId: const obx_int.IdUid(16, 3176158605346804112),
     lastRelationId: const obx_int.IdUid(0, 0),
     lastSequenceId: const obx_int.IdUid(0, 0),
     retiredEntityUids: const [],
@@ -337,6 +997,869 @@ obx_int.ModelDefinition getObjectBoxModel() {
         return object;
       },
     ),
+    Asset: obx_int.EntityDefinition<Asset>(
+      model: _entities[3],
+      toOneRelations: (Asset object) => [],
+      toManyRelations: (Asset object) => {},
+      getId: (Asset object) => object.id,
+      setId: (Asset object, int id) {
+        object.id = id;
+      },
+      objectToFB: (Asset object, fb.Builder fbb) {
+        final uuidOffset = fbb.writeString(object.uuid);
+        final workspaceIdOffset = fbb.writeString(object.workspaceId);
+        final nameOffset = fbb.writeString(object.name);
+        final filePathOffset = fbb.writeString(object.filePath);
+        final mimeTypeOffset = fbb.writeString(object.mimeType);
+        final extractedTextOffset = object.extractedText == null
+            ? null
+            : fbb.writeString(object.extractedText!);
+        final thumbnailPathOffset = object.thumbnailPath == null
+            ? null
+            : fbb.writeString(object.thumbnailPath!);
+        fbb.startTable(13);
+        fbb.addInt64(0, object.id);
+        fbb.addOffset(1, uuidOffset);
+        fbb.addOffset(2, workspaceIdOffset);
+        fbb.addOffset(3, nameOffset);
+        fbb.addOffset(4, filePathOffset);
+        fbb.addOffset(5, mimeTypeOffset);
+        fbb.addInt64(6, object.fileSize);
+        fbb.addInt64(7, object.typeIndex);
+        fbb.addOffset(8, extractedTextOffset);
+        fbb.addOffset(9, thumbnailPathOffset);
+        fbb.addInt64(10, object.createdAt);
+        fbb.addInt64(11, object.updatedAt);
+        fbb.finish(fbb.endTable());
+        return object.id;
+      },
+      objectFromFB: (obx.Store store, ByteData fbData) {
+        final buffer = fb.BufferContext(fbData);
+        final rootOffset = buffer.derefObject(0);
+        final idParam = const fb.Int64Reader().vTableGet(
+          buffer,
+          rootOffset,
+          4,
+          0,
+        );
+        final uuidParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGet(buffer, rootOffset, 6, '');
+        final workspaceIdParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGet(buffer, rootOffset, 8, '');
+        final nameParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGet(buffer, rootOffset, 10, '');
+        final filePathParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGet(buffer, rootOffset, 12, '');
+        final mimeTypeParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGet(buffer, rootOffset, 14, '');
+        final fileSizeParam = const fb.Int64Reader().vTableGet(
+          buffer,
+          rootOffset,
+          16,
+          0,
+        );
+        final typeIndexParam = const fb.Int64Reader().vTableGet(
+          buffer,
+          rootOffset,
+          18,
+          0,
+        );
+        final extractedTextParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGetNullable(buffer, rootOffset, 20);
+        final thumbnailPathParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGetNullable(buffer, rootOffset, 22);
+        final createdAtParam = const fb.Int64Reader().vTableGet(
+          buffer,
+          rootOffset,
+          24,
+          0,
+        );
+        final updatedAtParam = const fb.Int64Reader().vTableGet(
+          buffer,
+          rootOffset,
+          26,
+          0,
+        );
+        final object = Asset(
+          id: idParam,
+          uuid: uuidParam,
+          workspaceId: workspaceIdParam,
+          name: nameParam,
+          filePath: filePathParam,
+          mimeType: mimeTypeParam,
+          fileSize: fileSizeParam,
+          typeIndex: typeIndexParam,
+          extractedText: extractedTextParam,
+          thumbnailPath: thumbnailPathParam,
+          createdAt: createdAtParam,
+          updatedAt: updatedAtParam,
+        );
+
+        return object;
+      },
+    ),
+    ChatHistory: obx_int.EntityDefinition<ChatHistory>(
+      model: _entities[4],
+      toOneRelations: (ChatHistory object) => [],
+      toManyRelations: (ChatHistory object) => {},
+      getId: (ChatHistory object) => object.id,
+      setId: (ChatHistory object, int id) {
+        object.id = id;
+      },
+      objectToFB: (ChatHistory object, fb.Builder fbb) {
+        final uuidOffset = fbb.writeString(object.uuid);
+        final workspaceIdOffset = object.workspaceId == null
+            ? null
+            : fbb.writeString(object.workspaceId!);
+        final documentIdOffset = object.documentId == null
+            ? null
+            : fbb.writeString(object.documentId!);
+        final titleOffset = fbb.writeString(object.title);
+        fbb.startTable(8);
+        fbb.addInt64(0, object.id);
+        fbb.addOffset(1, uuidOffset);
+        fbb.addOffset(2, workspaceIdOffset);
+        fbb.addOffset(3, documentIdOffset);
+        fbb.addOffset(4, titleOffset);
+        fbb.addInt64(5, object.createdAt);
+        fbb.addInt64(6, object.updatedAt);
+        fbb.finish(fbb.endTable());
+        return object.id;
+      },
+      objectFromFB: (obx.Store store, ByteData fbData) {
+        final buffer = fb.BufferContext(fbData);
+        final rootOffset = buffer.derefObject(0);
+        final idParam = const fb.Int64Reader().vTableGet(
+          buffer,
+          rootOffset,
+          4,
+          0,
+        );
+        final uuidParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGet(buffer, rootOffset, 6, '');
+        final workspaceIdParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGetNullable(buffer, rootOffset, 8);
+        final documentIdParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGetNullable(buffer, rootOffset, 10);
+        final titleParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGet(buffer, rootOffset, 12, '');
+        final createdAtParam = const fb.Int64Reader().vTableGet(
+          buffer,
+          rootOffset,
+          14,
+          0,
+        );
+        final updatedAtParam = const fb.Int64Reader().vTableGet(
+          buffer,
+          rootOffset,
+          16,
+          0,
+        );
+        final object = ChatHistory(
+          id: idParam,
+          uuid: uuidParam,
+          workspaceId: workspaceIdParam,
+          documentId: documentIdParam,
+          title: titleParam,
+          createdAt: createdAtParam,
+          updatedAt: updatedAtParam,
+        );
+
+        return object;
+      },
+    ),
+    ChatMessage: obx_int.EntityDefinition<ChatMessage>(
+      model: _entities[5],
+      toOneRelations: (ChatMessage object) => [],
+      toManyRelations: (ChatMessage object) => {},
+      getId: (ChatMessage object) => object.id,
+      setId: (ChatMessage object, int id) {
+        object.id = id;
+      },
+      objectToFB: (ChatMessage object, fb.Builder fbb) {
+        final chatHistoryIdOffset = fbb.writeString(object.chatHistoryId);
+        final roleOffset = fbb.writeString(object.role);
+        final contentOffset = fbb.writeString(object.content);
+        final citationsJsonOffset = object.citationsJson == null
+            ? null
+            : fbb.writeString(object.citationsJson!);
+        final citationsOffset = fbb.writeList(
+          object.citations.map(fbb.writeString).toList(growable: false),
+        );
+        fbb.startTable(8);
+        fbb.addInt64(0, object.id);
+        fbb.addOffset(1, chatHistoryIdOffset);
+        fbb.addOffset(2, roleOffset);
+        fbb.addOffset(3, contentOffset);
+        fbb.addOffset(4, citationsJsonOffset);
+        fbb.addInt64(5, object.createdAt);
+        fbb.addOffset(6, citationsOffset);
+        fbb.finish(fbb.endTable());
+        return object.id;
+      },
+      objectFromFB: (obx.Store store, ByteData fbData) {
+        final buffer = fb.BufferContext(fbData);
+        final rootOffset = buffer.derefObject(0);
+        final idParam = const fb.Int64Reader().vTableGet(
+          buffer,
+          rootOffset,
+          4,
+          0,
+        );
+        final chatHistoryIdParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGet(buffer, rootOffset, 6, '');
+        final roleParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGet(buffer, rootOffset, 8, '');
+        final contentParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGet(buffer, rootOffset, 10, '');
+        final citationsJsonParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGetNullable(buffer, rootOffset, 12);
+        final createdAtParam = const fb.Int64Reader().vTableGet(
+          buffer,
+          rootOffset,
+          14,
+          0,
+        );
+        final object =
+            ChatMessage(
+                id: idParam,
+                chatHistoryId: chatHistoryIdParam,
+                role: roleParam,
+                content: contentParam,
+                citationsJson: citationsJsonParam,
+                createdAt: createdAtParam,
+              )
+              ..citations = const fb.ListReader<String>(
+                fb.StringReader(asciiOptimization: true),
+                lazy: false,
+              ).vTableGet(buffer, rootOffset, 16, []);
+
+        return object;
+      },
+    ),
+    DocumentChunk: obx_int.EntityDefinition<DocumentChunk>(
+      model: _entities[6],
+      toOneRelations: (DocumentChunk object) => [],
+      toManyRelations: (DocumentChunk object) => {},
+      getId: (DocumentChunk object) => object.id,
+      setId: (DocumentChunk object, int id) {
+        object.id = id;
+      },
+      objectToFB: (DocumentChunk object, fb.Builder fbb) {
+        final documentIdOffset = fbb.writeString(object.documentId);
+        final workspaceIdOffset = fbb.writeString(object.workspaceId);
+        final chunkTextOffset = fbb.writeString(object.chunkText);
+        final embeddingOffset = object.embedding == null
+            ? null
+            : fbb.writeListFloat32(object.embedding!);
+        fbb.startTable(8);
+        fbb.addInt64(0, object.id);
+        fbb.addOffset(1, documentIdOffset);
+        fbb.addOffset(2, workspaceIdOffset);
+        fbb.addInt64(3, object.chunkIndex);
+        fbb.addOffset(4, chunkTextOffset);
+        fbb.addOffset(5, embeddingOffset);
+        fbb.addInt64(6, object.createdAt);
+        fbb.finish(fbb.endTable());
+        return object.id;
+      },
+      objectFromFB: (obx.Store store, ByteData fbData) {
+        final buffer = fb.BufferContext(fbData);
+        final rootOffset = buffer.derefObject(0);
+        final idParam = const fb.Int64Reader().vTableGet(
+          buffer,
+          rootOffset,
+          4,
+          0,
+        );
+        final documentIdParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGet(buffer, rootOffset, 6, '');
+        final workspaceIdParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGet(buffer, rootOffset, 8, '');
+        final chunkIndexParam = const fb.Int64Reader().vTableGet(
+          buffer,
+          rootOffset,
+          10,
+          0,
+        );
+        final chunkTextParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGet(buffer, rootOffset, 12, '');
+        final embeddingParam = const fb.ListReader<double>(
+          fb.Float32Reader(),
+          lazy: false,
+        ).vTableGetNullable(buffer, rootOffset, 14);
+        final createdAtParam = const fb.Int64Reader().vTableGet(
+          buffer,
+          rootOffset,
+          16,
+          0,
+        );
+        final object = DocumentChunk(
+          id: idParam,
+          documentId: documentIdParam,
+          workspaceId: workspaceIdParam,
+          chunkIndex: chunkIndexParam,
+          chunkText: chunkTextParam,
+          embedding: embeddingParam,
+          createdAt: createdAtParam,
+        );
+
+        return object;
+      },
+    ),
+    DocumentContent: obx_int.EntityDefinition<DocumentContent>(
+      model: _entities[7],
+      toOneRelations: (DocumentContent object) => [],
+      toManyRelations: (DocumentContent object) => {},
+      getId: (DocumentContent object) => object.id,
+      setId: (DocumentContent object, int id) {
+        object.id = id;
+      },
+      objectToFB: (DocumentContent object, fb.Builder fbb) {
+        final documentIdOffset = fbb.writeString(object.documentId);
+        final workspaceIdOffset = fbb.writeString(object.workspaceId);
+        final titleOffset = fbb.writeString(object.title);
+        final contentOffset = fbb.writeString(object.content);
+        final tagsJsonOffset = fbb.writeString(object.tagsJson);
+        final tagsOffset = fbb.writeList(
+          object.tags.map(fbb.writeString).toList(growable: false),
+        );
+        fbb.startTable(9);
+        fbb.addInt64(0, object.id);
+        fbb.addOffset(1, documentIdOffset);
+        fbb.addOffset(2, workspaceIdOffset);
+        fbb.addOffset(3, titleOffset);
+        fbb.addOffset(4, contentOffset);
+        fbb.addOffset(5, tagsJsonOffset);
+        fbb.addInt64(6, object.updatedAt);
+        fbb.addOffset(7, tagsOffset);
+        fbb.finish(fbb.endTable());
+        return object.id;
+      },
+      objectFromFB: (obx.Store store, ByteData fbData) {
+        final buffer = fb.BufferContext(fbData);
+        final rootOffset = buffer.derefObject(0);
+        final idParam = const fb.Int64Reader().vTableGet(
+          buffer,
+          rootOffset,
+          4,
+          0,
+        );
+        final documentIdParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGet(buffer, rootOffset, 6, '');
+        final workspaceIdParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGet(buffer, rootOffset, 8, '');
+        final titleParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGet(buffer, rootOffset, 10, '');
+        final contentParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGet(buffer, rootOffset, 12, '');
+        final tagsJsonParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGet(buffer, rootOffset, 14, '');
+        final updatedAtParam = const fb.Int64Reader().vTableGet(
+          buffer,
+          rootOffset,
+          16,
+          0,
+        );
+        final object =
+            DocumentContent(
+                id: idParam,
+                documentId: documentIdParam,
+                workspaceId: workspaceIdParam,
+                title: titleParam,
+                content: contentParam,
+                tagsJson: tagsJsonParam,
+                updatedAt: updatedAtParam,
+              )
+              ..tags = const fb.ListReader<String>(
+                fb.StringReader(asciiOptimization: true),
+                lazy: false,
+              ).vTableGet(buffer, rootOffset, 18, []);
+
+        return object;
+      },
+    ),
+    DocumentMeta: obx_int.EntityDefinition<DocumentMeta>(
+      model: _entities[8],
+      toOneRelations: (DocumentMeta object) => [],
+      toManyRelations: (DocumentMeta object) => {},
+      getId: (DocumentMeta object) => object.id,
+      setId: (DocumentMeta object, int id) {
+        object.id = id;
+      },
+      objectToFB: (DocumentMeta object, fb.Builder fbb) {
+        final uuidOffset = fbb.writeString(object.uuid);
+        final workspaceIdOffset = fbb.writeString(object.workspaceId);
+        final titleOffset = fbb.writeString(object.title);
+        final parentFolderIdOffset = object.parentFolderId == null
+            ? null
+            : fbb.writeString(object.parentFolderId!);
+        final filePathOffset = fbb.writeString(object.filePath);
+        final tagsJsonOffset = fbb.writeString(object.tagsJson);
+        final tagsOffset = fbb.writeList(
+          object.tags.map(fbb.writeString).toList(growable: false),
+        );
+        fbb.startTable(15);
+        fbb.addInt64(0, object.id);
+        fbb.addOffset(1, uuidOffset);
+        fbb.addOffset(2, workspaceIdOffset);
+        fbb.addOffset(3, titleOffset);
+        fbb.addOffset(4, parentFolderIdOffset);
+        fbb.addOffset(5, filePathOffset);
+        fbb.addInt64(6, object.wordCount);
+        fbb.addInt64(7, object.characterCount);
+        fbb.addBool(8, object.isFolder);
+        fbb.addInt64(9, object.sortOrder);
+        fbb.addOffset(10, tagsJsonOffset);
+        fbb.addInt64(11, object.createdAt);
+        fbb.addInt64(12, object.updatedAt);
+        fbb.addOffset(13, tagsOffset);
+        fbb.finish(fbb.endTable());
+        return object.id;
+      },
+      objectFromFB: (obx.Store store, ByteData fbData) {
+        final buffer = fb.BufferContext(fbData);
+        final rootOffset = buffer.derefObject(0);
+        final idParam = const fb.Int64Reader().vTableGet(
+          buffer,
+          rootOffset,
+          4,
+          0,
+        );
+        final uuidParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGet(buffer, rootOffset, 6, '');
+        final workspaceIdParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGet(buffer, rootOffset, 8, '');
+        final titleParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGet(buffer, rootOffset, 10, '');
+        final parentFolderIdParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGetNullable(buffer, rootOffset, 12);
+        final filePathParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGet(buffer, rootOffset, 14, '');
+        final wordCountParam = const fb.Int64Reader().vTableGet(
+          buffer,
+          rootOffset,
+          16,
+          0,
+        );
+        final characterCountParam = const fb.Int64Reader().vTableGet(
+          buffer,
+          rootOffset,
+          18,
+          0,
+        );
+        final isFolderParam = const fb.BoolReader().vTableGet(
+          buffer,
+          rootOffset,
+          20,
+          false,
+        );
+        final sortOrderParam = const fb.Int64Reader().vTableGet(
+          buffer,
+          rootOffset,
+          22,
+          0,
+        );
+        final tagsJsonParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGet(buffer, rootOffset, 24, '');
+        final createdAtParam = const fb.Int64Reader().vTableGet(
+          buffer,
+          rootOffset,
+          26,
+          0,
+        );
+        final updatedAtParam = const fb.Int64Reader().vTableGet(
+          buffer,
+          rootOffset,
+          28,
+          0,
+        );
+        final object =
+            DocumentMeta(
+                id: idParam,
+                uuid: uuidParam,
+                workspaceId: workspaceIdParam,
+                title: titleParam,
+                parentFolderId: parentFolderIdParam,
+                filePath: filePathParam,
+                wordCount: wordCountParam,
+                characterCount: characterCountParam,
+                isFolder: isFolderParam,
+                sortOrder: sortOrderParam,
+                tagsJson: tagsJsonParam,
+                createdAt: createdAtParam,
+                updatedAt: updatedAtParam,
+              )
+              ..tags = const fb.ListReader<String>(
+                fb.StringReader(asciiOptimization: true),
+                lazy: false,
+              ).vTableGet(buffer, rootOffset, 30, []);
+
+        return object;
+      },
+    ),
+    ModelProfile: obx_int.EntityDefinition<ModelProfile>(
+      model: _entities[9],
+      toOneRelations: (ModelProfile object) => [],
+      toManyRelations: (ModelProfile object) => {},
+      getId: (ModelProfile object) => object.id,
+      setId: (ModelProfile object, int id) {
+        object.id = id;
+      },
+      objectToFB: (ModelProfile object, fb.Builder fbb) {
+        final uuidOffset = fbb.writeString(object.uuid);
+        final nameOffset = fbb.writeString(object.name);
+        final providerOffset = fbb.writeString(object.provider);
+        final modelNameOffset = fbb.writeString(object.modelName);
+        final apiKeyOffset = object.apiKey == null
+            ? null
+            : fbb.writeString(object.apiKey!);
+        final baseUrlOffset = object.baseUrl == null
+            ? null
+            : fbb.writeString(object.baseUrl!);
+        final systemPromptOffset = object.systemPrompt == null
+            ? null
+            : fbb.writeString(object.systemPrompt!);
+        fbb.startTable(15);
+        fbb.addInt64(0, object.id);
+        fbb.addOffset(1, uuidOffset);
+        fbb.addOffset(2, nameOffset);
+        fbb.addOffset(3, providerOffset);
+        fbb.addOffset(4, modelNameOffset);
+        fbb.addOffset(5, apiKeyOffset);
+        fbb.addOffset(6, baseUrlOffset);
+        fbb.addInt64(7, object.taskTypeIndex);
+        fbb.addBool(8, object.isDefault);
+        fbb.addFloat64(9, object.temperature);
+        fbb.addInt64(10, object.maxTokens);
+        fbb.addOffset(11, systemPromptOffset);
+        fbb.addInt64(12, object.createdAt);
+        fbb.addInt64(13, object.updatedAt);
+        fbb.finish(fbb.endTable());
+        return object.id;
+      },
+      objectFromFB: (obx.Store store, ByteData fbData) {
+        final buffer = fb.BufferContext(fbData);
+        final rootOffset = buffer.derefObject(0);
+        final idParam = const fb.Int64Reader().vTableGet(
+          buffer,
+          rootOffset,
+          4,
+          0,
+        );
+        final uuidParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGet(buffer, rootOffset, 6, '');
+        final nameParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGet(buffer, rootOffset, 8, '');
+        final providerParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGet(buffer, rootOffset, 10, '');
+        final modelNameParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGet(buffer, rootOffset, 12, '');
+        final apiKeyParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGetNullable(buffer, rootOffset, 14);
+        final baseUrlParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGetNullable(buffer, rootOffset, 16);
+        final taskTypeIndexParam = const fb.Int64Reader().vTableGet(
+          buffer,
+          rootOffset,
+          18,
+          0,
+        );
+        final isDefaultParam = const fb.BoolReader().vTableGet(
+          buffer,
+          rootOffset,
+          20,
+          false,
+        );
+        final temperatureParam = const fb.Float64Reader().vTableGet(
+          buffer,
+          rootOffset,
+          22,
+          0,
+        );
+        final maxTokensParam = const fb.Int64Reader().vTableGet(
+          buffer,
+          rootOffset,
+          24,
+          0,
+        );
+        final systemPromptParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGetNullable(buffer, rootOffset, 26);
+        final createdAtParam = const fb.Int64Reader().vTableGet(
+          buffer,
+          rootOffset,
+          28,
+          0,
+        );
+        final updatedAtParam = const fb.Int64Reader().vTableGet(
+          buffer,
+          rootOffset,
+          30,
+          0,
+        );
+        final object = ModelProfile(
+          id: idParam,
+          uuid: uuidParam,
+          name: nameParam,
+          provider: providerParam,
+          modelName: modelNameParam,
+          apiKey: apiKeyParam,
+          baseUrl: baseUrlParam,
+          taskTypeIndex: taskTypeIndexParam,
+          isDefault: isDefaultParam,
+          temperature: temperatureParam,
+          maxTokens: maxTokensParam,
+          systemPrompt: systemPromptParam,
+          createdAt: createdAtParam,
+          updatedAt: updatedAtParam,
+        );
+
+        return object;
+      },
+    ),
+    Workspace: obx_int.EntityDefinition<Workspace>(
+      model: _entities[10],
+      toOneRelations: (Workspace object) => [],
+      toManyRelations: (Workspace object) => {},
+      getId: (Workspace object) => object.id,
+      setId: (Workspace object, int id) {
+        object.id = id;
+      },
+      objectToFB: (Workspace object, fb.Builder fbb) {
+        final uuidOffset = fbb.writeString(object.uuid);
+        final nameOffset = fbb.writeString(object.name);
+        final descriptionOffset = object.description == null
+            ? null
+            : fbb.writeString(object.description!);
+        final iconOffset = object.icon == null
+            ? null
+            : fbb.writeString(object.icon!);
+        final colorThemeOffset = object.colorTheme == null
+            ? null
+            : fbb.writeString(object.colorTheme!);
+        final categoryOffset = object.category == null
+            ? null
+            : fbb.writeString(object.category!);
+        fbb.startTable(13);
+        fbb.addInt64(0, object.id);
+        fbb.addOffset(1, uuidOffset);
+        fbb.addOffset(2, nameOffset);
+        fbb.addOffset(3, descriptionOffset);
+        fbb.addOffset(4, iconOffset);
+        fbb.addOffset(5, colorThemeOffset);
+        fbb.addOffset(6, categoryOffset);
+        fbb.addBool(7, object.isPinned);
+        fbb.addBool(8, object.isArchived);
+        fbb.addInt64(9, object.createdAt);
+        fbb.addInt64(10, object.updatedAt);
+        fbb.addInt64(11, object.lastAccessedAt);
+        fbb.finish(fbb.endTable());
+        return object.id;
+      },
+      objectFromFB: (obx.Store store, ByteData fbData) {
+        final buffer = fb.BufferContext(fbData);
+        final rootOffset = buffer.derefObject(0);
+        final idParam = const fb.Int64Reader().vTableGet(
+          buffer,
+          rootOffset,
+          4,
+          0,
+        );
+        final uuidParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGet(buffer, rootOffset, 6, '');
+        final nameParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGet(buffer, rootOffset, 8, '');
+        final descriptionParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGetNullable(buffer, rootOffset, 10);
+        final iconParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGetNullable(buffer, rootOffset, 12);
+        final colorThemeParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGetNullable(buffer, rootOffset, 14);
+        final categoryParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGetNullable(buffer, rootOffset, 16);
+        final isPinnedParam = const fb.BoolReader().vTableGet(
+          buffer,
+          rootOffset,
+          18,
+          false,
+        );
+        final isArchivedParam = const fb.BoolReader().vTableGet(
+          buffer,
+          rootOffset,
+          20,
+          false,
+        );
+        final createdAtParam = const fb.Int64Reader().vTableGet(
+          buffer,
+          rootOffset,
+          22,
+          0,
+        );
+        final updatedAtParam = const fb.Int64Reader().vTableGet(
+          buffer,
+          rootOffset,
+          24,
+          0,
+        );
+        final lastAccessedAtParam = const fb.Int64Reader().vTableGet(
+          buffer,
+          rootOffset,
+          26,
+          0,
+        );
+        final object = Workspace(
+          id: idParam,
+          uuid: uuidParam,
+          name: nameParam,
+          description: descriptionParam,
+          icon: iconParam,
+          colorTheme: colorThemeParam,
+          category: categoryParam,
+          isPinned: isPinnedParam,
+          isArchived: isArchivedParam,
+          createdAt: createdAtParam,
+          updatedAt: updatedAtParam,
+          lastAccessedAt: lastAccessedAtParam,
+        );
+
+        return object;
+      },
+    ),
+    EmbeddingCache: obx_int.EntityDefinition<EmbeddingCache>(
+      model: _entities[11],
+      toOneRelations: (EmbeddingCache object) => [],
+      toManyRelations: (EmbeddingCache object) => {},
+      getId: (EmbeddingCache object) => object.id,
+      setId: (EmbeddingCache object, int id) {
+        object.id = id;
+      },
+      objectToFB: (EmbeddingCache object, fb.Builder fbb) {
+        final textHashOffset = fbb.writeString(object.textHash);
+        final textOffset = fbb.writeString(object.text);
+        final embeddingJsonOffset = fbb.writeString(object.embeddingJson);
+        final modelNameOffset = fbb.writeString(object.modelName);
+        final embeddingOffset = fbb.writeListFloat64(object.embedding);
+        fbb.startTable(11);
+        fbb.addInt64(0, object.id);
+        fbb.addOffset(1, textHashOffset);
+        fbb.addOffset(2, textOffset);
+        fbb.addOffset(3, embeddingJsonOffset);
+        fbb.addOffset(4, modelNameOffset);
+        fbb.addInt64(5, object.createdAt);
+        fbb.addInt64(6, object.expiresAt);
+        fbb.addInt64(7, object.accessCount);
+        fbb.addInt64(8, object.lastAccessedAt);
+        fbb.addOffset(9, embeddingOffset);
+        fbb.finish(fbb.endTable());
+        return object.id;
+      },
+      objectFromFB: (obx.Store store, ByteData fbData) {
+        final buffer = fb.BufferContext(fbData);
+        final rootOffset = buffer.derefObject(0);
+        final idParam = const fb.Int64Reader().vTableGet(
+          buffer,
+          rootOffset,
+          4,
+          0,
+        );
+        final textHashParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGet(buffer, rootOffset, 6, '');
+        final textParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGet(buffer, rootOffset, 8, '');
+        final embeddingJsonParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGet(buffer, rootOffset, 10, '');
+        final modelNameParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGet(buffer, rootOffset, 12, '');
+        final createdAtParam = const fb.Int64Reader().vTableGet(
+          buffer,
+          rootOffset,
+          14,
+          0,
+        );
+        final expiresAtParam = const fb.Int64Reader().vTableGet(
+          buffer,
+          rootOffset,
+          16,
+          0,
+        );
+        final accessCountParam = const fb.Int64Reader().vTableGet(
+          buffer,
+          rootOffset,
+          18,
+          0,
+        );
+        final lastAccessedAtParam = const fb.Int64Reader().vTableGet(
+          buffer,
+          rootOffset,
+          20,
+          0,
+        );
+        final object =
+            EmbeddingCache(
+                id: idParam,
+                textHash: textHashParam,
+                text: textParam,
+                embeddingJson: embeddingJsonParam,
+                modelName: modelNameParam,
+                createdAt: createdAtParam,
+                expiresAt: expiresAtParam,
+                accessCount: accessCountParam,
+                lastAccessedAt: lastAccessedAtParam,
+              )
+              ..embedding = const fb.ListReader<double>(
+                fb.Float64Reader(),
+                lazy: false,
+              ).vTableGet(buffer, rootOffset, 22, []);
+
+        return object;
+      },
+    ),
   };
 
   return obx_int.ModelDefinition(model, bindings);
@@ -407,5 +1930,485 @@ class RecentFiles_ {
   /// See [RecentFiles.lastEdited].
   static final lastEdited = obx.QueryIntegerProperty<RecentFiles>(
     _entities[2].properties[3],
+  );
+}
+
+/// [Asset] entity fields to define ObjectBox queries.
+class Asset_ {
+  /// See [Asset.id].
+  static final id = obx.QueryIntegerProperty<Asset>(_entities[3].properties[0]);
+
+  /// See [Asset.uuid].
+  static final uuid = obx.QueryStringProperty<Asset>(
+    _entities[3].properties[1],
+  );
+
+  /// See [Asset.workspaceId].
+  static final workspaceId = obx.QueryStringProperty<Asset>(
+    _entities[3].properties[2],
+  );
+
+  /// See [Asset.name].
+  static final name = obx.QueryStringProperty<Asset>(
+    _entities[3].properties[3],
+  );
+
+  /// See [Asset.filePath].
+  static final filePath = obx.QueryStringProperty<Asset>(
+    _entities[3].properties[4],
+  );
+
+  /// See [Asset.mimeType].
+  static final mimeType = obx.QueryStringProperty<Asset>(
+    _entities[3].properties[5],
+  );
+
+  /// See [Asset.fileSize].
+  static final fileSize = obx.QueryIntegerProperty<Asset>(
+    _entities[3].properties[6],
+  );
+
+  /// See [Asset.typeIndex].
+  static final typeIndex = obx.QueryIntegerProperty<Asset>(
+    _entities[3].properties[7],
+  );
+
+  /// See [Asset.extractedText].
+  static final extractedText = obx.QueryStringProperty<Asset>(
+    _entities[3].properties[8],
+  );
+
+  /// See [Asset.thumbnailPath].
+  static final thumbnailPath = obx.QueryStringProperty<Asset>(
+    _entities[3].properties[9],
+  );
+
+  /// See [Asset.createdAt].
+  static final createdAt = obx.QueryIntegerProperty<Asset>(
+    _entities[3].properties[10],
+  );
+
+  /// See [Asset.updatedAt].
+  static final updatedAt = obx.QueryIntegerProperty<Asset>(
+    _entities[3].properties[11],
+  );
+}
+
+/// [ChatHistory] entity fields to define ObjectBox queries.
+class ChatHistory_ {
+  /// See [ChatHistory.id].
+  static final id = obx.QueryIntegerProperty<ChatHistory>(
+    _entities[4].properties[0],
+  );
+
+  /// See [ChatHistory.uuid].
+  static final uuid = obx.QueryStringProperty<ChatHistory>(
+    _entities[4].properties[1],
+  );
+
+  /// See [ChatHistory.workspaceId].
+  static final workspaceId = obx.QueryStringProperty<ChatHistory>(
+    _entities[4].properties[2],
+  );
+
+  /// See [ChatHistory.documentId].
+  static final documentId = obx.QueryStringProperty<ChatHistory>(
+    _entities[4].properties[3],
+  );
+
+  /// See [ChatHistory.title].
+  static final title = obx.QueryStringProperty<ChatHistory>(
+    _entities[4].properties[4],
+  );
+
+  /// See [ChatHistory.createdAt].
+  static final createdAt = obx.QueryIntegerProperty<ChatHistory>(
+    _entities[4].properties[5],
+  );
+
+  /// See [ChatHistory.updatedAt].
+  static final updatedAt = obx.QueryIntegerProperty<ChatHistory>(
+    _entities[4].properties[6],
+  );
+}
+
+/// [ChatMessage] entity fields to define ObjectBox queries.
+class ChatMessage_ {
+  /// See [ChatMessage.id].
+  static final id = obx.QueryIntegerProperty<ChatMessage>(
+    _entities[5].properties[0],
+  );
+
+  /// See [ChatMessage.chatHistoryId].
+  static final chatHistoryId = obx.QueryStringProperty<ChatMessage>(
+    _entities[5].properties[1],
+  );
+
+  /// See [ChatMessage.role].
+  static final role = obx.QueryStringProperty<ChatMessage>(
+    _entities[5].properties[2],
+  );
+
+  /// See [ChatMessage.content].
+  static final content = obx.QueryStringProperty<ChatMessage>(
+    _entities[5].properties[3],
+  );
+
+  /// See [ChatMessage.citationsJson].
+  static final citationsJson = obx.QueryStringProperty<ChatMessage>(
+    _entities[5].properties[4],
+  );
+
+  /// See [ChatMessage.createdAt].
+  static final createdAt = obx.QueryIntegerProperty<ChatMessage>(
+    _entities[5].properties[5],
+  );
+
+  /// See [ChatMessage.citations].
+  static final citations = obx.QueryStringVectorProperty<ChatMessage>(
+    _entities[5].properties[6],
+  );
+}
+
+/// [DocumentChunk] entity fields to define ObjectBox queries.
+class DocumentChunk_ {
+  /// See [DocumentChunk.id].
+  static final id = obx.QueryIntegerProperty<DocumentChunk>(
+    _entities[6].properties[0],
+  );
+
+  /// See [DocumentChunk.documentId].
+  static final documentId = obx.QueryStringProperty<DocumentChunk>(
+    _entities[6].properties[1],
+  );
+
+  /// See [DocumentChunk.workspaceId].
+  static final workspaceId = obx.QueryStringProperty<DocumentChunk>(
+    _entities[6].properties[2],
+  );
+
+  /// See [DocumentChunk.chunkIndex].
+  static final chunkIndex = obx.QueryIntegerProperty<DocumentChunk>(
+    _entities[6].properties[3],
+  );
+
+  /// See [DocumentChunk.chunkText].
+  static final chunkText = obx.QueryStringProperty<DocumentChunk>(
+    _entities[6].properties[4],
+  );
+
+  /// See [DocumentChunk.embedding].
+  static final embedding = obx.QueryHnswProperty<DocumentChunk>(
+    _entities[6].properties[5],
+  );
+
+  /// See [DocumentChunk.createdAt].
+  static final createdAt = obx.QueryIntegerProperty<DocumentChunk>(
+    _entities[6].properties[6],
+  );
+}
+
+/// [DocumentContent] entity fields to define ObjectBox queries.
+class DocumentContent_ {
+  /// See [DocumentContent.id].
+  static final id = obx.QueryIntegerProperty<DocumentContent>(
+    _entities[7].properties[0],
+  );
+
+  /// See [DocumentContent.documentId].
+  static final documentId = obx.QueryStringProperty<DocumentContent>(
+    _entities[7].properties[1],
+  );
+
+  /// See [DocumentContent.workspaceId].
+  static final workspaceId = obx.QueryStringProperty<DocumentContent>(
+    _entities[7].properties[2],
+  );
+
+  /// See [DocumentContent.title].
+  static final title = obx.QueryStringProperty<DocumentContent>(
+    _entities[7].properties[3],
+  );
+
+  /// See [DocumentContent.content].
+  static final content = obx.QueryStringProperty<DocumentContent>(
+    _entities[7].properties[4],
+  );
+
+  /// See [DocumentContent.tagsJson].
+  static final tagsJson = obx.QueryStringProperty<DocumentContent>(
+    _entities[7].properties[5],
+  );
+
+  /// See [DocumentContent.updatedAt].
+  static final updatedAt = obx.QueryIntegerProperty<DocumentContent>(
+    _entities[7].properties[6],
+  );
+
+  /// See [DocumentContent.tags].
+  static final tags = obx.QueryStringVectorProperty<DocumentContent>(
+    _entities[7].properties[7],
+  );
+}
+
+/// [DocumentMeta] entity fields to define ObjectBox queries.
+class DocumentMeta_ {
+  /// See [DocumentMeta.id].
+  static final id = obx.QueryIntegerProperty<DocumentMeta>(
+    _entities[8].properties[0],
+  );
+
+  /// See [DocumentMeta.uuid].
+  static final uuid = obx.QueryStringProperty<DocumentMeta>(
+    _entities[8].properties[1],
+  );
+
+  /// See [DocumentMeta.workspaceId].
+  static final workspaceId = obx.QueryStringProperty<DocumentMeta>(
+    _entities[8].properties[2],
+  );
+
+  /// See [DocumentMeta.title].
+  static final title = obx.QueryStringProperty<DocumentMeta>(
+    _entities[8].properties[3],
+  );
+
+  /// See [DocumentMeta.parentFolderId].
+  static final parentFolderId = obx.QueryStringProperty<DocumentMeta>(
+    _entities[8].properties[4],
+  );
+
+  /// See [DocumentMeta.filePath].
+  static final filePath = obx.QueryStringProperty<DocumentMeta>(
+    _entities[8].properties[5],
+  );
+
+  /// See [DocumentMeta.wordCount].
+  static final wordCount = obx.QueryIntegerProperty<DocumentMeta>(
+    _entities[8].properties[6],
+  );
+
+  /// See [DocumentMeta.characterCount].
+  static final characterCount = obx.QueryIntegerProperty<DocumentMeta>(
+    _entities[8].properties[7],
+  );
+
+  /// See [DocumentMeta.isFolder].
+  static final isFolder = obx.QueryBooleanProperty<DocumentMeta>(
+    _entities[8].properties[8],
+  );
+
+  /// See [DocumentMeta.sortOrder].
+  static final sortOrder = obx.QueryIntegerProperty<DocumentMeta>(
+    _entities[8].properties[9],
+  );
+
+  /// See [DocumentMeta.tagsJson].
+  static final tagsJson = obx.QueryStringProperty<DocumentMeta>(
+    _entities[8].properties[10],
+  );
+
+  /// See [DocumentMeta.createdAt].
+  static final createdAt = obx.QueryIntegerProperty<DocumentMeta>(
+    _entities[8].properties[11],
+  );
+
+  /// See [DocumentMeta.updatedAt].
+  static final updatedAt = obx.QueryIntegerProperty<DocumentMeta>(
+    _entities[8].properties[12],
+  );
+
+  /// See [DocumentMeta.tags].
+  static final tags = obx.QueryStringVectorProperty<DocumentMeta>(
+    _entities[8].properties[13],
+  );
+}
+
+/// [ModelProfile] entity fields to define ObjectBox queries.
+class ModelProfile_ {
+  /// See [ModelProfile.id].
+  static final id = obx.QueryIntegerProperty<ModelProfile>(
+    _entities[9].properties[0],
+  );
+
+  /// See [ModelProfile.uuid].
+  static final uuid = obx.QueryStringProperty<ModelProfile>(
+    _entities[9].properties[1],
+  );
+
+  /// See [ModelProfile.name].
+  static final name = obx.QueryStringProperty<ModelProfile>(
+    _entities[9].properties[2],
+  );
+
+  /// See [ModelProfile.provider].
+  static final provider = obx.QueryStringProperty<ModelProfile>(
+    _entities[9].properties[3],
+  );
+
+  /// See [ModelProfile.modelName].
+  static final modelName = obx.QueryStringProperty<ModelProfile>(
+    _entities[9].properties[4],
+  );
+
+  /// See [ModelProfile.apiKey].
+  static final apiKey = obx.QueryStringProperty<ModelProfile>(
+    _entities[9].properties[5],
+  );
+
+  /// See [ModelProfile.baseUrl].
+  static final baseUrl = obx.QueryStringProperty<ModelProfile>(
+    _entities[9].properties[6],
+  );
+
+  /// See [ModelProfile.taskTypeIndex].
+  static final taskTypeIndex = obx.QueryIntegerProperty<ModelProfile>(
+    _entities[9].properties[7],
+  );
+
+  /// See [ModelProfile.isDefault].
+  static final isDefault = obx.QueryBooleanProperty<ModelProfile>(
+    _entities[9].properties[8],
+  );
+
+  /// See [ModelProfile.temperature].
+  static final temperature = obx.QueryDoubleProperty<ModelProfile>(
+    _entities[9].properties[9],
+  );
+
+  /// See [ModelProfile.maxTokens].
+  static final maxTokens = obx.QueryIntegerProperty<ModelProfile>(
+    _entities[9].properties[10],
+  );
+
+  /// See [ModelProfile.systemPrompt].
+  static final systemPrompt = obx.QueryStringProperty<ModelProfile>(
+    _entities[9].properties[11],
+  );
+
+  /// See [ModelProfile.createdAt].
+  static final createdAt = obx.QueryIntegerProperty<ModelProfile>(
+    _entities[9].properties[12],
+  );
+
+  /// See [ModelProfile.updatedAt].
+  static final updatedAt = obx.QueryIntegerProperty<ModelProfile>(
+    _entities[9].properties[13],
+  );
+}
+
+/// [Workspace] entity fields to define ObjectBox queries.
+class Workspace_ {
+  /// See [Workspace.id].
+  static final id = obx.QueryIntegerProperty<Workspace>(
+    _entities[10].properties[0],
+  );
+
+  /// See [Workspace.uuid].
+  static final uuid = obx.QueryStringProperty<Workspace>(
+    _entities[10].properties[1],
+  );
+
+  /// See [Workspace.name].
+  static final name = obx.QueryStringProperty<Workspace>(
+    _entities[10].properties[2],
+  );
+
+  /// See [Workspace.description].
+  static final description = obx.QueryStringProperty<Workspace>(
+    _entities[10].properties[3],
+  );
+
+  /// See [Workspace.icon].
+  static final icon = obx.QueryStringProperty<Workspace>(
+    _entities[10].properties[4],
+  );
+
+  /// See [Workspace.colorTheme].
+  static final colorTheme = obx.QueryStringProperty<Workspace>(
+    _entities[10].properties[5],
+  );
+
+  /// See [Workspace.category].
+  static final category = obx.QueryStringProperty<Workspace>(
+    _entities[10].properties[6],
+  );
+
+  /// See [Workspace.isPinned].
+  static final isPinned = obx.QueryBooleanProperty<Workspace>(
+    _entities[10].properties[7],
+  );
+
+  /// See [Workspace.isArchived].
+  static final isArchived = obx.QueryBooleanProperty<Workspace>(
+    _entities[10].properties[8],
+  );
+
+  /// See [Workspace.createdAt].
+  static final createdAt = obx.QueryIntegerProperty<Workspace>(
+    _entities[10].properties[9],
+  );
+
+  /// See [Workspace.updatedAt].
+  static final updatedAt = obx.QueryIntegerProperty<Workspace>(
+    _entities[10].properties[10],
+  );
+
+  /// See [Workspace.lastAccessedAt].
+  static final lastAccessedAt = obx.QueryIntegerProperty<Workspace>(
+    _entities[10].properties[11],
+  );
+}
+
+/// [EmbeddingCache] entity fields to define ObjectBox queries.
+class EmbeddingCache_ {
+  /// See [EmbeddingCache.id].
+  static final id = obx.QueryIntegerProperty<EmbeddingCache>(
+    _entities[11].properties[0],
+  );
+
+  /// See [EmbeddingCache.textHash].
+  static final textHash = obx.QueryStringProperty<EmbeddingCache>(
+    _entities[11].properties[1],
+  );
+
+  /// See [EmbeddingCache.text].
+  static final text = obx.QueryStringProperty<EmbeddingCache>(
+    _entities[11].properties[2],
+  );
+
+  /// See [EmbeddingCache.embeddingJson].
+  static final embeddingJson = obx.QueryStringProperty<EmbeddingCache>(
+    _entities[11].properties[3],
+  );
+
+  /// See [EmbeddingCache.modelName].
+  static final modelName = obx.QueryStringProperty<EmbeddingCache>(
+    _entities[11].properties[4],
+  );
+
+  /// See [EmbeddingCache.createdAt].
+  static final createdAt = obx.QueryIntegerProperty<EmbeddingCache>(
+    _entities[11].properties[5],
+  );
+
+  /// See [EmbeddingCache.expiresAt].
+  static final expiresAt = obx.QueryIntegerProperty<EmbeddingCache>(
+    _entities[11].properties[6],
+  );
+
+  /// See [EmbeddingCache.accessCount].
+  static final accessCount = obx.QueryIntegerProperty<EmbeddingCache>(
+    _entities[11].properties[7],
+  );
+
+  /// See [EmbeddingCache.lastAccessedAt].
+  static final lastAccessedAt = obx.QueryIntegerProperty<EmbeddingCache>(
+    _entities[11].properties[8],
+  );
+
+  /// See [EmbeddingCache.embedding].
+  static final embedding = obx.QueryDoubleVectorProperty<EmbeddingCache>(
+    _entities[11].properties[9],
   );
 }

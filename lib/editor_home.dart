@@ -6,6 +6,9 @@ import 'package:ai_text_editor/components/others/faded_text.dart';
 import 'package:ai_text_editor/components/others/model_settings_widget.dart';
 import 'package:ai_text_editor/components/others/position_widget.dart';
 import 'package:ai_text_editor/components/structures/spell_check_view.dart';
+import 'package:ai_text_editor/features/ai_assistant/ai_assistant.dart';
+import 'package:ai_text_editor/features/editor/widgets/document_outline.dart';
+import 'package:ai_text_editor/features/editor/widgets/focus_mode_overlay.dart';
 import 'package:ai_text_editor/models/ai_model.dart';
 import 'package:ai_text_editor/notifiers/app_body_notifier.dart';
 import 'package:ai_text_editor/notifiers/editor_state.dart';
@@ -57,149 +60,250 @@ class _EditorHomeState extends ConsumerState<EditorHome> {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        SizedBox.expand(
-          child: MenuBarWidget(
-            menuButtonStyle: ButtonStyle(
-                backgroundColor: WidgetStatePropertyAll(Colors.grey[200]),
-                fixedSize: WidgetStateProperty.all(Size.fromHeight(25)),
-                padding: WidgetStateProperty.all(
-                    EdgeInsets.only(left: 16, right: 16, top: 4, bottom: 4))),
-            barButtonStyle: ButtonStyle(
-                alignment: Alignment.center,
-                padding: WidgetStateProperty.all(EdgeInsets.all(1)),
-                shape: WidgetStateProperty.all(RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(4),
-                ))),
-            barStyle: MenuStyle(
-                backgroundColor: WidgetStatePropertyAll(Colors.grey[200]),
-                fixedSize: WidgetStateProperty.all(Size.fromHeight(25)),
-                padding:
-                    WidgetStatePropertyAll(EdgeInsets.symmetric(vertical: 8.0)),
-                shape: WidgetStateProperty.all(
-                  RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(0),
-                    side: BorderSide.none,
-                  ),
-                )),
-            barButtons: [
-              BarButton(
-                  text: Center(
-                    child: Text("File"),
-                  ),
-                  submenu: SubMenu(menuItems: [
-                    MenuButton(
-                        text: Text("Open"),
+    // Wrap with AIAssistantOverlay for keyboard shortcuts and floating button
+    // Requirements: 7.1, 7.2, 7.14
+    return AIAssistantOverlay(
+      showFAB: true,
+      child: Stack(
+        children: [
+          SizedBox.expand(
+            child: MenuBarWidget(
+              menuButtonStyle: ButtonStyle(
+                  backgroundColor: WidgetStatePropertyAll(Colors.grey[200]),
+                  fixedSize: WidgetStateProperty.all(Size.fromHeight(25)),
+                  padding: WidgetStateProperty.all(
+                      EdgeInsets.only(left: 16, right: 16, top: 4, bottom: 4))),
+              barButtonStyle: ButtonStyle(
+                  alignment: Alignment.center,
+                  padding: WidgetStateProperty.all(EdgeInsets.all(1)),
+                  shape: WidgetStateProperty.all(RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(4),
+                  ))),
+              barStyle: MenuStyle(
+                  backgroundColor: WidgetStatePropertyAll(Colors.grey[200]),
+                  fixedSize: WidgetStateProperty.all(Size.fromHeight(25)),
+                  padding: WidgetStatePropertyAll(
+                      EdgeInsets.symmetric(vertical: 8.0)),
+                  shape: WidgetStateProperty.all(
+                    RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(0),
+                      side: BorderSide.none,
+                    ),
+                  )),
+              barButtons: [
+                BarButton(
+                    text: Center(
+                      child: Text("File"),
+                    ),
+                    submenu: SubMenu(menuItems: [
+                      MenuButton(
+                          text: Text("Open"),
+                          onTap: () async {
+                            await openFile(acceptedTypeGroups: [typeGroup])
+                                .then((v) {
+                              if (v == null) {
+                                return;
+                              }
+                              File f = File(v.path);
+                              ref
+                                  .read(editorNotifierProvider.notifier)
+                                  .loadFromFile(f);
+                              ref
+                                  .read(editorNotifierProvider.notifier)
+                                  .setCurrentFilePath(f.path);
+                            });
+                          },
+                          shortcut: SingleActivator(LogicalKeyboardKey.keyO,
+                              control: true),
+                          shortcutText: "Ctrl+O"),
+                      MenuButton(
+                        text: Text("Save"),
+                        shortcutText: "Ctrl+S",
+                        shortcut: SingleActivator(
+                          LogicalKeyboardKey.keyS,
+                          control: true,
+                        ),
                         onTap: () async {
-                          await openFile(acceptedTypeGroups: [typeGroup])
-                              .then((v) {
-                            if (v == null) {
-                              return;
-                            }
-                            File f = File(v.path);
-                            ref
-                                .read(editorNotifierProvider.notifier)
-                                .loadFromFile(f);
-                            ref
-                                .read(editorNotifierProvider.notifier)
-                                .setCurrentFilePath(f.path);
-                          });
-                        },
-                        shortcut: SingleActivator(LogicalKeyboardKey.keyO,
-                            control: true),
-                        shortcutText: "Ctrl+O"),
-                    MenuButton(
-                      text: Text("Save"),
-                      shortcutText: "Ctrl+S",
-                      shortcut: SingleActivator(
-                        LogicalKeyboardKey.keyS,
-                        control: true,
-                      ),
-                      onTap: () async {
-                        final j =
-                            ref.read(editorNotifierProvider.notifier).getJson();
-                        if (j.isEmpty) {
-                          ToastUtils.error(
-                            null,
-                            title: "Error",
-                            description: "Editor is empty",
-                          );
-                          return;
-                        }
-
-                        if (ref.read(editorNotifierProvider).currentFilePath !=
-                            null) {
-                          logger.d(
-                              "save file to ${ref.read(editorNotifierProvider).currentFilePath}");
-                          FileUtils.updateJsonFile(
-                                  j,
-                                  ref
-                                      .read(editorNotifierProvider)
-                                      .currentFilePath!)
-                              .then((_) {
-                            ToastUtils.sucess(
+                          final j = ref
+                              .read(editorNotifierProvider.notifier)
+                              .getJson();
+                          if (j.isEmpty) {
+                            ToastUtils.error(
                               null,
-                              title: "File Saved",
+                              title: "Error",
+                              description: "Editor is empty",
                             );
-                            ref.read(editorNotifierProvider.notifier).updateDoc(
-                                ref
-                                    .read(editorNotifierProvider)
-                                    .currentFilePath!);
-                            ref
-                                .read(editorNotifierProvider.notifier)
-                                .setLoading(false);
-                          });
-                        } else {
-                          await showGeneralDialog(
-                              context: context,
-                              barrierColor: Colors.transparent,
-                              barrierDismissible: true,
-                              barrierLabel: "new-file-dialog",
-                              pageBuilder: (c, _, __) {
-                                return Center(
-                                  child: NewFileDialog(),
-                                );
-                              }).then((v) {
-                            if (v == null) {
-                              return;
-                            }
+                            return;
+                          }
 
-                            final filename = "$v.json";
-                            FileUtils.saveFileToJson(j, filename: filename)
-                                .then((p) {
+                          if (ref
+                                  .read(editorNotifierProvider)
+                                  .currentFilePath !=
+                              null) {
+                            logger.d(
+                                "save file to ${ref.read(editorNotifierProvider).currentFilePath}");
+                            FileUtils.updateJsonFile(
+                                    j,
+                                    ref
+                                        .read(editorNotifierProvider)
+                                        .currentFilePath!)
+                                .then((_) {
                               ToastUtils.sucess(
                                 null,
                                 title: "File Saved",
-                                description: "check $p",
                               );
                               ref
                                   .read(editorNotifierProvider.notifier)
-                                  .setCurrentFilePath(p);
-                              ref
-                                  .read(editorNotifierProvider.notifier)
-                                  .newDoc(p);
+                                  .updateDoc(ref
+                                      .read(editorNotifierProvider)
+                                      .currentFilePath!);
                               ref
                                   .read(editorNotifierProvider.notifier)
                                   .setLoading(false);
                             });
-                          });
-                        }
+                          } else {
+                            await showGeneralDialog(
+                                context: context,
+                                barrierColor: Colors.transparent,
+                                barrierDismissible: true,
+                                barrierLabel: "new-file-dialog",
+                                pageBuilder: (c, _, __) {
+                                  return Center(
+                                    child: NewFileDialog(),
+                                  );
+                                }).then((v) {
+                              if (v == null) {
+                                return;
+                              }
 
-                        ref.read(recentFilesProvider.notifier).refresh();
+                              final filename = "$v.json";
+                              FileUtils.saveFileToJson(j, filename: filename)
+                                  .then((p) {
+                                ToastUtils.sucess(
+                                  null,
+                                  title: "File Saved",
+                                  description: "check $p",
+                                );
+                                ref
+                                    .read(editorNotifierProvider.notifier)
+                                    .setCurrentFilePath(p);
+                                ref
+                                    .read(editorNotifierProvider.notifier)
+                                    .newDoc(p);
+                                ref
+                                    .read(editorNotifierProvider.notifier)
+                                    .setLoading(false);
+                              });
+                            });
+                          }
 
-                        ref
-                            .read(editorNotifierProvider.notifier)
-                            .changeSavedStatus(true);
-                      },
-                    ),
-                    MenuButton(
-                        text: Text("Export As"),
-                        submenu: SubMenu(menuItems: [
-                          MenuButton(
+                          ref.read(recentFilesProvider.notifier).refresh();
+
+                          ref
+                              .read(editorNotifierProvider.notifier)
+                              .changeSavedStatus(true);
+                        },
+                      ),
+                      MenuButton(
+                          text: Text("Export As"),
+                          submenu: SubMenu(menuItems: [
+                            MenuButton(
+                                text: Row(
+                                  children: [
+                                    Expanded(child: Text("Markdown")),
+                                    Tooltip(
+                                      message: "Experimental feature",
+                                      child: Icon(
+                                        Icons.info_outline,
+                                        color: Colors.grey,
+                                        size: Styles.menuBarIconSize,
+                                      ),
+                                    )
+                                  ],
+                                ),
+                                onTap: () async {
+                                  final mdString = ref
+                                      .read(editorNotifierProvider.notifier)
+                                      .getText();
+                                  if (mdString.trim().isEmpty) {
+                                    ToastUtils.error(
+                                      null,
+                                      title: "Error",
+                                      description: "Editor is empty",
+                                    );
+                                    return;
+                                  }
+
+                                  await showGeneralDialog(
+                                      // ignore: use_build_context_synchronously
+                                      context: context,
+                                      barrierColor: Colors.transparent,
+                                      barrierDismissible: true,
+                                      barrierLabel: "new-file-dialog",
+                                      pageBuilder: (c, _, __) {
+                                        return Center(
+                                          child: NewFileDialog(
+                                            ext: ".md",
+                                          ),
+                                        );
+                                      }).then((v) {
+                                    if (v == null) {
+                                      return;
+                                    }
+                                    FileUtils.saveFileToMarkdown(mdString,
+                                            filename: "$v.md")
+                                        .then((p) {
+                                      ToastUtils.sucess(
+                                        null,
+                                        title: "File Saved",
+                                        description: "check $p",
+                                      );
+                                    });
+                                  });
+                                }),
+                            MenuButton(
+                              onTap: () async {
+                                await showGeneralDialog(
+                                    context: context,
+                                    barrierColor: Colors.transparent,
+                                    barrierDismissible: true,
+                                    barrierLabel: "new-file-dialog",
+                                    pageBuilder: (c, _, __) {
+                                      return Center(
+                                        child: NewFileDialog(
+                                          ext: ".pdf",
+                                        ),
+                                      );
+                                    }).then((v) {
+                                  if (v == null) {
+                                    return;
+                                  }
+                                  FileUtils.saveFileToPdf(
+                                          ref
+                                              .read(editorNotifierProvider
+                                                  .notifier)
+                                              .getText(),
+                                          filename: "$v.pdf")
+                                      .then((v) {
+                                    if (v.toString().isNotEmpty) {
+                                      ToastUtils.sucess(
+                                        null,
+                                        title: "File Saved",
+                                        description: "check $v",
+                                      );
+                                    } else {
+                                      ToastUtils.error(
+                                        null,
+                                        title: "Error",
+                                        description: "Failed to save file",
+                                      );
+                                    }
+                                  });
+                                });
+                              },
                               text: Row(
                                 children: [
-                                  Expanded(child: Text("Markdown")),
+                                  Expanded(child: Text("Pdf")),
                                   Tooltip(
                                     message: "Experimental feature",
                                     child: Icon(
@@ -210,21 +314,15 @@ class _EditorHomeState extends ConsumerState<EditorHome> {
                                   )
                                 ],
                               ),
+                            ),
+                            MenuButton(
                               onTap: () async {
-                                final mdString = ref
+                                ref
                                     .read(editorNotifierProvider.notifier)
-                                    .getText();
-                                if (mdString.trim().isEmpty) {
-                                  ToastUtils.error(
-                                    null,
-                                    title: "Error",
-                                    description: "Editor is empty",
-                                  );
-                                  return;
-                                }
+                                    .changeToolbarPosition(
+                                        ToolbarPosition.none);
 
                                 await showGeneralDialog(
-                                    // ignore: use_build_context_synchronously
                                     context: context,
                                     barrierColor: Colors.transparent,
                                     barrierDismissible: true,
@@ -232,341 +330,302 @@ class _EditorHomeState extends ConsumerState<EditorHome> {
                                     pageBuilder: (c, _, __) {
                                       return Center(
                                         child: NewFileDialog(
-                                          ext: ".md",
+                                          ext: ".png",
                                         ),
                                       );
-                                    }).then((v) {
+                                    }).then((v1) {
+                                  if (v1 == null) {
+                                    return;
+                                  }
+                                  ref
+                                      .read(editorNotifierProvider.notifier)
+                                      .getImage()
+                                      .then((v) {
+                                    if (v == null) {
+                                      ToastUtils.error(
+                                        null,
+                                        title: "Error",
+                                        description: "Convert failed",
+                                      );
+                                    } else {
+                                      FileUtils.saveFileToImage(v,
+                                              filename: "$v1.png")
+                                          .then((p) {
+                                        ToastUtils.sucess(
+                                          null,
+                                          title: "File Saved",
+                                          description: "check $p",
+                                        );
+                                      });
+                                    }
+                                  });
+                                });
+                              },
+                              text: Row(
+                                children: [
+                                  Expanded(child: Text("Image")),
+                                ],
+                              ),
+                            ),
+                            MenuButton(
+                              onTap: () async {
+                                await showGeneralDialog(
+                                    context: context,
+                                    barrierColor: Colors.transparent,
+                                    barrierDismissible: true,
+                                    barrierLabel: "new-file-dialog",
+                                    pageBuilder: (c, _, __) {
+                                      return Center(
+                                        child: NewFileDialog(
+                                          ext: ".docx",
+                                        ),
+                                      );
+                                    }).then((v) async {
                                   if (v == null) {
                                     return;
                                   }
-                                  FileUtils.saveFileToMarkdown(mdString,
-                                          filename: "$v.md")
-                                      .then((p) {
-                                    ToastUtils.sucess(
-                                      null,
-                                      title: "File Saved",
-                                      description: "check $p",
-                                    );
-                                  });
+                                  final filePath =
+                                      await FileUtils.getDocxFilepath(
+                                          filename: "$v.docx");
+                                  final mdString = ref
+                                      .read(editorNotifierProvider.notifier)
+                                      .getText();
+                                  markdownToDocx(
+                                      markdownText: mdString,
+                                      filepath: filePath);
                                 });
-                              }),
-                          MenuButton(
-                            onTap: () async {
-                              await showGeneralDialog(
-                                  context: context,
-                                  barrierColor: Colors.transparent,
-                                  barrierDismissible: true,
-                                  barrierLabel: "new-file-dialog",
-                                  pageBuilder: (c, _, __) {
-                                    return Center(
-                                      child: NewFileDialog(
-                                        ext: ".pdf",
-                                      ),
-                                    );
-                                  }).then((v) {
-                                if (v == null) {
-                                  return;
-                                }
-                                FileUtils.saveFileToPdf(
-                                        ref
-                                            .read(
-                                                editorNotifierProvider.notifier)
-                                            .getText(),
-                                        filename: "$v.pdf")
-                                    .then((v) {
-                                  if (v.toString().isNotEmpty) {
-                                    ToastUtils.sucess(
-                                      null,
-                                      title: "File Saved",
-                                      description: "check $v",
-                                    );
-                                  } else {
-                                    ToastUtils.error(
-                                      null,
-                                      title: "Error",
-                                      description: "Failed to save file",
-                                    );
-                                  }
-                                });
-                              });
-                            },
-                            text: Row(
-                              children: [
-                                Expanded(child: Text("Pdf")),
-                                Tooltip(
-                                  message: "Experimental feature",
-                                  child: Icon(
-                                    Icons.info_outline,
-                                    color: Colors.grey,
-                                    size: Styles.menuBarIconSize,
-                                  ),
-                                )
-                              ],
+                              },
+                              text: Row(
+                                children: [
+                                  Expanded(child: Text("Docx")),
+                                  Tooltip(
+                                    message: "Experimental feature",
+                                    child: Icon(
+                                      Icons.info_outline,
+                                      color: Colors.grey,
+                                      size: Styles.menuBarIconSize,
+                                    ),
+                                  )
+                                ],
+                              ),
                             ),
-                          ),
-                          MenuButton(
-                            onTap: () async {
-                              ref
-                                  .read(editorNotifierProvider.notifier)
-                                  .changeToolbarPosition(ToolbarPosition.none);
-
-                              await showGeneralDialog(
-                                  context: context,
-                                  barrierColor: Colors.transparent,
-                                  barrierDismissible: true,
-                                  barrierLabel: "new-file-dialog",
-                                  pageBuilder: (c, _, __) {
-                                    return Center(
-                                      child: NewFileDialog(
-                                        ext: ".png",
-                                      ),
-                                    );
-                                  }).then((v1) {
-                                if (v1 == null) {
-                                  return;
-                                }
-                                ref
-                                    .read(editorNotifierProvider.notifier)
-                                    .getImage()
-                                    .then((v) {
-                                  if (v == null) {
-                                    ToastUtils.error(
-                                      null,
-                                      title: "Error",
-                                      description: "Convert failed",
-                                    );
-                                  } else {
-                                    FileUtils.saveFileToImage(v,
-                                            filename: "$v1.png")
-                                        .then((p) {
-                                      ToastUtils.sucess(
-                                        null,
-                                        title: "File Saved",
-                                        description: "check $p",
-                                      );
-                                    });
-                                  }
-                                });
-                              });
-                            },
-                            text: Row(
-                              children: [
-                                Expanded(child: Text("Image")),
-                              ],
-                            ),
-                          ),
-                          MenuButton(
-                            onTap: () async {
-                              await showGeneralDialog(
-                                  context: context,
-                                  barrierColor: Colors.transparent,
-                                  barrierDismissible: true,
-                                  barrierLabel: "new-file-dialog",
-                                  pageBuilder: (c, _, __) {
-                                    return Center(
-                                      child: NewFileDialog(
-                                        ext: ".docx",
-                                      ),
-                                    );
-                                  }).then((v) async {
-                                if (v == null) {
-                                  return;
-                                }
-                                final filePath =
-                                    await FileUtils.getDocxFilepath(
-                                        filename: "$v.docx");
-                                final mdString = ref
-                                    .read(editorNotifierProvider.notifier)
-                                    .getText();
-                                markdownToDocx(
-                                    markdownText: mdString, filepath: filePath);
-                              });
-                            },
-                            text: Row(
-                              children: [
-                                Expanded(child: Text("Docx")),
-                                Tooltip(
-                                  message: "Experimental feature",
-                                  child: Icon(
-                                    Icons.info_outline,
-                                    color: Colors.grey,
-                                    size: Styles.menuBarIconSize,
-                                  ),
-                                )
-                              ],
-                            ),
-                          ),
-                        ])),
-                    MenuButton(
-                      text: Text("Back to main"),
-                      onTap: () {
-                        context.go('/');
-                      },
+                          ])),
+                      MenuButton(
+                        text: Text("Back to main"),
+                        onTap: () {
+                          context.go('/');
+                        },
+                      ),
+                      MenuButton(
+                        text: Text("Exit"),
+                        shortcutText: "Ctrl+E",
+                        shortcut: SingleActivator(
+                          LogicalKeyboardKey.keyE,
+                          control: true,
+                        ),
+                        onTap: () {
+                          logger.d("Exiting");
+                          SystemNavigator.pop();
+                        },
+                      )
+                    ])),
+                BarButton(
+                    text: Center(
+                      child: Text("View"),
                     ),
-                    MenuButton(
-                      text: Text("Exit"),
-                      shortcutText: "Ctrl+E",
-                      shortcut: SingleActivator(
-                        LogicalKeyboardKey.keyE,
-                        control: true,
-                      ),
-                      onTap: () {
-                        logger.d("Exiting");
-                        SystemNavigator.pop();
-                      },
-                    )
-                  ])),
-              BarButton(
-                  text: Center(
-                    child: Text("View"),
-                  ),
-                  submenu: SubMenu(menuItems: [
-                    MenuButton(
-                      text: Text("Structure"),
-                      shortcutText: "Ctrl+P",
-                      shortcut: SingleActivator(
-                        LogicalKeyboardKey.keyP,
-                        control: true,
-                      ),
-                      onTap: () {
-                        ref
-                            .read(editorNotifierProvider.notifier)
-                            .toggleStructure();
-                      },
-                    ),
-                    MenuButton(
-                      text: Text("Toolbar"),
-                      shortcutText: "Ctrl+T",
-                      shortcut: SingleActivator(
-                        LogicalKeyboardKey.keyT,
-                        control: true,
-                      ),
-                      onTap: () {
-                        if (ref.read(editorNotifierProvider).toolbarPosition ==
-                            ToolbarPosition.none) {
+                    submenu: SubMenu(menuItems: [
+                      MenuButton(
+                        text: Text("Structure"),
+                        shortcutText: "Ctrl+P",
+                        shortcut: SingleActivator(
+                          LogicalKeyboardKey.keyP,
+                          control: true,
+                        ),
+                        onTap: () {
                           ref
                               .read(editorNotifierProvider.notifier)
-                              .changeToolbarPosition(ToolbarPosition.top);
-                        } else {
+                              .toggleStructure();
+                        },
+                      ),
+                      MenuButton(
+                        text: Text("Document Outline"),
+                        shortcutText: "Ctrl+Shift+O",
+                        shortcut: SingleActivator(
+                          LogicalKeyboardKey.keyO,
+                          control: true,
+                          shift: true,
+                        ),
+                        onTap: () {
                           ref
                               .read(editorNotifierProvider.notifier)
-                              .changeToolbarPosition(ToolbarPosition.none);
-                        }
-                      },
-                    ),
-                    MenuButton(
-                      text: Text("AI"),
-                      onTap: () {
-                        ref.read(editorNotifierProvider.notifier).toggleAi(
-                            open: !ref.read(editorNotifierProvider).showAI);
-                      },
-                    )
-                  ])),
-              BarButton(
-                  text: Center(
-                    child: Text("Tools"),
-                  ),
-                  submenu: SubMenu(menuItems: [
-                    MenuButton(
-                      text: Row(
-                        spacing: 5,
-                        children: [
-                          Icon(
-                            Icons.spellcheck,
-                            size: Styles.menuBarIconSize,
-                          ),
-                          Text("Spell check")
-                        ],
+                              .toggleDocumentOutline();
+                        },
                       ),
-                      onTap: () async {
-                        ref.read(editorNotifierProvider.notifier).spellCheck();
-                      },
-                    ),
-                    MenuButton(
-                      text: Row(
-                        spacing: 5,
-                        children: [
-                          Icon(
-                            Icons.auto_graph,
-                            size: Styles.menuBarIconSize,
-                          ),
-                          Text("Generate mind graph")
-                        ],
+                      MenuButton(
+                        text: Text("Focus Mode"),
+                        shortcutText: "Ctrl+Shift+F",
+                        shortcut: SingleActivator(
+                          LogicalKeyboardKey.keyF,
+                          control: true,
+                          shift: true,
+                        ),
+                        onTap: () {
+                          ref
+                              .read(editorNotifierProvider.notifier)
+                              .toggleFocusMode();
+                        },
                       ),
-                      onTap: () async {
-                        ref
-                            .read(editorNotifierProvider.notifier)
-                            .mindGraph(context);
-                      },
-                    )
-                  ])),
-              BarButton(
-                  text: Padding(
-                    padding: EdgeInsets.only(left: 10, right: 10),
-                    child: Text("Settings"),
-                  ),
-                  submenu: SubMenu(menuItems: [
-                    MenuButton(
-                      onTap: () {
-                        showGeneralDialog(
-                            barrierColor: Colors.transparent,
-                            context: context,
-                            pageBuilder: (c, _, __) {
-                              return ModelSettingsWidget();
-                            });
-                      },
-                      text: Row(
-                        spacing: 10,
-                        children: [
-                          Icon(
-                            Icons.desktop_mac,
-                            size: Styles.menuBarIconSize,
-                          ),
-                          Text("Models")
-                        ],
+                      MenuButton(
+                        text: Text("Toolbar"),
+                        shortcutText: "Ctrl+T",
+                        shortcut: SingleActivator(
+                          LogicalKeyboardKey.keyT,
+                          control: true,
+                        ),
+                        onTap: () {
+                          if (ref
+                                  .read(editorNotifierProvider)
+                                  .toolbarPosition ==
+                              ToolbarPosition.none) {
+                            ref
+                                .read(editorNotifierProvider.notifier)
+                                .changeToolbarPosition(ToolbarPosition.top);
+                          } else {
+                            ref
+                                .read(editorNotifierProvider.notifier)
+                                .changeToolbarPosition(ToolbarPosition.none);
+                          }
+                        },
                       ),
+                      MenuButton(
+                        text: Text("AI"),
+                        onTap: () {
+                          ref.read(editorNotifierProvider.notifier).toggleAi(
+                              open: !ref.read(editorNotifierProvider).showAI);
+                        },
+                      ),
+                      MenuButton(
+                        text: Text("AI 助手"),
+                        shortcutText: "⌘J",
+                        onTap: () {
+                          // Toggle AI Assistant panel - Requirements: 7.1, 7.2
+                          ref.read(aiAssistantProvider.notifier).togglePanel();
+                        },
+                      )
+                    ])),
+                BarButton(
+                    text: Center(
+                      child: Text("Tools"),
                     ),
-                  ]))
-            ],
-            child: Scaffold(
-              body: Row(
-                children: [
-                  StreamBuilder(
+                    submenu: SubMenu(menuItems: [
+                      MenuButton(
+                        text: Row(
+                          spacing: 5,
+                          children: [
+                            Icon(
+                              Icons.spellcheck,
+                              size: Styles.menuBarIconSize,
+                            ),
+                            Text("Spell check")
+                          ],
+                        ),
+                        onTap: () async {
+                          ref
+                              .read(editorNotifierProvider.notifier)
+                              .spellCheck();
+                        },
+                      ),
+                      MenuButton(
+                        text: Row(
+                          spacing: 5,
+                          children: [
+                            Icon(
+                              Icons.auto_graph,
+                              size: Styles.menuBarIconSize,
+                            ),
+                            Text("Generate mind graph")
+                          ],
+                        ),
+                        onTap: () async {
+                          ref
+                              .read(editorNotifierProvider.notifier)
+                              .mindGraph(context);
+                        },
+                      )
+                    ])),
+                BarButton(
+                    text: Padding(
+                      padding: EdgeInsets.only(left: 10, right: 10),
+                      child: Text("Settings"),
+                    ),
+                    submenu: SubMenu(menuItems: [
+                      MenuButton(
+                        onTap: () {
+                          showGeneralDialog(
+                              barrierColor: Colors.transparent,
+                              context: context,
+                              pageBuilder: (c, _, __) {
+                                return ModelSettingsWidget();
+                              });
+                        },
+                        text: Row(
+                          spacing: 10,
+                          children: [
+                            Icon(
+                              Icons.desktop_mac,
+                              size: Styles.menuBarIconSize,
+                            ),
+                            Text("Models")
+                          ],
+                        ),
+                      ),
+                    ]))
+              ],
+              child: FocusModeOverlay(
+                child: Scaffold(
+                  body: StreamBuilder(
                       stream: ref
                           .read(editorNotifierProvider.notifier)
                           .quillTextChangeStream,
                       builder: (c, s) {
                         final models = MarkdownUtil.fromMdString(s.data ?? "");
-                        return FileStructureView(
-                          models: models,
+                        return Row(
+                          children: [
+                            FileStructureView(
+                              models: models,
+                            ),
+                            Expanded(child: Editor()),
+                            DocumentOutline(
+                              models: models,
+                            ),
+                            AiWidget(),
+                            SpellCheckView()
+                          ],
                         );
                       }),
-                  Expanded(child: Editor()),
-                  AiWidget(),
-                  SpellCheckView()
-                ],
+                ),
               ),
             ),
           ),
-        ),
-        if (ref.watch(editorNotifierProvider.select((v) => v.loading)))
+          if (ref.watch(editorNotifierProvider.select((v) => v.loading)))
+            Positioned(
+              bottom: 10,
+              right: 10,
+              child: AnimatedEightTrigrams(size: 50),
+            ),
+          if (!ref.watch(savedNotifierProvider))
+            Positioned(
+              top: 0,
+              right: 10,
+              child: FadedText(),
+            ),
           Positioned(
-            bottom: 10,
-            right: 10,
-            child: AnimatedEightTrigrams(size: 50),
-          ),
-        if (!ref.watch(savedNotifierProvider))
-          Positioned(
-            top: 0,
-            right: 10,
-            child: FadedText(),
-          ),
-        Positioned(
-          right: 100,
-          top: 1,
-          child: PositionWidget(),
-        )
-      ],
+            right: 100,
+            top: 1,
+            child: PositionWidget(),
+          )
+        ],
+      ),
     );
   }
 }

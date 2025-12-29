@@ -12,6 +12,7 @@ import 'package:ai_text_editor/embeds/image/image_embed.dart';
 import 'package:ai_text_editor/embeds/ref/ref_embed.dart';
 import 'package:ai_text_editor/embeds/roll/roll_embed.dart';
 import 'package:ai_text_editor/embeds/table/table_embed.dart';
+import 'package:ai_text_editor/features/editor/embeds/link/link_embed.dart';
 import 'package:ai_text_editor/init.dart';
 import 'package:ai_text_editor/models/ai_model.dart';
 import 'package:ai_text_editor/models/json_error_model.dart';
@@ -93,6 +94,7 @@ class EditorNotifier extends Notifier<EditorState> {
     customImageEmbedType: customImageEmbedToMarkdown,
     customRefEmbedType: customImageEmbedToMarkdown,
     customFormularEmbedType: customFormularEmbedToMarkdown,
+    customLinkEmbedType: customLinkEmbedToMarkdown,
   });
   late final _mdDocument = md.Document(encodeHtml: false);
   late final _mdToDelta = MarkdownToDelta(markdownDocument: _mdDocument);
@@ -369,6 +371,31 @@ class EditorNotifier extends Notifier<EditorState> {
     state = state.copyWith(
         showSpellCheck: !state.showSpellCheck,
         showAI: !state.showSpellCheck ? false : state.showAI);
+  }
+
+  /// 切换专注模式 - Requirements: 2.6
+  /// 专注模式下隐藏所有UI元素，只显示编辑器和当前段落
+  void toggleFocusMode() {
+    final newFocusMode = !state.focusMode;
+    if (newFocusMode) {
+      // 进入专注模式时，隐藏所有其他UI元素
+      state = state.copyWith(
+        focusMode: true,
+        showStructure: false,
+        showAI: false,
+        showSpellCheck: false,
+        toolbarPosition: ToolbarPosition.none,
+        showDocumentOutline: false,
+      );
+    } else {
+      // 退出专注模式
+      state = state.copyWith(focusMode: false);
+    }
+  }
+
+  /// 切换文档大纲 - Requirements: 2.7
+  void toggleDocumentOutline() {
+    state = state.copyWith(showDocumentOutline: !state.showDocumentOutline);
   }
 
   /// 修改保存状态
