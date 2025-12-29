@@ -13,9 +13,8 @@ import 'ref_embed.dart';
 
 class CustomRefEmbedBuilder extends EmbedBuilder {
   @override
-  Widget build(BuildContext context, QuillController controller, Embed node,
-      bool readOnly, bool inline, TextStyle textStyle) {
-    final data = node.value.data;
+  Widget build(BuildContext context, EmbedContext embedCtx) {
+    final data = embedCtx.node.value.data;
     final m = FileModel.fromJson(jsonDecode(data));
     assert(m.validate());
     return _ReferenceWidget(model: m);

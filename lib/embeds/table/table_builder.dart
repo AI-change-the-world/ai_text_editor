@@ -7,10 +7,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class CustomTableEmbedBuilder extends EmbedBuilder {
   @override
-  Widget build(BuildContext context, QuillController controller, Embed node,
-      bool readOnly, bool inline, TextStyle textStyle) {
+  Widget build(BuildContext context, EmbedContext embedCtx) {
     // final l = node.value.data.split(",");
-    final m = jsonDecode(node.value.data);
+    final m = jsonDecode(embedCtx.node.value.data);
 
     return SizedBox(
       height: 30 * m["colCount"] + 40,

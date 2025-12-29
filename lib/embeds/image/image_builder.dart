@@ -9,10 +9,9 @@ import 'package:flutter_quill/flutter_quill.dart';
 
 class CustomImageEmbedBuilder extends EmbedBuilder {
   @override
-  Widget build(BuildContext context, QuillController controller, Embed node,
-      bool readOnly, bool inline, TextStyle textStyle) {
+  Widget build(BuildContext context, EmbedContext embedCtx) {
     /// {"url":string,"type":local/web,"uuid":string}
-    final m = FileModel.fromJson(jsonDecode(node.value.data));
+    final m = FileModel.fromJson(jsonDecode(embedCtx.node.value.data));
     assert(m.validate());
     if (m.type == 'local') {
       return ExtendedImage.file(

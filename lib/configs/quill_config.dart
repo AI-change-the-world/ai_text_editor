@@ -10,7 +10,7 @@ import 'package:flutter_quill/flutter_quill.dart';
 class QuillConfig {
   QuillConfig._();
 
-  static QuillEditorConfigurations get config => QuillEditorConfigurations(
+  static QuillEditorConfig get config => QuillEditorConfig(
           characterShortcutEvents: [
             ...standardCharactersShortcutEvents,
             SomeShortcuts.aiInstEvent
@@ -26,7 +26,7 @@ class QuillConfig {
             CustomRefEmbedBuilder(),
             CustomFormularEmbedBuilder()
           ],
-          searchConfigurations: const QuillSearchConfigurations(
+          searchConfig: const QuillSearchConfig(
             searchEmbedMode: SearchEmbedMode.plainText,
           ),
           placeholder: "Write something...");

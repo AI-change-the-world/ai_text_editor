@@ -2,9 +2,8 @@ part of 'roll_embed.dart';
 
 class CustomRollEmbedBuilder extends EmbedBuilder {
   @override
-  Widget build(BuildContext context, QuillController controller, Embed node,
-      bool readOnly, bool inline, TextStyle textStyle) {
-    final m = jsonDecode(node.value.data);
+  Widget build(BuildContext context, EmbedContext embedCtx) {
+    final m = jsonDecode(embedCtx.node.value.data);
     return SizedBox(
       width: 150,
       height: 150,

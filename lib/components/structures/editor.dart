@@ -108,7 +108,7 @@ class _EditorState extends ConsumerState<Editor> with WindowListener {
                 child: Padding(
                   padding: padding,
                   child: QuillEditor(
-                    configurations: QuillConfig.config,
+                    // configurations: QuillConfig.config,
                     controller: ref
                         .read(editorNotifierProvider.notifier)
                         .quillController,
@@ -311,7 +311,7 @@ class ToolbarWidget extends StatelessWidget {
         size: size1,
         child: QuillSimpleToolbar(
           controller: controller,
-          configurations: QuillToolbarConfig.simple(
+          config: QuillToolbarConfig.simple(
             alignment: WrapAlignment.start,
             crossAlignment: WrapCrossAlignment.start,
           ),
@@ -323,7 +323,7 @@ class ToolbarWidget extends StatelessWidget {
         size: size2,
         child: QuillSimpleToolbar(
           controller: controller,
-          configurations: QuillToolbarConfig.simple(),
+          config: QuillToolbarConfig.simple(),
         ),
       );
     } else {

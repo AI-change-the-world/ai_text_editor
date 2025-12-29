@@ -4,11 +4,11 @@ import 'package:flutter_quill/flutter_quill.dart';
 class QuillToolbarConfig {
   QuillToolbarConfig._();
 
-  static QuillSimpleToolbarConfigurations simple({
+  static QuillSimpleToolbarConfig simple({
     WrapAlignment? alignment,
     WrapCrossAlignment? crossAlignment,
   }) {
-    return QuillSimpleToolbarConfigurations(
+    return QuillSimpleToolbarConfig(
       toolbarIconAlignment: alignment ?? WrapAlignment.center,
       toolbarIconCrossAlignment: crossAlignment ?? WrapCrossAlignment.center,
       showFontSize: false,

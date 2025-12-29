@@ -11,9 +11,8 @@ import 'package:screenshot/screenshot.dart';
 
 class CustomFormularEmbedBuilder extends EmbedBuilder {
   @override
-  Widget build(BuildContext context, QuillController controller, Embed node,
-      bool readOnly, bool inline, TextStyle textStyle) {
-    final m = jsonDecode(node.value.data);
+  Widget build(BuildContext context, EmbedContext embedCtx) {
+    final m = jsonDecode(embedCtx.node.value.data);
     return _FormularWidget(m['formular'], m['uuid']);
   }
 
