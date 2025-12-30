@@ -17,3 +17,5 @@ target/
 #.idea/
 
 *.docx
+*.pdf
+test_output.md

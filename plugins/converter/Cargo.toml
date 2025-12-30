@@ -15,3 +15,7 @@ pdfium-render = "0.8"
 regex = "1.11.1"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
+thiserror = "1.0"
+
+[dev-dependencies]
+tempfile = "3.14"

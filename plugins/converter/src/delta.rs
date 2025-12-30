@@ -1,3 +1,9 @@
+//! Delta 格式解析（用于富文本编辑器格式转换）
+//!
+//! 暂未使用，保留供后续扩展
+
+#![allow(dead_code)]
+
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
