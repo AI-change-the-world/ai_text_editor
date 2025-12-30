@@ -5,7 +5,7 @@
 //! ## 支持的转换
 //! - PDF -> Markdown
 //! - CSV -> Markdown  
-//! - DOCX -> Markdown (TODO)
+//! - DOCX -> Markdown
 //! - Markdown -> DOCX
 //!
 //! ## 使用示例
@@ -14,6 +14,9 @@
 //!
 //! // 将 PDF 转换为 Markdown
 //! let markdown = to_markdown("document.pdf")?;
+//!
+//! // 将 DOCX 转换为 Markdown
+//! let markdown = to_markdown("document.docx")?;
 //!
 //! // 将 Markdown 转换为 DOCX
 //! from_markdown::to_docx("output.docx", &markdown)?;

@@ -3,9 +3,10 @@
 //! 支持的格式:
 //! - PDF (基于 pdfium-render)
 //! - CSV
-//! - XLSX (TODO)
+//! - DOCX (基于 docx-rs)
 
 pub mod csv;
+pub mod docx;
 pub mod pdf;
 
 use std::path::Path;
@@ -31,7 +32,7 @@ pub fn convert<P: AsRef<Path>>(path: P) -> Result<String> {
         match ext.to_lowercase().as_str() {
             "pdf" => return pdf::PdfConverter::to_markdown(path),
             "csv" => return csv::CsvConverter::to_markdown(path),
-            // "xlsx" | "xls" => return xlsx::XlsxConverter::to_markdown(path),
+            "docx" => return docx::DocxConverter::to_markdown(path),
             _ => {}
         }
     }
@@ -43,6 +44,7 @@ pub fn convert<P: AsRef<Path>>(path: P) -> Result<String> {
     match kind {
         Some(k) => match k.extension() {
             "pdf" => pdf::PdfConverter::to_markdown(path),
+            "docx" => docx::DocxConverter::to_markdown(path),
             _ => Err(ConvertError::UnsupportedFormat(k.extension().to_string())),
         },
         None => Err(ConvertError::UnknownFormat),

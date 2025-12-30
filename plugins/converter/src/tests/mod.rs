@@ -8,3 +8,6 @@ mod csv_tests;
 
 #[cfg(test)]
 mod docx_tests;
+
+#[cfg(test)]
+mod docx_to_md_tests;
