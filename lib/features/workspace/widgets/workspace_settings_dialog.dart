@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../data/datasources/objectbox/entities/workspace.dart';
 import '../../../services/workspace_service.dart';
+import '../../../utils/app_theme.dart';
+import '../../../utils/name_to_icon.dart';
 import '../notifiers/workspace_notifier.dart';
 
 /// 预定义的颜色主题
@@ -133,7 +135,9 @@ class _WorkspaceSettingsDialogState
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Dialog(
+      backgroundColor: colors.dialogBackground,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Container(
         width: 520,
@@ -194,22 +198,24 @@ class _WorkspaceSettingsDialogState
   }
 
   Widget _buildHeader() {
+    final colors = context.colors;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       child: Row(
         children: [
           Icon(Icons.settings, color: _selectedColor),
           const SizedBox(width: 8),
-          const Text(
+          Text(
             '工作空间设置',
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w600,
+              color: colors.textPrimary,
             ),
           ),
           const Spacer(),
           IconButton(
-            icon: const Icon(Icons.close),
+            icon: Icon(Icons.close, color: colors.textSecondary),
             onPressed: () => Navigator.of(context).pop(),
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(
@@ -223,12 +229,13 @@ class _WorkspaceSettingsDialogState
   }
 
   Widget _buildStatsSection() {
+    final colors = context.colors;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.grey.shade50,
+        color: colors.surfaceVariant,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: colors.border),
       ),
       child: _isLoadingStats
           ? const Center(
@@ -271,22 +278,24 @@ class _WorkspaceSettingsDialogState
     required String label,
     required String value,
   }) {
+    final colors = context.colors;
     return Column(
       children: [
-        Icon(icon, size: 20, color: Colors.grey.shade600),
+        Icon(icon, size: 20, color: colors.textSecondary),
         const SizedBox(height: 4),
         Text(
           value,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,
+            color: colors.textPrimary,
           ),
         ),
         Text(
           label,
           style: TextStyle(
             fontSize: 11,
-            color: Colors.grey.shade600,
+            color: colors.textSecondary,
           ),
         ),
       ],
@@ -294,15 +303,17 @@ class _WorkspaceSettingsDialogState
   }
 
   Widget _buildIconSection() {
+    final colors = context.colors;
+    final hasEmoji = _selectedEmoji != null && _selectedEmoji!.isNotEmpty;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           '图标',
           style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w500,
-            color: Colors.black87,
+            color: colors.textPrimary,
           ),
         ),
         const SizedBox(height: 8),
@@ -314,10 +325,15 @@ class _WorkspaceSettingsDialogState
               width: 56,
               height: 56,
               decoration: BoxDecoration(
-                color: _selectedColor.withValues(alpha: 0.1),
+                color: hasEmoji
+                    ? _selectedColor.withValues(alpha: 0.1)
+                    : colors.surfaceVariant,
                 borderRadius: BorderRadius.circular(12),
-                border:
-                    Border.all(color: _selectedColor.withValues(alpha: 0.3)),
+                border: Border.all(
+                  color: hasEmoji
+                      ? _selectedColor.withValues(alpha: 0.3)
+                      : colors.border,
+                ),
               ),
               child: _buildIconPreview(),
             ),
@@ -353,21 +369,25 @@ class _WorkspaceSettingsDialogState
         ),
       );
     }
-    return Center(
-      child: Text(
-        _nameController.text.isNotEmpty
-            ? _nameController.text[0].toUpperCase()
-            : 'W',
-        style: TextStyle(
-          fontSize: 24,
-          fontWeight: FontWeight.bold,
-          color: _selectedColor,
-        ),
+    // 使用 Identicon 生成图标
+    final name = _nameController.text.isNotEmpty
+        ? _nameController.text
+        : widget.workspace.name;
+    final iconData = Identicon.generate(name, size: 128);
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(8),
+      child: Image.memory(
+        iconData,
+        width: 56,
+        height: 56,
+        fit: BoxFit.cover,
+        gaplessPlayback: true,
       ),
     );
   }
 
   Widget _buildEmojiButton(String? emoji, {required bool isSelected}) {
+    final colors = context.colors;
     return InkWell(
       onTap: () {
         setState(() {
@@ -382,10 +402,10 @@ class _WorkspaceSettingsDialogState
         decoration: BoxDecoration(
           color: isSelected
               ? _selectedColor.withValues(alpha: 0.2)
-              : Colors.grey.shade100,
+              : colors.surfaceVariant,
           borderRadius: BorderRadius.circular(6),
           border: Border.all(
-            color: isSelected ? _selectedColor : Colors.grey.shade300,
+            color: isSelected ? _selectedColor : colors.border,
             width: isSelected ? 2 : 1,
           ),
         ),
@@ -393,9 +413,9 @@ class _WorkspaceSettingsDialogState
           child: emoji != null
               ? Text(emoji, style: const TextStyle(fontSize: 16))
               : Icon(
-                  Icons.text_fields,
+                  Icons.auto_awesome,
                   size: 16,
-                  color: isSelected ? _selectedColor : Colors.grey.shade500,
+                  color: isSelected ? _selectedColor : colors.textHint,
                 ),
         ),
       ),
@@ -452,15 +472,16 @@ class _WorkspaceSettingsDialogState
   }
 
   Widget _buildColorSection() {
+    final colors = context.colors;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           '主题色',
           style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w500,
-            color: Colors.black87,
+            color: colors.textPrimary,
           ),
         ),
         const SizedBox(height: 8),
@@ -484,7 +505,7 @@ class _WorkspaceSettingsDialogState
                   color: color,
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: isSelected ? Colors.black54 : Colors.transparent,
+                    color: isSelected ? colors.textPrimary : Colors.transparent,
                     width: 2,
                   ),
                 ),
@@ -504,26 +525,27 @@ class _WorkspaceSettingsDialogState
   }
 
   Widget _buildDangerZone() {
+    final colors = context.colors;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.red.shade50,
+        color: colors.error.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.red.shade200),
+        border: Border.all(color: colors.error.withValues(alpha: 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(Icons.warning, size: 18, color: Colors.red.shade700),
+              Icon(Icons.warning, size: 18, color: colors.error),
               const SizedBox(width: 8),
               Text(
                 '危险操作',
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: Colors.red.shade700,
+                  color: colors.error,
                 ),
               ),
             ],
@@ -535,18 +557,19 @@ class _WorkspaceSettingsDialogState
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       '归档工作空间',
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w500,
+                        color: colors.textPrimary,
                       ),
                     ),
                     Text(
                       '归档后将从列表中隐藏，可在设置中恢复',
                       style: TextStyle(
                         fontSize: 11,
-                        color: Colors.grey.shade600,
+                        color: colors.textSecondary,
                       ),
                     ),
                   ],
@@ -555,8 +578,9 @@ class _WorkspaceSettingsDialogState
               OutlinedButton(
                 onPressed: _archiveWorkspace,
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: Colors.orange.shade700,
-                  side: BorderSide(color: Colors.orange.shade300),
+                  foregroundColor: colors.warning,
+                  side:
+                      BorderSide(color: colors.warning.withValues(alpha: 0.5)),
                 ),
                 child: const Text('归档'),
               ),
@@ -569,18 +593,19 @@ class _WorkspaceSettingsDialogState
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       '删除工作空间',
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w500,
+                        color: colors.textPrimary,
                       ),
                     ),
                     Text(
                       '永久删除，包括所有文档和资产，无法恢复',
                       style: TextStyle(
                         fontSize: 11,
-                        color: Colors.grey.shade600,
+                        color: colors.textSecondary,
                       ),
                     ),
                   ],
@@ -589,8 +614,8 @@ class _WorkspaceSettingsDialogState
               OutlinedButton(
                 onPressed: _deleteWorkspace,
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: Colors.red.shade700,
-                  side: BorderSide(color: Colors.red.shade300),
+                  foregroundColor: colors.error,
+                  side: BorderSide(color: colors.error.withValues(alpha: 0.5)),
                 ),
                 child: const Text('删除'),
               ),

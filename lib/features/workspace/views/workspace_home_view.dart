@@ -117,7 +117,10 @@ class _WorkspaceHomeViewState extends ConsumerState<WorkspaceHomeView> {
   Widget _buildToolbar(
       Workspace workspace, Color colorTheme, AppColors colors) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      height: 60,
+      padding: const EdgeInsets.symmetric(
+        horizontal: 16,
+      ),
       decoration: BoxDecoration(
         color: colors.surface,
         border: Border(bottom: BorderSide(color: colors.border)),

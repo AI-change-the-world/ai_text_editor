@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:ai_text_editor/components/dialogs/new_file_dialog.dart';
 import 'package:ai_text_editor/components/structures/editor.dart';
 import 'package:ai_text_editor/components/others/faded_text.dart';
-import 'package:ai_text_editor/components/others/model_settings_widget.dart';
 import 'package:ai_text_editor/components/others/position_widget.dart';
 import 'package:ai_text_editor/components/structures/spell_check_view.dart';
 import 'package:ai_text_editor/features/ai_assistant/ai_assistant.dart';
@@ -69,27 +68,34 @@ class _EditorHomeState extends ConsumerState<EditorHome> {
           SizedBox.expand(
             child: MenuBarWidget(
               menuButtonStyle: ButtonStyle(
-                  backgroundColor: WidgetStatePropertyAll(Colors.grey[200]),
-                  fixedSize: WidgetStateProperty.all(Size.fromHeight(25)),
-                  padding: WidgetStateProperty.all(
-                      EdgeInsets.only(left: 16, right: 16, top: 4, bottom: 4))),
+                backgroundColor: WidgetStatePropertyAll(Colors.white),
+                fixedSize: WidgetStateProperty.all(const Size.fromHeight(32)),
+                padding: WidgetStateProperty.all(
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 6)),
+                shape: WidgetStateProperty.all(RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(6),
+                )),
+              ),
               barButtonStyle: ButtonStyle(
-                  alignment: Alignment.center,
-                  padding: WidgetStateProperty.all(EdgeInsets.all(1)),
-                  shape: WidgetStateProperty.all(RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(4),
-                  ))),
+                alignment: Alignment.center,
+                padding: WidgetStateProperty.all(
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 4)),
+                shape: WidgetStateProperty.all(RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(6),
+                )),
+              ),
               barStyle: MenuStyle(
-                  backgroundColor: WidgetStatePropertyAll(Colors.grey[200]),
-                  fixedSize: WidgetStateProperty.all(Size.fromHeight(25)),
-                  padding: WidgetStatePropertyAll(
-                      EdgeInsets.symmetric(vertical: 8.0)),
-                  shape: WidgetStateProperty.all(
-                    RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(0),
-                      side: BorderSide.none,
-                    ),
-                  )),
+                backgroundColor: WidgetStatePropertyAll(Colors.grey[100]),
+                fixedSize: WidgetStateProperty.all(const Size.fromHeight(36)),
+                padding: WidgetStatePropertyAll(
+                    const EdgeInsets.symmetric(vertical: 4, horizontal: 8)),
+                shape: WidgetStateProperty.all(
+                  const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.zero,
+                    side: BorderSide.none,
+                  ),
+                ),
+              ),
               barButtons: [
                 BarButton(
                     text: Center(
@@ -553,33 +559,6 @@ class _EditorHomeState extends ConsumerState<EditorHome> {
                         },
                       )
                     ])),
-                BarButton(
-                    text: Padding(
-                      padding: EdgeInsets.only(left: 10, right: 10),
-                      child: Text("Settings"),
-                    ),
-                    submenu: SubMenu(menuItems: [
-                      MenuButton(
-                        onTap: () {
-                          showGeneralDialog(
-                              barrierColor: Colors.transparent,
-                              context: context,
-                              pageBuilder: (c, _, __) {
-                                return ModelSettingsWidget();
-                              });
-                        },
-                        text: Row(
-                          spacing: 10,
-                          children: [
-                            Icon(
-                              Icons.desktop_mac,
-                              size: Styles.menuBarIconSize,
-                            ),
-                            Text("Models")
-                          ],
-                        ),
-                      ),
-                    ]))
               ],
               child: FocusModeOverlay(
                 child: Scaffold(

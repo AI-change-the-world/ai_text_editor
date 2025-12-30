@@ -5,6 +5,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
+import 'dart:ui' as ui;
 
 import 'package:ai_packages_core/ai_packages_core.dart' as core;
 import 'package:ai_text_editor/embeds/formular/formular_embed.dart';
@@ -22,9 +23,10 @@ import 'package:ai_text_editor/objectbox/recent_files.dart';
 import 'package:ai_text_editor/src/rust/api/charts_api.dart';
 import 'package:ai_text_editor/utils/logger.dart';
 import 'package:ai_text_editor/utils/toast_utils.dart';
-import 'package:listview_screenshot/listview_screenshot.dart';
+import 'package:ai_text_editor/utils/screen_stitcher.dart';
 import 'package:meta/meta.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_quill/flutter_quill.dart' hide EditorState;
 import 'package:flutter_quill/quill_delta.dart';
 import 'package:markdown_quill/markdown_quill.dart';
@@ -526,16 +528,38 @@ class EditorNotifier extends Notifier<EditorState> {
 
   Future<Uint8List?> getImage() async {
     try {
-      WidgetShotRenderRepaintBoundary repaintBoundary =
-          editorKey.currentContext!.findRenderObject()
-              as WidgetShotRenderRepaintBoundary;
-      var resultImage = await repaintBoundary.screenshotPng(
-        backgroundColor: Colors.white,
+      final stitcher = ScrollableStitcher(
+        repaintBoundaryKey: editorKey,
+        scrollController: scrollController,
       );
 
-      return resultImage;
+      final bytes = await stitcher.capture(
+        fromTop: true,
+        overlap: 80.0,
+        waitForPaint: 300,
+        pixelRatio: 2.0,
+        background: Colors.white,
+      );
+
+      return bytes;
     } catch (e) {
       logger.e('截取图片失败: $e');
+      // 如果 ScrollableStitcher 失败，回退到简单截图
+      return _captureSimpleScreenshot();
+    }
+  }
+
+  Future<Uint8List?> _captureSimpleScreenshot() async {
+    try {
+      final boundary = editorKey.currentContext?.findRenderObject()
+          as RenderRepaintBoundary?;
+      if (boundary == null) return null;
+
+      final image = await boundary.toImage(pixelRatio: 2.0);
+      final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+      return byteData?.buffer.asUint8List();
+    } catch (e) {
+      logger.e('简单截图失败: $e');
       return null;
     }
   }

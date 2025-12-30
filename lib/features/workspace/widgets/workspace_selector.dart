@@ -59,6 +59,7 @@ class WorkspaceSelector extends ConsumerWidget {
 
   Widget _buildHeader(BuildContext context, AppColors colors) {
     return Container(
+      height: 60,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Row(
         children: [
@@ -179,7 +180,8 @@ class WorkspaceSelector extends ConsumerWidget {
 
   Widget _buildFooter(BuildContext context, WidgetRef ref, AppColors colors) {
     return Container(
-      padding: const EdgeInsets.all(12),
+      height: 60,
+      padding: const EdgeInsets.only(left: 12, right: 12),
       decoration: BoxDecoration(
         border: Border(top: BorderSide(color: colors.border)),
       ),
