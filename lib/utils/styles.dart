@@ -2,6 +2,8 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 
+import 'app_theme.dart';
+
 class Styles {
   Styles._();
 
@@ -32,64 +34,112 @@ class Styles {
   /// 浅色主题
   static ThemeData lightTheme = ThemeData(
     brightness: Brightness.light,
-    primaryColor: Colors.blue,
-    scaffoldBackgroundColor: Colors.white,
+    primaryColor: AppColors.light.primary,
+    scaffoldBackgroundColor: AppColors.light.background,
     colorScheme: ColorScheme.light(
-      primary: Colors.blue,
-      secondary: Colors.blueAccent,
-      surface: Colors.white,
+      primary: AppColors.light.primary,
+      secondary: AppColors.light.primaryDark,
+      surface: AppColors.light.surface,
+      error: AppColors.light.error,
     ),
     appBarTheme: AppBarTheme(
-      backgroundColor: Colors.white,
-      foregroundColor: Colors.black87,
+      backgroundColor: AppColors.light.background,
+      foregroundColor: AppColors.light.textPrimary,
       elevation: 0,
-      iconTheme: IconThemeData(color: Colors.black87),
+      iconTheme: IconThemeData(color: AppColors.light.textPrimary),
     ),
     cardTheme: CardThemeData(
-      color: Colors.white,
+      color: AppColors.light.card,
       elevation: 1,
     ),
-    dividerColor: Colors.grey.shade200,
+    dividerColor: AppColors.light.divider,
     textTheme: TextTheme(
       headlineLarge: TextStyle(
-          fontSize: 32.0, fontWeight: FontWeight.bold, color: Colors.black),
-      bodyLarge: TextStyle(fontSize: 16.0, color: Colors.black87),
+        fontSize: 32.0,
+        fontWeight: FontWeight.bold,
+        color: AppColors.light.textPrimary,
+      ),
+      bodyLarge: TextStyle(
+        fontSize: 16.0,
+        color: AppColors.light.textPrimary,
+      ),
+      bodyMedium: TextStyle(
+        fontSize: 14.0,
+        color: AppColors.light.textSecondary,
+      ),
     ),
-    buttonTheme: ButtonThemeData(
-      buttonColor: Colors.blue,
-      textTheme: ButtonTextTheme.primary,
+    inputDecorationTheme: InputDecorationTheme(
+      filled: true,
+      fillColor: AppColors.light.inputBackground,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(8),
+        borderSide: BorderSide(color: AppColors.light.inputBorder),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(8),
+        borderSide: BorderSide(color: AppColors.light.inputBorder),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(8),
+        borderSide: BorderSide(color: AppColors.light.inputFocusBorder),
+      ),
     ),
+    extensions: [AppColors.light],
   );
 
   /// 暗黑主题
   static ThemeData darkTheme = ThemeData(
     brightness: Brightness.dark,
-    primaryColor: Colors.blue,
-    scaffoldBackgroundColor: Color(0xFF1E1E1E),
+    primaryColor: AppColors.dark.primary,
+    scaffoldBackgroundColor: AppColors.dark.background,
     colorScheme: ColorScheme.dark(
-      primary: Colors.blue,
-      secondary: Colors.blueAccent,
-      surface: Color(0xFF2D2D2D),
+      primary: AppColors.dark.primary,
+      secondary: AppColors.dark.primaryDark,
+      surface: AppColors.dark.surface,
+      error: AppColors.dark.error,
     ),
     appBarTheme: AppBarTheme(
-      backgroundColor: Color(0xFF2D2D2D),
-      foregroundColor: Colors.white,
+      backgroundColor: AppColors.dark.surface,
+      foregroundColor: AppColors.dark.textPrimary,
       elevation: 0,
-      iconTheme: IconThemeData(color: Colors.white),
+      iconTheme: IconThemeData(color: AppColors.dark.textPrimary),
     ),
     cardTheme: CardThemeData(
-      color: Color(0xFF2D2D2D),
+      color: AppColors.dark.card,
       elevation: 1,
     ),
-    dividerColor: Colors.grey.shade800,
+    dividerColor: AppColors.dark.divider,
     textTheme: TextTheme(
       headlineLarge: TextStyle(
-          fontSize: 32.0, fontWeight: FontWeight.bold, color: Colors.white),
-      bodyLarge: TextStyle(fontSize: 16.0, color: Colors.white70),
+        fontSize: 32.0,
+        fontWeight: FontWeight.bold,
+        color: AppColors.dark.textPrimary,
+      ),
+      bodyLarge: TextStyle(
+        fontSize: 16.0,
+        color: AppColors.dark.textPrimary,
+      ),
+      bodyMedium: TextStyle(
+        fontSize: 14.0,
+        color: AppColors.dark.textSecondary,
+      ),
     ),
-    buttonTheme: ButtonThemeData(
-      buttonColor: Colors.blue,
-      textTheme: ButtonTextTheme.primary,
+    inputDecorationTheme: InputDecorationTheme(
+      filled: true,
+      fillColor: AppColors.dark.inputBackground,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(8),
+        borderSide: BorderSide(color: AppColors.dark.inputBorder),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(8),
+        borderSide: BorderSide(color: AppColors.dark.inputBorder),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(8),
+        borderSide: BorderSide(color: AppColors.dark.inputFocusBorder),
+      ),
     ),
+    extensions: [AppColors.dark],
   );
 }

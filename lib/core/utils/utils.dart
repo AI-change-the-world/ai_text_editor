@@ -1,5 +1,6 @@
 /// Core utilities barrel file
 /// Re-exports utilities from both old and new locations for gradual migration
+library;
 
 // New location exports
 export 'logger.dart';

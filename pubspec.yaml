@@ -81,11 +81,14 @@ flutter:
     - family: HanSansCN
       fonts:
         - asset: assets/fonts/SourceHanSansCN-Bold.ttf
+          weight: 700
         - asset: assets/fonts/SourceHanSansCN-Regular.ttf
+          weight: 400
     
     - family: emoji
       fonts:
         - asset: assets/fonts/NotoEmoji-VariableFont_wght.ttf
+          weight: 400
     
     - family: song
       fonts:

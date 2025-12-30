@@ -4,7 +4,6 @@ import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'package:http/http.dart' as http;
 
-import '../data/datasources/objectbox/entities/embedding_cache.dart';
 import '../data/datasources/objectbox/objectbox.dart';
 import '../objectbox.g.dart';
 

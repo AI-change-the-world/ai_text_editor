@@ -8,7 +8,6 @@ import 'package:ai_text_editor/notifiers/editor_state.dart';
 import 'package:ai_text_editor/utils/some_shortcuts.dart';
 import 'package:ai_text_editor/utils/styles.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:listview_screenshot/listview_screenshot.dart';
