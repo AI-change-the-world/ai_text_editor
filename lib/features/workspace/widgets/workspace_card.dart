@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../data/datasources/objectbox/entities/workspace.dart';
 import '../../../utils/app_theme.dart';
+import '../../../utils/name_to_icon.dart';
 
 /// 工作空间卡片组件
 /// 显示工作空间的图标、名称、描述和最近活动
@@ -136,23 +137,16 @@ class WorkspaceCard extends StatelessWidget {
       }
     }
 
-    // 默认使用首字母图标
-    return Container(
-      width: 40,
-      height: 40,
-      decoration: BoxDecoration(
-        color: colorTheme.withValues(alpha: 0.2),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Center(
-        child: Text(
-          workspace.name.isNotEmpty ? workspace.name[0].toUpperCase() : 'W',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: colorTheme,
-          ),
-        ),
+    // 使用 Identicon 生成图标
+    final iconData = Identicon.generate(workspace.name, size: 128);
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(8),
+      child: Image.memory(
+        iconData,
+        width: 40,
+        height: 40,
+        fit: BoxFit.cover,
+        gaplessPlayback: true,
       ),
     );
   }

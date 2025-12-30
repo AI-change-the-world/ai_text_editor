@@ -11,6 +11,7 @@ import 'package:xml/xml.dart';
 import '../../../data/datasources/objectbox/entities/document_meta.dart';
 import '../../../data/datasources/objectbox/entities/workspace.dart';
 import '../../../utils/app_theme.dart';
+import '../../../utils/name_to_icon.dart';
 import '../../editor/notifiers/document_tree_notifier.dart';
 import '../notifiers/workspace_notifier.dart';
 import '../widgets/create_workspace_dialog.dart';
@@ -124,28 +125,7 @@ class _WorkspaceHomeViewState extends ConsumerState<WorkspaceHomeView> {
       child: Row(
         children: [
           // 工作空间图标和名称
-          Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              color: colorTheme.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Center(
-              child: workspace.icon != null && workspace.icon!.isNotEmpty
-                  ? Text(workspace.icon!, style: const TextStyle(fontSize: 18))
-                  : Text(
-                      workspace.name.isNotEmpty
-                          ? workspace.name[0].toUpperCase()
-                          : 'W',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: colorTheme,
-                      ),
-                    ),
-            ),
-          ),
+          _buildWorkspaceIcon(workspace, colorTheme),
           const SizedBox(width: 12),
           Text(
             workspace.name,
@@ -711,6 +691,36 @@ class _WorkspaceHomeViewState extends ConsumerState<WorkspaceHomeView> {
     );
     if (workspace.uuid.isEmpty) return;
     await showWorkspaceSettingsDialog(context, workspace);
+  }
+
+  Widget _buildWorkspaceIcon(Workspace workspace, Color colorTheme) {
+    // 如果有 emoji 图标
+    if (workspace.icon != null && workspace.icon!.isNotEmpty) {
+      return Container(
+        width: 36,
+        height: 36,
+        decoration: BoxDecoration(
+          color: colorTheme.withValues(alpha: 0.12),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Center(
+          child: Text(workspace.icon!, style: const TextStyle(fontSize: 18)),
+        ),
+      );
+    }
+
+    // 使用 Identicon 生成图标
+    final iconData = Identicon.generate(workspace.name, size: 128);
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(8),
+      child: Image.memory(
+        iconData,
+        width: 36,
+        height: 36,
+        fit: BoxFit.cover,
+        gaplessPlayback: true,
+      ),
+    );
   }
 
   Color _parseColorTheme(String? colorTheme) {

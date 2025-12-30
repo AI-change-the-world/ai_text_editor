@@ -3,11 +3,13 @@ import 'dart:io';
 import 'package:ai_text_editor/init.dart';
 import 'package:ai_text_editor/data/datasources/objectbox/database.dart';
 import 'package:ai_text_editor/features/settings/notifiers/settings_notifier.dart';
+import 'package:ai_text_editor/i18n/translations.g.dart';
 import 'package:ai_text_editor/routers.dart';
 import 'package:ai_text_editor/utils/file_utils.dart';
 import 'package:ai_text_editor/utils/logger.dart';
 import 'package:ai_text_editor/utils/styles.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:markdown_to_pdf/markdown_to_pdf.dart';
@@ -18,6 +20,10 @@ import 'package:ai_text_editor/src/rust/frb_generated.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await RustLib.init();
+
+  // 初始化国际化
+  await LocaleSettings.useDeviceLocale();
+
   final regular =
       await FileUtils.loadAsset("assets/fonts/SourceHanSansCN-Regular.ttf");
   final bold =
@@ -46,7 +52,7 @@ void main() async {
   await ObxDatabase.create();
   logger.d("Database initialized");
 
-  runApp(const ProviderScope(child: App()));
+  runApp(TranslationProvider(child: const ProviderScope(child: App())));
 }
 
 class App extends ConsumerWidget {
@@ -60,7 +66,12 @@ class App extends ConsumerWidget {
 
     return ToastificationWrapper(
       child: MaterialApp.router(
+        locale: TranslationProvider.of(context).flutterLocale,
+        supportedLocales: AppLocaleUtils.supportedLocales,
         localizationsDelegates: [
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
           FlutterQuillLocalizations.delegate,
         ],
         debugShowCheckedModeBanner: false,

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../i18n/translations.g.dart';
+import '../../../utils/app_theme.dart';
 import '../notifiers/settings_notifier.dart';
 
 /// 通用设置组件
@@ -11,6 +13,7 @@ class GeneralSettings extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colors = context.colors;
     final settings = ref.watch(settingsProvider);
     final notifier = ref.read(settingsProvider.notifier);
 
@@ -19,21 +22,24 @@ class GeneralSettings extends ConsumerWidget {
       children: [
         // 语言设置
         _buildSettingsCard(
-          title: '语言',
+          title: t.settings.language,
           icon: Icons.language,
+          colors: colors,
           children: [
             _buildDropdownSetting(
-              label: '界面语言',
-              description: '选择应用界面显示的语言',
-              value: settings.language,
-              items: const [
-                DropdownMenuItem(value: 'zh_CN', child: Text('简体中文')),
-                DropdownMenuItem(value: 'zh_TW', child: Text('繁體中文')),
-                DropdownMenuItem(value: 'en_US', child: Text('English')),
+              label: t.settings.language,
+              description: t.settings.languageDesc,
+              value: LocaleSettings.currentLocale,
+              colors: colors,
+              items: [
+                DropdownMenuItem(
+                    value: AppLocale.zh, child: const Text('简体中文')),
+                DropdownMenuItem(
+                    value: AppLocale.en, child: const Text('English')),
               ],
               onChanged: (value) {
                 if (value != null) {
-                  notifier.setLanguage(value);
+                  LocaleSettings.setLocale(value);
                 }
               },
             ),
@@ -43,40 +49,46 @@ class GeneralSettings extends ConsumerWidget {
 
         // 编辑器设置
         _buildSettingsCard(
-          title: '编辑器',
+          title: t.settings.editor,
           icon: Icons.edit_note,
+          colors: colors,
           children: [
             _buildSwitchSetting(
-              label: '自动保存',
-              description: '自动保存文档更改',
+              label: t.settings.autoSave,
+              description: t.settings.autoSaveDesc,
               value: settings.autoSave,
+              colors: colors,
               onChanged: (value) => notifier.setAutoSave(value),
             ),
             if (settings.autoSave) ...[
-              const Divider(height: 24),
+              Divider(height: 24, color: colors.divider),
               _buildSliderSetting(
-                label: '自动保存间隔',
-                description: '每 ${settings.autoSaveInterval} 秒自动保存一次',
+                label: t.settings.autoSaveInterval,
+                description: t.settings
+                    .autoSaveIntervalDesc(seconds: settings.autoSaveInterval),
                 value: settings.autoSaveInterval.toDouble(),
                 min: 10,
                 max: 120,
                 divisions: 11,
+                colors: colors,
                 onChanged: (value) =>
                     notifier.setAutoSaveInterval(value.round()),
               ),
             ],
-            const Divider(height: 24),
+            Divider(height: 24, color: colors.divider),
             _buildSwitchSetting(
-              label: '显示字数统计',
-              description: '在编辑器底部显示字数和字符数',
+              label: t.settings.showWordCount,
+              description: t.settings.showWordCountDesc,
               value: settings.showWordCount,
+              colors: colors,
               onChanged: (value) => notifier.setShowWordCount(value),
             ),
-            const Divider(height: 24),
+            Divider(height: 24, color: colors.divider),
             _buildSwitchSetting(
-              label: '拼写检查',
-              description: '启用拼写检查功能',
+              label: t.settings.spellCheck,
+              description: t.settings.spellCheckDesc,
               value: settings.spellCheck,
+              colors: colors,
               onChanged: (value) => notifier.setSpellCheck(value),
             ),
           ],
@@ -85,23 +97,28 @@ class GeneralSettings extends ConsumerWidget {
 
         // AI 助手设置
         _buildSettingsCard(
-          title: 'AI 助手',
+          title: t.settings.aiAssistant,
           icon: Icons.smart_toy,
+          colors: colors,
           children: [
             _buildSwitchSetting(
-              label: '显示悬浮按钮',
-              description: '在界面右下角显示 AI 助手快捷按钮',
+              label: t.settings.showFloatingButton,
+              description: t.settings.showFloatingButtonDesc,
               value: settings.showFloatingButton,
+              colors: colors,
               onChanged: (value) => notifier.setShowFloatingButton(value),
             ),
-            const Divider(height: 24),
+            Divider(height: 24, color: colors.divider),
             _buildDropdownSetting(
-              label: '默认搜索范围',
-              description: '打开 AI 助手时的默认知识库搜索范围',
+              label: t.settings.defaultSearchScope,
+              description: t.settings.defaultSearchScopeDesc,
               value: settings.defaultSearchScope,
-              items: const [
-                DropdownMenuItem(value: 'current', child: Text('当前工作空间')),
-                DropdownMenuItem(value: 'all', child: Text('所有工作空间')),
+              colors: colors,
+              items: [
+                DropdownMenuItem(
+                    value: 'current', child: Text(t.settings.currentWorkspace)),
+                DropdownMenuItem(
+                    value: 'all', child: Text(t.settings.allWorkspaces)),
               ],
               onChanged: (value) {
                 if (value != null) {
@@ -118,13 +135,14 @@ class GeneralSettings extends ConsumerWidget {
   Widget _buildSettingsCard({
     required String title,
     required IconData icon,
+    required AppColors colors,
     required List<Widget> children,
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colors.card,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: colors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -134,18 +152,19 @@ class GeneralSettings extends ConsumerWidget {
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               border: Border(
-                bottom: BorderSide(color: Colors.grey.shade200),
+                bottom: BorderSide(color: colors.border),
               ),
             ),
             child: Row(
               children: [
-                Icon(icon, size: 20, color: Colors.blue.shade600),
+                Icon(icon, size: 20, color: colors.primary),
                 const SizedBox(width: 8),
                 Text(
                   title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
+                    color: colors.textPrimary,
                   ),
                 ),
               ],
@@ -167,6 +186,7 @@ class GeneralSettings extends ConsumerWidget {
     required String label,
     required String description,
     required bool value,
+    required AppColors colors,
     required ValueChanged<bool> onChanged,
   }) {
     return Row(
@@ -177,9 +197,10 @@ class GeneralSettings extends ConsumerWidget {
             children: [
               Text(
                 label,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
+                  color: colors.textPrimary,
                 ),
               ),
               const SizedBox(height: 2),
@@ -187,7 +208,7 @@ class GeneralSettings extends ConsumerWidget {
                 description,
                 style: TextStyle(
                   fontSize: 12,
-                  color: Colors.grey.shade600,
+                  color: colors.textSecondary,
                 ),
               ),
             ],
@@ -196,7 +217,7 @@ class GeneralSettings extends ConsumerWidget {
         Switch(
           value: value,
           onChanged: onChanged,
-          activeTrackColor: Colors.blue.shade600,
+          activeTrackColor: colors.primary,
         ),
       ],
     );
@@ -206,6 +227,7 @@ class GeneralSettings extends ConsumerWidget {
     required String label,
     required String description,
     required T value,
+    required AppColors colors,
     required List<DropdownMenuItem<T>> items,
     required ValueChanged<T?> onChanged,
   }) {
@@ -217,9 +239,10 @@ class GeneralSettings extends ConsumerWidget {
             children: [
               Text(
                 label,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
+                  color: colors.textPrimary,
                 ),
               ),
               const SizedBox(height: 2),
@@ -227,7 +250,7 @@ class GeneralSettings extends ConsumerWidget {
                 description,
                 style: TextStyle(
                   fontSize: 12,
-                  color: Colors.grey.shade600,
+                  color: colors.textSecondary,
                 ),
               ),
             ],
@@ -237,7 +260,7 @@ class GeneralSettings extends ConsumerWidget {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12),
           decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey.shade300),
+            border: Border.all(color: colors.border),
             borderRadius: BorderRadius.circular(8),
           ),
           child: DropdownButton<T>(
@@ -246,6 +269,7 @@ class GeneralSettings extends ConsumerWidget {
             onChanged: onChanged,
             underline: const SizedBox(),
             borderRadius: BorderRadius.circular(8),
+            dropdownColor: colors.dialogBackground,
           ),
         ),
       ],
@@ -259,6 +283,7 @@ class GeneralSettings extends ConsumerWidget {
     required double min,
     required double max,
     required int divisions,
+    required AppColors colors,
     required ValueChanged<double> onChanged,
   }) {
     return Column(
@@ -272,9 +297,10 @@ class GeneralSettings extends ConsumerWidget {
                 children: [
                   Text(
                     label,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
+                      color: colors.textPrimary,
                     ),
                   ),
                   const SizedBox(height: 2),
@@ -282,7 +308,7 @@ class GeneralSettings extends ConsumerWidget {
                     description,
                     style: TextStyle(
                       fontSize: 12,
-                      color: Colors.grey.shade600,
+                      color: colors.textSecondary,
                     ),
                   ),
                 ],
@@ -293,7 +319,7 @@ class GeneralSettings extends ConsumerWidget {
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
-                color: Colors.blue.shade600,
+                color: colors.primary,
               ),
             ),
           ],
@@ -301,10 +327,10 @@ class GeneralSettings extends ConsumerWidget {
         const SizedBox(height: 8),
         SliderTheme(
           data: SliderThemeData(
-            activeTrackColor: Colors.blue.shade600,
-            inactiveTrackColor: Colors.grey.shade300,
-            thumbColor: Colors.blue.shade600,
-            overlayColor: Colors.blue.shade100,
+            activeTrackColor: colors.primary,
+            inactiveTrackColor: colors.border,
+            thumbColor: colors.primary,
+            overlayColor: colors.primaryLight,
           ),
           child: Slider(
             value: value,
