@@ -39,7 +39,10 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
       appBar: AppBar(
-        title: const Text('设置'),
+        title: Align(
+          alignment: AlignmentGeometry.centerLeft,
+          child: Text('设置'),
+        ),
         backgroundColor: Colors.white,
         elevation: 1,
         scrolledUnderElevation: 0,

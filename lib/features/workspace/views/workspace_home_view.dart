@@ -1,9 +1,16 @@
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:archive/archive.dart';
+import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:xml/xml.dart';
 
 import '../../../data/datasources/objectbox/entities/document_meta.dart';
 import '../../../data/datasources/objectbox/entities/workspace.dart';
+import '../../../utils/app_theme.dart';
 import '../../editor/notifiers/document_tree_notifier.dart';
 import '../notifiers/workspace_notifier.dart';
 import '../widgets/create_workspace_dialog.dart';
@@ -64,20 +71,21 @@ class _WorkspaceHomeViewState extends ConsumerState<WorkspaceHomeView> {
   }
 
   Widget _buildNoWorkspaceSelected() {
+    final colors = context.colors;
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.workspaces_outline, size: 64, color: Colors.grey.shade400),
+          Icon(Icons.workspaces_outline, size: 64, color: colors.textHint),
           const SizedBox(height: 16),
           Text(
             '选择一个工作空间开始',
-            style: TextStyle(fontSize: 18, color: Colors.grey.shade600),
+            style: TextStyle(fontSize: 18, color: colors.textSecondary),
           ),
           const SizedBox(height: 8),
           Text(
             '从左侧选择或点击 + 创建工作空间',
-            style: TextStyle(fontSize: 14, color: Colors.grey.shade500),
+            style: TextStyle(fontSize: 14, color: colors.textHint),
           ),
         ],
       ),
@@ -85,31 +93,33 @@ class _WorkspaceHomeViewState extends ConsumerState<WorkspaceHomeView> {
   }
 
   Widget _buildWorkspaceContent(Workspace workspace) {
+    final colors = context.colors;
     final colorTheme = _parseColorTheme(workspace.colorTheme);
     final treeState = ref.watch(documentTreeProvider);
 
     return Column(
       children: [
         // 顶部工具栏
-        _buildToolbar(workspace, colorTheme),
+        _buildToolbar(workspace, colorTheme, colors),
         // 文档列表区域
         Expanded(
           child: treeState.isLoading
               ? const Center(child: CircularProgressIndicator(strokeWidth: 2))
               : treeState.rootNodes.isEmpty
-                  ? _buildEmptyDocuments(colorTheme)
-                  : _buildDocumentGrid(treeState, colorTheme),
+                  ? _buildEmptyDocuments(colorTheme, colors)
+                  : _buildDocumentGrid(treeState, colorTheme, colors),
         ),
       ],
     );
   }
 
-  Widget _buildToolbar(Workspace workspace, Color colorTheme) {
+  Widget _buildToolbar(
+      Workspace workspace, Color colorTheme, AppColors colors) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
+        color: colors.surface,
+        border: Border(bottom: BorderSide(color: colors.border)),
       ),
       child: Row(
         children: [
@@ -139,15 +149,18 @@ class _WorkspaceHomeViewState extends ConsumerState<WorkspaceHomeView> {
           const SizedBox(width: 12),
           Text(
             workspace.name,
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+            style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: colors.textPrimary),
           ),
           const Spacer(),
           // 新建按钮
-          _buildAddButton(colorTheme),
+          _buildAddButton(colorTheme, colors),
           const SizedBox(width: 8),
           IconButton(
             icon: Icon(Icons.settings_outlined,
-                size: 20, color: Colors.grey.shade600),
+                size: 20, color: colors.textSecondary),
             onPressed: () => _showWorkspaceSettings(context, workspace.uuid),
             tooltip: '设置',
           ),
@@ -156,15 +169,16 @@ class _WorkspaceHomeViewState extends ConsumerState<WorkspaceHomeView> {
     );
   }
 
-  Widget _buildAddButton(Color colorTheme) {
+  Widget _buildAddButton(Color colorTheme, AppColors colors) {
     return PopupMenuButton<String>(
       offset: const Offset(0, 40),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      color: colors.dialogBackground,
       onSelected: (value) {
         if (value == 'document') {
           _showCreateDocumentDialog(context);
-        } else if (value == 'folder') {
-          _showCreateFolderDialog(context);
+        } else if (value == 'import') {
+          _importDocument(context);
         }
       },
       itemBuilder: (context) => [
@@ -172,21 +186,19 @@ class _WorkspaceHomeViewState extends ConsumerState<WorkspaceHomeView> {
           value: 'document',
           child: Row(
             children: [
-              Icon(Icons.description_outlined,
-                  size: 18, color: Colors.blue.shade400),
+              Icon(Icons.description_outlined, size: 18, color: colors.primary),
               const SizedBox(width: 10),
-              const Text('新建文档'),
+              Text('新建文档', style: TextStyle(color: colors.textPrimary)),
             ],
           ),
         ),
         PopupMenuItem(
-          value: 'folder',
+          value: 'import',
           child: Row(
             children: [
-              Icon(Icons.folder_outlined,
-                  size: 18, color: Colors.amber.shade600),
+              Icon(Icons.file_upload_outlined, size: 18, color: colors.success),
               const SizedBox(width: 10),
-              const Text('新建文件夹'),
+              Text('导入文档', style: TextStyle(color: colors.textPrimary)),
             ],
           ),
         ),
@@ -197,21 +209,22 @@ class _WorkspaceHomeViewState extends ConsumerState<WorkspaceHomeView> {
           color: colorTheme,
           borderRadius: BorderRadius.circular(8),
         ),
-        child: const Row(
+        child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.add, size: 18, color: Colors.white),
-            SizedBox(width: 6),
+            Icon(Icons.add, size: 18, color: colors.dialogBackground),
+            const SizedBox(width: 6),
             Text('新建',
                 style: TextStyle(
-                    color: Colors.white, fontWeight: FontWeight.w500)),
+                    color: colors.dialogBackground,
+                    fontWeight: FontWeight.w500)),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildEmptyDocuments(Color colorTheme) {
+  Widget _buildEmptyDocuments(Color colorTheme, AppColors colors) {
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -229,19 +242,20 @@ class _WorkspaceHomeViewState extends ConsumerState<WorkspaceHomeView> {
           const SizedBox(height: 20),
           Text(
             '还没有文档',
-            style: TextStyle(fontSize: 16, color: Colors.grey.shade600),
+            style: TextStyle(fontSize: 16, color: colors.textSecondary),
           ),
           const SizedBox(height: 8),
           Text(
             '点击上方「新建」按钮创建第一个文档',
-            style: TextStyle(fontSize: 13, color: Colors.grey.shade500),
+            style: TextStyle(fontSize: 13, color: colors.textHint),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildDocumentGrid(DocumentTreeState treeState, Color colorTheme) {
+  Widget _buildDocumentGrid(
+      DocumentTreeState treeState, Color colorTheme, AppColors colors) {
     // 扁平化显示所有文档和文件夹
     final items = <_DocumentItem>[];
     _flattenTree(treeState.rootNodes, items);
@@ -258,7 +272,7 @@ class _WorkspaceHomeViewState extends ConsumerState<WorkspaceHomeView> {
         itemCount: items.length,
         itemBuilder: (context, index) {
           final item = items[index];
-          return _buildDocumentCard(item, colorTheme, treeState);
+          return _buildDocumentCard(item, colorTheme, treeState, colors);
         },
       ),
     );
@@ -273,8 +287,8 @@ class _WorkspaceHomeViewState extends ConsumerState<WorkspaceHomeView> {
     }
   }
 
-  Widget _buildDocumentCard(
-      _DocumentItem item, Color colorTheme, DocumentTreeState treeState) {
+  Widget _buildDocumentCard(_DocumentItem item, Color colorTheme,
+      DocumentTreeState treeState, AppColors colors) {
     final doc = item.document;
     final isSelected = treeState.selectedDocumentId == doc.uuid;
 
@@ -299,10 +313,10 @@ class _WorkspaceHomeViewState extends ConsumerState<WorkspaceHomeView> {
         decoration: BoxDecoration(
           color: isSelected
               ? colorTheme.withValues(alpha: 0.08)
-              : Colors.grey.shade50,
+              : colors.surfaceVariant,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? colorTheme : Colors.grey.shade200,
+            color: isSelected ? colorTheme : colors.border,
             width: isSelected ? 1.5 : 1,
           ),
         ),
@@ -313,15 +327,15 @@ class _WorkspaceHomeViewState extends ConsumerState<WorkspaceHomeView> {
               width: 48,
               height: 48,
               decoration: BoxDecoration(
-                color:
-                    doc.isFolder ? Colors.amber.shade50 : Colors.blue.shade50,
+                color: doc.isFolder
+                    ? colors.warning.withValues(alpha: 0.1)
+                    : colors.primary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
                 doc.isFolder ? Icons.folder_rounded : Icons.description_rounded,
                 size: 28,
-                color:
-                    doc.isFolder ? Colors.amber.shade600 : Colors.blue.shade400,
+                color: doc.isFolder ? colors.warning : colors.primary,
               ),
             ),
             const SizedBox(height: 12),
@@ -332,7 +346,7 @@ class _WorkspaceHomeViewState extends ConsumerState<WorkspaceHomeView> {
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w500,
-                  color: Colors.grey.shade800,
+                  color: colors.textPrimary,
                 ),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
@@ -343,7 +357,7 @@ class _WorkspaceHomeViewState extends ConsumerState<WorkspaceHomeView> {
               const SizedBox(height: 4),
               Text(
                 '${doc.wordCount} 字',
-                style: TextStyle(fontSize: 11, color: Colors.grey.shade500),
+                style: TextStyle(fontSize: 11, color: colors.textHint),
               ),
             ],
           ],
@@ -354,30 +368,33 @@ class _WorkspaceHomeViewState extends ConsumerState<WorkspaceHomeView> {
 
   void _showContextMenu(
       BuildContext context, Offset position, DocumentMeta doc) {
+    final colors = context.colors;
     showMenu(
       context: context,
       position: RelativeRect.fromLTRB(
           position.dx, position.dy, position.dx + 1, position.dy + 1),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      color: colors.dialogBackground,
       items: [
         if (!doc.isFolder)
           PopupMenuItem(
             onTap: () => context.push('/editor', extra: doc),
-            child: const Row(
+            child: Row(
               children: [
-                Icon(Icons.edit, size: 18),
-                SizedBox(width: 10),
-                Text('编辑'),
+                Icon(Icons.edit, size: 18, color: colors.textSecondary),
+                const SizedBox(width: 10),
+                Text('编辑', style: TextStyle(color: colors.textPrimary)),
               ],
             ),
           ),
         PopupMenuItem(
           onTap: () => _showRenameDialog(context, doc),
-          child: const Row(
+          child: Row(
             children: [
-              Icon(Icons.drive_file_rename_outline, size: 18),
-              SizedBox(width: 10),
-              Text('重命名'),
+              Icon(Icons.drive_file_rename_outline,
+                  size: 18, color: colors.textSecondary),
+              const SizedBox(width: 10),
+              Text('重命名', style: TextStyle(color: colors.textPrimary)),
             ],
           ),
         ),
@@ -385,9 +402,9 @@ class _WorkspaceHomeViewState extends ConsumerState<WorkspaceHomeView> {
           onTap: () => _showDeleteDialog(context, doc),
           child: Row(
             children: [
-              Icon(Icons.delete_outline, size: 18, color: Colors.red.shade400),
+              Icon(Icons.delete_outline, size: 18, color: colors.error),
               const SizedBox(width: 10),
-              Text('删除', style: TextStyle(color: Colors.red.shade400)),
+              Text('删除', style: TextStyle(color: colors.error)),
             ],
           ),
         ),
@@ -397,6 +414,7 @@ class _WorkspaceHomeViewState extends ConsumerState<WorkspaceHomeView> {
 
   void _showCreateDocumentDialog(BuildContext context) {
     final controller = TextEditingController();
+    final colors = context.colors;
     showGeneralDialog(
       context: context,
       barrierDismissible: true,
@@ -407,6 +425,7 @@ class _WorkspaceHomeViewState extends ConsumerState<WorkspaceHomeView> {
         title: '新建文档',
         hint: '输入文档名称',
         controller: controller,
+        colors: colors,
         onConfirm: () {
           if (controller.text.trim().isNotEmpty) {
             Navigator.pop(context);
@@ -419,32 +438,82 @@ class _WorkspaceHomeViewState extends ConsumerState<WorkspaceHomeView> {
     );
   }
 
-  void _showCreateFolderDialog(BuildContext context) {
-    final controller = TextEditingController();
-    showGeneralDialog(
-      context: context,
-      barrierDismissible: true,
-      barrierLabel: '关闭',
-      barrierColor: Colors.black54,
-      transitionDuration: const Duration(milliseconds: 200),
-      pageBuilder: (context, _, __) => _buildInputDialog(
-        title: '新建文件夹',
-        hint: '输入文件夹名称',
-        controller: controller,
-        onConfirm: () {
-          if (controller.text.trim().isNotEmpty) {
-            Navigator.pop(context);
-            ref
-                .read(documentTreeProvider.notifier)
-                .createFolder(controller.text.trim());
-          }
-        },
-      ),
+  Future<void> _importDocument(BuildContext context) async {
+    const typeGroup = XTypeGroup(
+      label: '文档',
+      extensions: ['txt', 'md', 'markdown', 'docx', 'doc'],
     );
+
+    final file = await openFile(acceptedTypeGroups: [typeGroup]);
+
+    if (file != null) {
+      try {
+        String content = '';
+        final filePath = file.path;
+        final extension = filePath.split('.').last.toLowerCase();
+
+        if (extension == 'txt' ||
+            extension == 'md' ||
+            extension == 'markdown') {
+          // 纯文本和 Markdown 文件直接读取
+          content = await File(filePath).readAsString();
+        } else if (extension == 'docx' || extension == 'doc') {
+          // Word 文档需要解析
+          content = await _parseDocxFile(filePath);
+        }
+
+        if (content.isNotEmpty && mounted) {
+          // 使用文件名（不含扩展名）作为文档标题
+          final fileName = file.name.replaceAll(RegExp(r'\.[^.]+$'), '');
+          await ref
+              .read(documentTreeProvider.notifier)
+              .createDocumentWithContent(fileName, content);
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('导入失败: $e'), backgroundColor: Colors.red),
+          );
+        }
+      }
+    }
+  }
+
+  Future<String> _parseDocxFile(String filePath) async {
+    try {
+      final bytes = await File(filePath).readAsBytes();
+      final archive = ZipDecoder().decodeBytes(bytes);
+
+      // 查找 word/document.xml
+      final documentFile = archive.files.firstWhere(
+        (file) => file.name == 'word/document.xml',
+        orElse: () => throw Exception('无效的 docx 文件'),
+      );
+
+      final xmlContent = utf8.decode(documentFile.content as List<int>);
+      final document = XmlDocument.parse(xmlContent);
+
+      // 提取所有文本内容
+      final buffer = StringBuffer();
+      final paragraphs = document.findAllElements('w:p');
+
+      for (final p in paragraphs) {
+        final texts = p.findAllElements('w:t');
+        for (final t in texts) {
+          buffer.write(t.innerText);
+        }
+        buffer.writeln();
+      }
+
+      return buffer.toString().trim();
+    } catch (e) {
+      throw Exception('解析 Word 文档失败: $e');
+    }
   }
 
   void _showRenameDialog(BuildContext context, DocumentMeta doc) {
     final controller = TextEditingController(text: doc.title);
+    final colors = context.colors;
     showGeneralDialog(
       context: context,
       barrierDismissible: true,
@@ -455,6 +524,7 @@ class _WorkspaceHomeViewState extends ConsumerState<WorkspaceHomeView> {
         title: '重命名',
         hint: '输入新名称',
         controller: controller,
+        colors: colors,
         onConfirm: () {
           if (controller.text.trim().isNotEmpty) {
             Navigator.pop(context);
@@ -468,6 +538,7 @@ class _WorkspaceHomeViewState extends ConsumerState<WorkspaceHomeView> {
   }
 
   void _showDeleteDialog(BuildContext context, DocumentMeta doc) {
+    final colors = context.colors;
     showGeneralDialog(
       context: context,
       barrierDismissible: true,
@@ -481,24 +552,26 @@ class _WorkspaceHomeViewState extends ConsumerState<WorkspaceHomeView> {
             width: 320,
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: colors.dialogBackground,
               borderRadius: BorderRadius.circular(16),
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(Icons.warning_amber_rounded,
-                    size: 48, color: Colors.red.shade400),
+                    size: 48, color: colors.error),
                 const SizedBox(height: 16),
                 Text(
                   '确定删除「${doc.title}」？',
-                  style: const TextStyle(
-                      fontSize: 16, fontWeight: FontWeight.w600),
+                  style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: colors.textPrimary),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   doc.isFolder ? '文件夹内的所有内容也会被删除' : '此操作不可撤销',
-                  style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
+                  style: TextStyle(fontSize: 13, color: colors.textSecondary),
                 ),
                 const SizedBox(height: 24),
                 Row(
@@ -506,7 +579,8 @@ class _WorkspaceHomeViewState extends ConsumerState<WorkspaceHomeView> {
                     Expanded(
                       child: TextButton(
                         onPressed: () => Navigator.pop(context),
-                        child: const Text('取消'),
+                        child: Text('取消',
+                            style: TextStyle(color: colors.textSecondary)),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -519,8 +593,8 @@ class _WorkspaceHomeViewState extends ConsumerState<WorkspaceHomeView> {
                               .deleteDocument(doc.uuid);
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.red.shade400,
-                          foregroundColor: Colors.white,
+                          backgroundColor: colors.error,
+                          foregroundColor: colors.dialogBackground,
                         ),
                         child: const Text('删除'),
                       ),
@@ -539,6 +613,7 @@ class _WorkspaceHomeViewState extends ConsumerState<WorkspaceHomeView> {
     required String title,
     required String hint,
     required TextEditingController controller,
+    required AppColors colors,
     required VoidCallback onConfirm,
   }) {
     return Center(
@@ -548,7 +623,7 @@ class _WorkspaceHomeViewState extends ConsumerState<WorkspaceHomeView> {
           width: 360,
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: colors.dialogBackground,
             borderRadius: BorderRadius.circular(16),
           ),
           child: Column(
@@ -556,27 +631,31 @@ class _WorkspaceHomeViewState extends ConsumerState<WorkspaceHomeView> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(title,
-                  style: const TextStyle(
-                      fontSize: 17, fontWeight: FontWeight.w600)),
+                  style: TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w600,
+                      color: colors.textPrimary)),
               const SizedBox(height: 16),
               TextField(
                 controller: controller,
                 autofocus: true,
+                style: TextStyle(color: colors.textPrimary),
                 decoration: InputDecoration(
                   hintText: hint,
+                  hintStyle: TextStyle(color: colors.textHint),
                   filled: true,
-                  fillColor: Colors.grey.shade50,
+                  fillColor: colors.inputBackground,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide(color: Colors.grey.shade200),
+                    borderSide: BorderSide(color: colors.inputBorder),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide(color: Colors.grey.shade200),
+                    borderSide: BorderSide(color: colors.inputBorder),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
-                    borderSide: const BorderSide(color: Colors.blue),
+                    borderSide: BorderSide(color: colors.primary),
                   ),
                   contentPadding:
                       const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
@@ -586,12 +665,13 @@ class _WorkspaceHomeViewState extends ConsumerState<WorkspaceHomeView> {
               const SizedBox(height: 20),
               Row(
                 children: [
-                  Spacer(),
+                  const Spacer(),
                   SizedBox(
                     width: 80,
                     child: TextButton(
                       onPressed: () => Navigator.pop(context),
-                      child: const Text('取消'),
+                      child: Text('取消',
+                          style: TextStyle(color: colors.textSecondary)),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -600,8 +680,8 @@ class _WorkspaceHomeViewState extends ConsumerState<WorkspaceHomeView> {
                     child: ElevatedButton(
                       onPressed: onConfirm,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue,
-                        foregroundColor: Colors.white,
+                        backgroundColor: colors.primary,
+                        foregroundColor: colors.dialogBackground,
                       ),
                       child: const Text('确定'),
                     ),

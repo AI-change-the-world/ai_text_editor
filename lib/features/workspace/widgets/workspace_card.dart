@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../data/datasources/objectbox/entities/workspace.dart';
+import '../../../utils/app_theme.dart';
 
 /// 工作空间卡片组件
 /// 显示工作空间的图标、名称、描述和最近活动
@@ -25,6 +26,7 @@ class WorkspaceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     final colorTheme = _parseColorTheme(workspace.colorTheme);
 
     return MouseRegion(
@@ -38,10 +40,10 @@ class WorkspaceCard extends StatelessWidget {
           decoration: BoxDecoration(
             color: isSelected
                 ? colorTheme.withValues(alpha: 0.15)
-                : Colors.grey.shade50,
+                : colors.surfaceVariant,
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
-              color: isSelected ? colorTheme : Colors.grey.shade200,
+              color: isSelected ? colorTheme : colors.border,
               width: isSelected ? 2 : 1,
             ),
           ),
@@ -64,7 +66,8 @@ class WorkspaceCard extends StatelessWidget {
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
-                              color: isSelected ? colorTheme : Colors.black87,
+                              color:
+                                  isSelected ? colorTheme : colors.textPrimary,
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -74,7 +77,7 @@ class WorkspaceCard extends StatelessWidget {
                           Icon(
                             Icons.push_pin,
                             size: 14,
-                            color: Colors.orange.shade400,
+                            color: colors.warning,
                           ),
                       ],
                     ),
@@ -85,7 +88,7 @@ class WorkspaceCard extends StatelessWidget {
                         workspace.description!,
                         style: TextStyle(
                           fontSize: 12,
-                          color: Colors.grey.shade600,
+                          color: colors.textSecondary,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -96,14 +99,14 @@ class WorkspaceCard extends StatelessWidget {
                       _formatLastAccessed(workspace.lastAccessedAt),
                       style: TextStyle(
                         fontSize: 11,
-                        color: Colors.grey.shade500,
+                        color: colors.textHint,
                       ),
                     ),
                   ],
                 ),
               ),
               // 操作按钮
-              _buildActionMenu(context),
+              _buildActionMenu(context, colors),
             ],
           ),
         ),
@@ -154,18 +157,19 @@ class WorkspaceCard extends StatelessWidget {
     );
   }
 
-  Widget _buildActionMenu(BuildContext context) {
+  Widget _buildActionMenu(BuildContext context, AppColors colors) {
     return PopupMenuButton<String>(
       icon: Icon(
         Icons.more_vert,
         size: 18,
-        color: Colors.grey.shade600,
+        color: colors.textSecondary,
       ),
       padding: EdgeInsets.zero,
       constraints: const BoxConstraints(minWidth: 120),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8),
       ),
+      color: colors.dialogBackground,
       onSelected: (value) {
         switch (value) {
           case 'pin':
@@ -188,12 +192,12 @@ class WorkspaceCard extends StatelessWidget {
               Icon(
                 workspace.isPinned ? Icons.push_pin_outlined : Icons.push_pin,
                 size: 16,
-                color: Colors.orange.shade400,
+                color: colors.warning,
               ),
               const SizedBox(width: 8),
               Text(
                 workspace.isPinned ? '取消置顶' : '置顶',
-                style: const TextStyle(fontSize: 13),
+                style: TextStyle(fontSize: 13, color: colors.textPrimary),
               ),
             ],
           ),
@@ -206,12 +210,12 @@ class WorkspaceCard extends StatelessWidget {
               Icon(
                 Icons.settings,
                 size: 16,
-                color: Colors.grey.shade600,
+                color: colors.textSecondary,
               ),
               const SizedBox(width: 8),
-              const Text(
+              Text(
                 '设置',
-                style: TextStyle(fontSize: 13),
+                style: TextStyle(fontSize: 13, color: colors.textPrimary),
               ),
             ],
           ),
@@ -225,12 +229,12 @@ class WorkspaceCard extends StatelessWidget {
               Icon(
                 Icons.archive,
                 size: 16,
-                color: Colors.red.shade400,
+                color: colors.error,
               ),
               const SizedBox(width: 8),
               Text(
                 '归档',
-                style: TextStyle(fontSize: 13, color: Colors.red.shade400),
+                style: TextStyle(fontSize: 13, color: colors.error),
               ),
             ],
           ),

@@ -13,6 +13,7 @@ import '../../../init.dart';
 import '../../../notifiers/app_body_notifier.dart';
 import '../../../notifiers/editor_notifier.dart';
 import '../../../objectbox/recent_files.dart';
+import '../../../utils/app_theme.dart';
 import '../../../utils/toast_utils.dart';
 
 /// 新闻项模型
@@ -105,6 +106,7 @@ class _WelcomeDialogState extends ConsumerState<WelcomeDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     final appBodyState = ref.watch(appBodyProvider);
     final recentFiles = ref.watch(recentFilesProvider);
     final newsAsync = ref.watch(newsProvider);
@@ -117,7 +119,7 @@ class _WelcomeDialogState extends ConsumerState<WelcomeDialog> {
           width: 720,
           height: 500,
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: colors.dialogBackground,
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
@@ -134,11 +136,11 @@ class _WelcomeDialogState extends ConsumerState<WelcomeDialog> {
                 // 左侧面板
                 SizedBox(
                   width: 280,
-                  child: _buildLeftPanel(appBodyState, recentFiles),
+                  child: _buildLeftPanel(appBodyState, recentFiles, colors),
                 ),
                 // 右侧：今日热点
                 Expanded(
-                  child: _buildNewsPanel(newsAsync),
+                  child: _buildNewsPanel(newsAsync, colors),
                 ),
               ],
             ),
@@ -148,14 +150,14 @@ class _WelcomeDialogState extends ConsumerState<WelcomeDialog> {
     );
   }
 
-  Widget _buildLeftPanel(
-      AppBodyState appBodyState, List<RecentFiles> recentFiles) {
+  Widget _buildLeftPanel(AppBodyState appBodyState,
+      List<RecentFiles> recentFiles, AppColors colors) {
     final recentTwo = recentFiles.take(2).toList();
 
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.grey.shade50,
+        color: colors.surfaceVariant,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -164,14 +166,17 @@ class _WelcomeDialogState extends ConsumerState<WelcomeDialog> {
           Text.rich(
             TextSpan(
               text: "${APPConfig.appName}\n",
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              children: const [
+              style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: colors.textPrimary),
+              children: [
                 TextSpan(
                   text: "Enjoy writing with AI",
                   style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.normal,
-                      color: Colors.grey),
+                      color: colors.textHint),
                 ),
               ],
             ),
@@ -181,11 +186,11 @@ class _WelcomeDialogState extends ConsumerState<WelcomeDialog> {
           _buildDayNightBanner(appBodyState),
           const SizedBox(height: 12),
           // 名言
-          Expanded(child: _buildQuote(appBodyState)),
+          Expanded(child: _buildQuote(appBodyState, colors)),
           // 近期文件
           if (recentTwo.isNotEmpty) ...[
             const SizedBox(height: 8),
-            ...recentTwo.map((file) => _buildRecentFileLink(file)),
+            ...recentTwo.map((file) => _buildRecentFileLink(file, colors)),
           ],
           const SizedBox(height: 12),
           // 进入按钮
@@ -194,8 +199,8 @@ class _WelcomeDialogState extends ConsumerState<WelcomeDialog> {
             child: ElevatedButton(
               onPressed: () => Navigator.of(context).pop(),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue,
-                foregroundColor: Colors.white,
+                backgroundColor: colors.primary,
+                foregroundColor: colors.dialogBackground,
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8)),
@@ -249,7 +254,7 @@ class _WelcomeDialogState extends ConsumerState<WelcomeDialog> {
     );
   }
 
-  Widget _buildQuote(AppBodyState state) {
+  Widget _buildQuote(AppBodyState state, AppColors colors) {
     if (state.word.isEmpty) return const SizedBox.shrink();
 
     return AnimatedOpacity(
@@ -267,7 +272,7 @@ class _WelcomeDialogState extends ConsumerState<WelcomeDialog> {
             style: TextStyle(
               fontFamily: state.region == "中国" ? "song" : null,
               height: 1.5,
-              color: Colors.grey.shade700,
+              color: colors.textSecondary,
             ),
           ),
           if (state.from.isNotEmpty) ...[
@@ -276,7 +281,7 @@ class _WelcomeDialogState extends ConsumerState<WelcomeDialog> {
               alignment: Alignment.centerRight,
               child: Text(
                 "—— ${state.from}",
-                style: TextStyle(fontSize: 11, color: Colors.grey.shade500),
+                style: TextStyle(fontSize: 11, color: colors.textHint),
               ),
             ),
           ],
@@ -285,7 +290,8 @@ class _WelcomeDialogState extends ConsumerState<WelcomeDialog> {
     );
   }
 
-  Widget _buildNewsPanel(AsyncValue<List<NewsItem>> newsAsync) {
+  Widget _buildNewsPanel(
+      AsyncValue<List<NewsItem>> newsAsync, AppColors colors) {
     return Container(
       padding: const EdgeInsets.all(20),
       child: Column(
@@ -295,10 +301,13 @@ class _WelcomeDialogState extends ConsumerState<WelcomeDialog> {
           Row(
             children: [
               Icon(Icons.local_fire_department,
-                  color: Colors.orange.shade600, size: 22),
+                  color: colors.warning, size: 22),
               const SizedBox(width: 8),
-              const Text("今日热点",
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+              Text("今日热点",
+                  style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: colors.textPrimary)),
             ],
           ),
           const SizedBox(height: 12),
@@ -308,17 +317,17 @@ class _WelcomeDialogState extends ConsumerState<WelcomeDialog> {
               data: (news) => news.isEmpty
                   ? Center(
                       child: Text('暂无热点',
-                          style: TextStyle(color: Colors.grey.shade500)))
+                          style: TextStyle(color: colors.textHint)))
                   : ListView.builder(
                       itemCount: news.length,
                       itemBuilder: (context, index) =>
-                          _buildNewsItem(index + 1, news[index]),
+                          _buildNewsItem(index + 1, news[index], colors),
                     ),
               loading: () => const Center(
                   child: CircularProgressIndicator(strokeWidth: 2)),
               error: (_, __) => Center(
-                  child: Text('加载失败',
-                      style: TextStyle(color: Colors.grey.shade500))),
+                  child:
+                      Text('加载失败', style: TextStyle(color: colors.textHint))),
             ),
           ),
         ],
@@ -326,7 +335,7 @@ class _WelcomeDialogState extends ConsumerState<WelcomeDialog> {
     );
   }
 
-  Widget _buildNewsItem(int rank, NewsItem news) {
+  Widget _buildNewsItem(int rank, NewsItem news, AppColors colors) {
     final isTop3 = rank <= 3;
 
     return MouseRegion(
@@ -338,7 +347,9 @@ class _WelcomeDialogState extends ConsumerState<WelcomeDialog> {
           padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(6),
-            color: isTop3 ? Colors.orange.shade50 : Colors.grey.shade50,
+            color: isTop3
+                ? colors.warning.withValues(alpha: 0.1)
+                : colors.surfaceVariant,
           ),
           child: Row(
             children: [
@@ -346,14 +357,14 @@ class _WelcomeDialogState extends ConsumerState<WelcomeDialog> {
                 width: 22,
                 height: 22,
                 decoration: BoxDecoration(
-                  color: isTop3 ? Colors.orange.shade400 : Colors.grey.shade400,
+                  color: isTop3 ? colors.warning : colors.textHint,
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Center(
                   child: Text(
                     '$rank',
-                    style: const TextStyle(
-                        color: Colors.white,
+                    style: TextStyle(
+                        color: colors.dialogBackground,
                         fontSize: 11,
                         fontWeight: FontWeight.bold),
                   ),
@@ -368,6 +379,7 @@ class _WelcomeDialogState extends ConsumerState<WelcomeDialog> {
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: isTop3 ? FontWeight.w500 : FontWeight.normal,
+                    color: colors.textPrimary,
                   ),
                 ),
               ),
@@ -380,7 +392,7 @@ class _WelcomeDialogState extends ConsumerState<WelcomeDialog> {
 
   String _formatTime(int value) => value < 10 ? "0$value" : "$value";
 
-  Widget _buildRecentFileLink(RecentFiles file) {
+  Widget _buildRecentFileLink(RecentFiles file, AppColors colors) {
     final fileName = file.path.split(Platform.pathSeparator).last;
 
     return Padding(
@@ -395,9 +407,9 @@ class _WelcomeDialogState extends ConsumerState<WelcomeDialog> {
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
               fontSize: 12,
-              color: Colors.blue.shade600,
+              color: colors.primary,
               decoration: TextDecoration.underline,
-              decorationColor: Colors.blue.shade600,
+              decorationColor: colors.primary,
             ),
           ),
         ),

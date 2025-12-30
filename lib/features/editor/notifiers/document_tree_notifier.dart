@@ -198,6 +198,32 @@ class DocumentTreeNotifier extends Notifier<DocumentTreeState> {
     }
   }
 
+  /// 创建带内容的新文档（用于导入）
+  Future<DocumentMeta?> createDocumentWithContent(String title, String content,
+      {String? parentFolderId}) async {
+    final workspaceState = ref.read(workspaceProvider);
+    final currentWorkspace = workspaceState.currentWorkspace;
+
+    if (currentWorkspace == null) return null;
+
+    try {
+      final document = await _documentService.createDocument(
+        currentWorkspace.uuid,
+        CreateDocumentRequest(
+          title: title,
+          parentFolderId: parentFolderId,
+          initialContent: content,
+        ),
+      );
+      await loadDocuments();
+      selectDocument(document.uuid);
+      return document;
+    } catch (e) {
+      state = state.copyWith(error: e.toString());
+      return null;
+    }
+  }
+
   /// 创建新文件夹
   Future<DocumentMeta?> createFolder(String name,
       {String? parentFolderId}) async {

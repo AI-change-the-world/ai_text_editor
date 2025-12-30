@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../services/workspace_service.dart';
+import '../../../utils/app_theme.dart';
 import '../../../utils/name_to_icon.dart';
 import '../notifiers/workspace_notifier.dart';
 
@@ -108,6 +109,7 @@ class _CreateWorkspaceDialogContentState
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Center(
       child: Material(
         color: Colors.transparent,
@@ -115,7 +117,7 @@ class _CreateWorkspaceDialogContentState
           width: 400,
           margin: const EdgeInsets.all(24),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: colors.dialogBackground,
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
@@ -128,22 +130,22 @@ class _CreateWorkspaceDialogContentState
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              _buildHeader(),
+              _buildHeader(colors),
               Flexible(
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildIconSection(),
+                      _buildIconSection(colors),
                       const SizedBox(height: 24),
-                      _buildNameField(),
+                      _buildNameField(colors),
                       const SizedBox(height: 16),
-                      _buildDescriptionField(),
+                      _buildDescriptionField(colors),
                       const SizedBox(height: 24),
-                      _buildColorSection(),
+                      _buildColorSection(colors),
                       const SizedBox(height: 28),
-                      _buildActions(),
+                      _buildActions(colors),
                     ],
                   ),
                 ),
@@ -155,12 +157,12 @@ class _CreateWorkspaceDialogContentState
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(AppColors colors) {
     return Container(
       padding: const EdgeInsets.fromLTRB(24, 20, 16, 16),
       decoration: BoxDecoration(
         border: Border(
-          bottom: BorderSide(color: Colors.grey.shade100),
+          bottom: BorderSide(color: colors.border),
         ),
       ),
       child: Row(
@@ -179,17 +181,17 @@ class _CreateWorkspaceDialogContentState
             ),
           ),
           const SizedBox(width: 12),
-          const Text(
+          Text(
             '新建工作空间',
             style: TextStyle(
               fontSize: 17,
               fontWeight: FontWeight.w600,
-              color: Color(0xFF1F2937),
+              color: colors.textPrimary,
             ),
           ),
           const Spacer(),
           IconButton(
-            icon: Icon(Icons.close_rounded, color: Colors.grey.shade500),
+            icon: Icon(Icons.close_rounded, color: colors.textSecondary),
             onPressed: () => Navigator.of(context).pop(),
             splashRadius: 20,
           ),
@@ -198,7 +200,7 @@ class _CreateWorkspaceDialogContentState
     );
   }
 
-  Widget _buildIconSection() {
+  Widget _buildIconSection(AppColors colors) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -226,7 +228,7 @@ class _CreateWorkspaceDialogContentState
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w500,
-                  color: Colors.grey.shade700,
+                  color: colors.textSecondary,
                 ),
               ),
               const SizedBox(height: 10),
@@ -234,11 +236,13 @@ class _CreateWorkspaceDialogContentState
                 spacing: 6,
                 runSpacing: 6,
                 children: [
-                  _buildEmojiButton(null, isSelected: _selectedEmoji == null),
+                  _buildEmojiButton(null,
+                      isSelected: _selectedEmoji == null, colors: colors),
                   ..._predefinedEmojis.map(
                     (emoji) => _buildEmojiButton(
                       emoji,
                       isSelected: _selectedEmoji == emoji,
+                      colors: colors,
                     ),
                   ),
                 ],
@@ -281,7 +285,8 @@ class _CreateWorkspaceDialogContentState
     }
   }
 
-  Widget _buildEmojiButton(String? emoji, {required bool isSelected}) {
+  Widget _buildEmojiButton(String? emoji,
+      {required bool isSelected, required AppColors colors}) {
     return GestureDetector(
       onTap: () {
         setState(() {
@@ -298,10 +303,10 @@ class _CreateWorkspaceDialogContentState
         decoration: BoxDecoration(
           color: isSelected
               ? _selectedColor.withValues(alpha: 0.15)
-              : Colors.grey.shade50,
+              : colors.inputBackground,
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
-            color: isSelected ? _selectedColor : Colors.grey.shade200,
+            color: isSelected ? _selectedColor : colors.border,
             width: isSelected ? 1.5 : 1,
           ),
         ),
@@ -311,14 +316,14 @@ class _CreateWorkspaceDialogContentState
               : Icon(
                   Icons.auto_awesome_rounded,
                   size: 18,
-                  color: isSelected ? _selectedColor : Colors.grey.shade400,
+                  color: isSelected ? _selectedColor : colors.textHint,
                 ),
         ),
       ),
     );
   }
 
-  Widget _buildNameField() {
+  Widget _buildNameField(AppColors colors) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -327,28 +332,28 @@ class _CreateWorkspaceDialogContentState
           style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w500,
-            color: Colors.grey.shade700,
+            color: colors.textSecondary,
           ),
         ),
         const SizedBox(height: 8),
         TextField(
           controller: _nameController,
           autofocus: true,
-          style: const TextStyle(fontSize: 15),
+          style: TextStyle(fontSize: 15, color: colors.textPrimary),
           decoration: InputDecoration(
             hintText: '输入工作空间名称',
-            hintStyle: TextStyle(color: Colors.grey.shade400),
+            hintStyle: TextStyle(color: colors.textHint),
             filled: true,
-            fillColor: Colors.grey.shade50,
+            fillColor: colors.inputBackground,
             contentPadding:
                 const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
-              borderSide: BorderSide(color: Colors.grey.shade200),
+              borderSide: BorderSide(color: colors.inputBorder),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
-              borderSide: BorderSide(color: Colors.grey.shade200),
+              borderSide: BorderSide(color: colors.inputBorder),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
@@ -356,7 +361,7 @@ class _CreateWorkspaceDialogContentState
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
-              borderSide: const BorderSide(color: Colors.red),
+              borderSide: BorderSide(color: colors.error),
             ),
             errorText: _nameError,
           ),
@@ -365,7 +370,7 @@ class _CreateWorkspaceDialogContentState
     );
   }
 
-  Widget _buildDescriptionField() {
+  Widget _buildDescriptionField(AppColors colors) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -374,28 +379,28 @@ class _CreateWorkspaceDialogContentState
           style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w500,
-            color: Colors.grey.shade700,
+            color: colors.textSecondary,
           ),
         ),
         const SizedBox(height: 8),
         TextField(
           controller: _descriptionController,
           maxLines: 2,
-          style: const TextStyle(fontSize: 15),
+          style: TextStyle(fontSize: 15, color: colors.textPrimary),
           decoration: InputDecoration(
             hintText: '简要描述这个工作空间',
-            hintStyle: TextStyle(color: Colors.grey.shade400),
+            hintStyle: TextStyle(color: colors.textHint),
             filled: true,
-            fillColor: Colors.grey.shade50,
+            fillColor: colors.inputBackground,
             contentPadding:
                 const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
-              borderSide: BorderSide(color: Colors.grey.shade200),
+              borderSide: BorderSide(color: colors.inputBorder),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
-              borderSide: BorderSide(color: Colors.grey.shade200),
+              borderSide: BorderSide(color: colors.inputBorder),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
@@ -407,7 +412,7 @@ class _CreateWorkspaceDialogContentState
     );
   }
 
-  Widget _buildColorSection() {
+  Widget _buildColorSection(AppColors colors) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -416,7 +421,7 @@ class _CreateWorkspaceDialogContentState
           style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w500,
-            color: Colors.grey.shade700,
+            color: colors.textSecondary,
           ),
         ),
         const SizedBox(height: 10),
@@ -435,7 +440,9 @@ class _CreateWorkspaceDialogContentState
                     color: color,
                     shape: BoxShape.circle,
                     border: Border.all(
-                      color: isSelected ? Colors.white : Colors.transparent,
+                      color: isSelected
+                          ? colors.dialogBackground
+                          : Colors.transparent,
                       width: 2,
                     ),
                     boxShadow: isSelected
@@ -449,8 +456,8 @@ class _CreateWorkspaceDialogContentState
                         : null,
                   ),
                   child: isSelected
-                      ? const Icon(Icons.check_rounded,
-                          size: 16, color: Colors.white)
+                      ? Icon(Icons.check_rounded,
+                          size: 16, color: colors.dialogBackground)
                       : null,
                 ),
               ),
@@ -461,7 +468,7 @@ class _CreateWorkspaceDialogContentState
     );
   }
 
-  Widget _buildActions() {
+  Widget _buildActions(AppColors colors) {
     return Row(
       children: [
         Expanded(
@@ -471,13 +478,13 @@ class _CreateWorkspaceDialogContentState
               padding: const EdgeInsets.symmetric(vertical: 14),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
-                side: BorderSide(color: Colors.grey.shade300),
+                side: BorderSide(color: colors.border),
               ),
             ),
             child: Text(
               '取消',
               style: TextStyle(
-                color: Colors.grey.shade700,
+                color: colors.textSecondary,
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -490,7 +497,7 @@ class _CreateWorkspaceDialogContentState
             onPressed: _isCreating ? null : _createWorkspace,
             style: ElevatedButton.styleFrom(
               backgroundColor: _selectedColor,
-              foregroundColor: Colors.white,
+              foregroundColor: colors.dialogBackground,
               elevation: 0,
               padding: const EdgeInsets.symmetric(vertical: 14),
               shape: RoundedRectangleBorder(
@@ -498,12 +505,13 @@ class _CreateWorkspaceDialogContentState
               ),
             ),
             child: _isCreating
-                ? const SizedBox(
+                ? SizedBox(
                     width: 18,
                     height: 18,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                          colors.dialogBackground),
                     ),
                   )
                 : const Text(
