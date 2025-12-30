@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:daynightbanner/daynightbanner.dart';
@@ -12,7 +11,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../init.dart';
 import '../../../notifiers/app_body_notifier.dart';
 import '../../../notifiers/editor_notifier.dart';
-import '../../../objectbox/recent_files.dart';
+import '../../../data/datasources/objectbox/entities/document_meta.dart';
 import '../../../utils/app_theme.dart';
 import '../../../utils/toast_utils.dart';
 
@@ -108,7 +107,7 @@ class _WelcomeDialogState extends ConsumerState<WelcomeDialog> {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final appBodyState = ref.watch(appBodyProvider);
-    final recentFiles = ref.watch(recentFilesProvider);
+    final recentDocs = ref.watch(recentDocumentsProvider);
     final newsAsync = ref.watch(newsProvider);
     // final size = MediaQuery.of(context).size;
 
@@ -136,7 +135,7 @@ class _WelcomeDialogState extends ConsumerState<WelcomeDialog> {
                 // 左侧面板
                 SizedBox(
                   width: 280,
-                  child: _buildLeftPanel(appBodyState, recentFiles, colors),
+                  child: _buildLeftPanel(appBodyState, recentDocs, colors),
                 ),
                 // 右侧：今日热点
                 Expanded(
@@ -151,8 +150,8 @@ class _WelcomeDialogState extends ConsumerState<WelcomeDialog> {
   }
 
   Widget _buildLeftPanel(AppBodyState appBodyState,
-      List<RecentFiles> recentFiles, AppColors colors) {
-    final recentTwo = recentFiles.take(2).toList();
+      List<DocumentMeta> recentDocs, AppColors colors) {
+    final recentTwo = recentDocs.take(2).toList();
 
     return Container(
       padding: const EdgeInsets.all(20),
@@ -190,7 +189,7 @@ class _WelcomeDialogState extends ConsumerState<WelcomeDialog> {
           // 近期文件
           if (recentTwo.isNotEmpty) ...[
             const SizedBox(height: 8),
-            ...recentTwo.map((file) => _buildRecentFileLink(file, colors)),
+            ...recentTwo.map((doc) => _buildRecentDocLink(doc, colors)),
           ],
           const SizedBox(height: 12),
           // 进入按钮
@@ -392,17 +391,15 @@ class _WelcomeDialogState extends ConsumerState<WelcomeDialog> {
 
   String _formatTime(int value) => value < 10 ? "0$value" : "$value";
 
-  Widget _buildRecentFileLink(RecentFiles file, AppColors colors) {
-    final fileName = file.path.split(Platform.pathSeparator).last;
-
+  Widget _buildRecentDocLink(DocumentMeta doc, AppColors colors) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 4),
       child: MouseRegion(
         cursor: SystemMouseCursors.click,
         child: GestureDetector(
-          onTap: () => _openFile(file),
+          onTap: () => _openDocument(doc),
           child: Text(
-            fileName,
+            doc.title,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
@@ -417,20 +414,20 @@ class _WelcomeDialogState extends ConsumerState<WelcomeDialog> {
     );
   }
 
-  void _openFile(RecentFiles recentFile) {
-    final file = File(recentFile.path);
-    if (file.existsSync()) {
-      ref.read(editorNotifierProvider.notifier).loadFromFile(file).then((_) {
-        if (mounted) {
-          Navigator.of(context).pop();
-          context.go('/editor');
-        }
-      });
-    } else {
+  void _openDocument(DocumentMeta doc) {
+    ref
+        .read(editorNotifierProvider.notifier)
+        .loadFromObjectBox(doc.uuid)
+        .then((_) {
       if (mounted) {
-        ToastUtils.error(context, title: '文件不存在');
+        Navigator.of(context).pop();
+        context.go('/editor');
       }
-    }
+    }).catchError((e) {
+      if (mounted) {
+        ToastUtils.error(context, title: '加载文档失败');
+      }
+    });
   }
 
   void _openUrl(String url) async {

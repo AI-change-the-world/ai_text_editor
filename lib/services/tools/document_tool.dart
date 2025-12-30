@@ -198,13 +198,14 @@ class DocumentTool implements ITool {
       return ToolResult.failure('文档不存在: $documentId');
     }
 
-    final content = await _documentService.getDocumentContent(documentId);
+    final contentData = await _documentService.getDocumentContent(documentId);
+    final content = contentData?.plainText ?? '';
 
     return ToolResult.success(
       data: {
         'document_id': document.uuid,
         'title': document.title,
-        'content': content ?? '',
+        'content': content,
         'word_count': document.wordCount,
         'character_count': document.characterCount,
         'tags': document.tags,
@@ -217,9 +218,9 @@ class DocumentTool implements ITool {
           workspaceName: '', // Would need workspace lookup
           documentId: document.uuid,
           documentTitle: document.title,
-          snippet: content != null && content.length > 200
+          snippet: content.length > 200
               ? '${content.substring(0, 200)}...'
-              : content ?? '',
+              : content,
         ),
       ],
     );

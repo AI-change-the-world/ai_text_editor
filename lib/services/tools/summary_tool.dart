@@ -115,7 +115,9 @@ class SummaryTool implements ITool {
         }
 
         documentTitle = document.title;
-        textToSummarize = await _documentService.getDocumentContent(documentId);
+        final contentData =
+            await _documentService.getDocumentContent(documentId);
+        textToSummarize = contentData?.plainText;
 
         if (textToSummarize == null || textToSummarize.isEmpty) {
           return ToolResult.failure('文档内容为空');

@@ -89,24 +89,24 @@ abstract class IModelProfileService {
   /// 获取所有模型配置
   Future<List<ModelProfile>> getAllProfiles();
 
-  /// 根据 ID 获取模型配置
-  Future<ModelProfile?> getProfileById(String uuid);
+  /// 根据 tag 获取模型配置
+  Future<ModelProfile?> getProfileByTag(String tag);
 
   /// 创建模型配置
   Future<ModelProfile> createProfile(CreateModelProfileRequest request);
 
   /// 更新模型配置
   Future<ModelProfile> updateProfile(
-      String uuid, UpdateModelProfileRequest request);
+      String tag, UpdateModelProfileRequest request);
 
   /// 删除模型配置
-  Future<void> deleteProfile(String uuid);
+  Future<void> deleteProfile(String tag);
 
   /// 获取指定任务的默认模型
   Future<ModelProfile?> getDefaultProfileForTask(AITask task);
 
   /// 设置任务的默认模型
-  Future<void> setDefaultProfileForTask(String uuid, AITask task);
+  Future<void> setDefaultProfileForTask(String tag, AITask task);
 
   /// 获取指定任务的所有模型
   Future<List<ModelProfile>> getProfilesForTask(AITask task);
@@ -201,11 +201,11 @@ class ModelProfileService implements IModelProfileService {
     return profiles;
   }
 
-  /// 根据 ID 获取模型配置
+  /// 根据 tag 获取模型配置
   @override
-  Future<ModelProfile?> getProfileById(String uuid) async {
+  Future<ModelProfile?> getProfileByTag(String tag) async {
     final query =
-        _db.modelProfileBox.query(ModelProfile_.uuid.equals(uuid)).build();
+        _db.modelProfileBox.query(ModelProfile_.tag.equals(tag)).build();
 
     final profile = query.findFirst();
     query.close();
@@ -237,12 +237,12 @@ class ModelProfileService implements IModelProfileService {
     }
 
     final profile = ModelProfile(
-      uuid: _uuid.v4(),
+      tag: _uuid.v4(),
       name: request.name,
       provider: request.provider,
       modelName: request.modelName,
-      apiKey: encryptedApiKey,
-      baseUrl: baseUrl,
+      apiKey: encryptedApiKey ?? '',
+      baseUrl: baseUrl ?? '',
       taskTypeIndex: request.taskType.index,
       isDefault: request.isDefault,
       temperature: request.temperature,
@@ -259,10 +259,10 @@ class ModelProfileService implements IModelProfileService {
   /// 更新模型配置
   @override
   Future<ModelProfile> updateProfile(
-      String uuid, UpdateModelProfileRequest request) async {
-    final existing = await getProfileById(uuid);
+      String tag, UpdateModelProfileRequest request) async {
+    final existing = await getProfileByTag(tag);
     if (existing == null) {
-      throw ModelProfileNotFoundException(uuid);
+      throw ModelProfileNotFoundException(tag);
     }
 
     // 如果设置为默认，先取消其他同任务类型的默认设置
@@ -301,15 +301,15 @@ class ModelProfileService implements IModelProfileService {
 
   /// 删除模型配置
   @override
-  Future<void> deleteProfile(String uuid) async {
+  Future<void> deleteProfile(String tag) async {
     final query =
-        _db.modelProfileBox.query(ModelProfile_.uuid.equals(uuid)).build();
+        _db.modelProfileBox.query(ModelProfile_.tag.equals(tag)).build();
 
     final profile = query.findFirst();
     query.close();
 
     if (profile == null) {
-      throw ModelProfileNotFoundException(uuid);
+      throw ModelProfileNotFoundException(tag);
     }
 
     _db.modelProfileBox.remove(profile.id);
@@ -330,14 +330,14 @@ class ModelProfileService implements IModelProfileService {
 
   /// 设置任务的默认模型
   @override
-  Future<void> setDefaultProfileForTask(String uuid, AITask task) async {
+  Future<void> setDefaultProfileForTask(String tag, AITask task) async {
     // 先取消其他同任务类型的默认设置
     await _clearDefaultForTask(task);
 
     // 设置新的默认模型
-    final profile = await getProfileById(uuid);
+    final profile = await getProfileByTag(tag);
     if (profile == null) {
-      throw ModelProfileNotFoundException(uuid);
+      throw ModelProfileNotFoundException(tag);
     }
 
     final updated = profile.copyWith(
@@ -390,7 +390,7 @@ class ModelProfileService implements IModelProfileService {
     // 如果默认模型不可用，获取同任务类型的其他模型
     final profiles = await getProfilesForTask(task);
     for (final profile in profiles) {
-      if (profile.uuid != defaultProfile?.uuid &&
+      if (profile.tag != defaultProfile?.tag &&
           await validateProfile(profile)) {
         return profile;
       }
@@ -496,6 +496,8 @@ class ModelProfileService implements IModelProfileService {
   /// 获取任务类型的推荐系统提示词
   static String? getDefaultSystemPrompt(AITask task) {
     switch (task) {
+      case AITask.chat:
+        return '你是一个智能助手，能够回答各种问题并提供帮助。';
       case AITask.writing:
         return '你是一个专业的写作助手，帮助用户改进文章质量、润色文字、扩展内容。请保持用户的写作风格，同时提升表达的清晰度和流畅性。';
       case AITask.qa:

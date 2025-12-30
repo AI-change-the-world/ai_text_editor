@@ -53,7 +53,7 @@ class _ModelSettingsWidgetState extends ConsumerState<ModelSettingsWidget> {
                     runSpacing: 20,
                     children: [
                       ...state.models.map((v) => ModelChip(
-                            model: v,
+                            profile: v,
                           )),
                       AddModelButton()
                     ],

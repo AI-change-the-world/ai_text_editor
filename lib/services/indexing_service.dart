@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:collection';
-import 'dart:io';
 
 import '../data/datasources/objectbox/objectbox.dart';
 import '../objectbox.g.dart';
@@ -477,9 +476,8 @@ class IndexingService implements IIndexingService {
     if (existing != null) {
       // 更新现有索引
       final updated = existing.copyWith(
-        title: document.title,
-        content: content,
-        tagsJson: document.tagsJson,
+        plainText: content,
+        markdown: content,
         updatedAt: now,
       );
       _db.documentContentBox.put(updated);
@@ -488,9 +486,8 @@ class IndexingService implements IIndexingService {
       final docContent = DocumentContent(
         documentId: document.uuid,
         workspaceId: document.workspaceId,
-        title: document.title,
-        content: content,
-        tagsJson: document.tagsJson,
+        plainText: content,
+        markdown: content,
         updatedAt: now,
       );
       _db.documentContentBox.put(docContent);
@@ -499,20 +496,14 @@ class IndexingService implements IIndexingService {
 
   /// 获取文档内容
   Future<String?> _getDocumentContent(DocumentMeta document) async {
-    if (document.filePath.isEmpty) {
-      return null;
-    }
+    // 从 DocumentContent 获取内容
+    final contentQuery = _db.documentContentBox
+        .query(DocumentContent_.documentId.equals(document.uuid))
+        .build();
+    final contentData = contentQuery.findFirst();
+    contentQuery.close();
 
-    try {
-      final file = File(document.filePath);
-      if (await file.exists()) {
-        return await file.readAsString();
-      }
-      return null;
-    } catch (e) {
-      // 文件读取失败，返回 null
-      return null;
-    }
+    return contentData?.plainText;
   }
 
   /// 批量索引文档

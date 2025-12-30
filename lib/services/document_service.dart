@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -8,6 +9,7 @@ import 'package:uuid/uuid.dart';
 import '../data/datasources/objectbox/objectbox.dart';
 import '../objectbox.g.dart';
 import '../src/rust/api/converter_api.dart' as converter;
+import 'indexing_service.dart';
 
 /// 导出格式枚举
 enum ExportFormat {
@@ -23,28 +25,31 @@ class CreateDocumentRequest {
   final String? parentFolderId;
   final List<String>? tags;
   final String? initialContent;
+  final String? deltaJson;
 
   CreateDocumentRequest({
     required this.title,
     this.parentFolderId,
     this.tags,
     this.initialContent,
-  });
-}
-
-/// 文档内容
-class DocumentContentData {
-  final String plainText;
-  final String? deltaJson;
-
-  DocumentContentData({
-    required this.plainText,
     this.deltaJson,
   });
 }
 
+/// 文档内容数据
+class DocumentContentData {
+  final String? deltaJson;
+  final String? plainText;
+  final String? markdown;
+
+  DocumentContentData({
+    this.deltaJson,
+    this.plainText,
+    this.markdown,
+  });
+}
+
 /// 文档服务接口
-/// Requirements: 1.4, 1.6, 1.7, 2.1
 abstract class IDocumentService {
   Future<DocumentMeta> createDocument(
       String workspaceId, CreateDocumentRequest request);
@@ -71,36 +76,28 @@ class DocumentService implements IDocumentService {
     return _instance!;
   }
 
-  Future<Directory> _getDocumentsDirectory(String workspaceId) async {
-    final appDir = await getApplicationSupportDirectory();
-    final docsDir = Directory(p.join(
-        appDir.path, 'AITextEditor', 'workspaces', workspaceId, 'documents'));
-    if (!await docsDir.exists()) {
-      await docsDir.create(recursive: true);
-    }
-    return docsDir;
-  }
-
   @override
   Future<DocumentMeta> createDocument(
       String workspaceId, CreateDocumentRequest request) async {
     final docId = _uuid.v4();
     final now = DateTime.now().millisecondsSinceEpoch;
-    final docsDir = await _getDocumentsDirectory(workspaceId);
-    final filePath = p.join(docsDir.path, '$docId.json');
 
+    // 创建文档元数据
     final docMeta = DocumentMeta(
       uuid: docId,
       workspaceId: workspaceId,
       title: request.title,
       parentFolderId: request.parentFolderId,
-      filePath: filePath,
       wordCount: 0,
       characterCount: 0,
       isFolder: false,
       sortOrder: await _getNextSortOrder(workspaceId, request.parentFolderId),
+      searchModeIndex: SearchMode.fulltext.index,
+      isIndexed: false,
+      isEmbedded: false,
       createdAt: now,
       updatedAt: now,
+      lastAccessedAt: now,
     );
 
     if (request.tags != null && request.tags!.isNotEmpty) {
@@ -109,22 +106,38 @@ class DocumentService implements IDocumentService {
 
     _db.documentMetaBox.put(docMeta);
 
-    final initialContent = request.initialContent ?? '';
-    final file = File(filePath);
-    await file.writeAsString(initialContent);
+    // 创建文档内容
+    final plainText = request.initialContent ?? '';
+    final deltaJson = request.deltaJson ?? _createEmptyDelta();
+    final markdown = plainText;
 
     final docContent = DocumentContent(
       documentId: docId,
       workspaceId: workspaceId,
-      title: request.title,
-      content: initialContent,
+      deltaJson: deltaJson,
+      plainText: plainText,
+      markdown: markdown,
+      updatedAt: now,
     );
-    if (request.tags != null) {
-      docContent.tags = request.tags!;
-    }
     _db.documentContentBox.put(docContent);
 
+    // 更新字数统计
+    if (plainText.isNotEmpty) {
+      final wordCount = _countWords(plainText);
+      final updatedMeta = docMeta.copyWith(
+        wordCount: wordCount,
+        characterCount: plainText.length,
+      );
+      _db.documentMetaBox.put(updatedMeta);
+    }
+
     return docMeta;
+  }
+
+  String _createEmptyDelta() {
+    return jsonEncode([
+      {'insert': '\n'}
+    ]);
   }
 
   @override
@@ -141,21 +154,23 @@ class DocumentService implements IDocumentService {
     }
 
     final now = DateTime.now().millisecondsSinceEpoch;
-    final plainText = content.plainText;
+    final plainText = content.plainText ?? '';
     final wordCount = _countWords(plainText);
     final characterCount = plainText.length;
 
+    // 更新元数据
     final updatedMeta = docMeta.copyWith(
       wordCount: wordCount,
       characterCount: characterCount,
       updatedAt: now,
+      lastAccessedAt: now,
+      // 内容变更后需要重新索引
+      isIndexed: false,
+      isEmbedded: false,
     );
     _db.documentMetaBox.put(updatedMeta);
 
-    final file = File(docMeta.filePath);
-    final contentToSave = content.deltaJson ?? content.plainText;
-    await file.writeAsString(contentToSave);
-
+    // 更新内容
     final contentQuery = _db.documentContentBox
         .query(DocumentContent_.documentId.equals(documentId))
         .build();
@@ -164,7 +179,9 @@ class DocumentService implements IDocumentService {
 
     if (existingContent != null) {
       final updatedContent = existingContent.copyWith(
-        content: plainText,
+        deltaJson: content.deltaJson ?? existingContent.deltaJson,
+        plainText: plainText,
+        markdown: content.markdown ?? plainText,
         updatedAt: now,
       );
       _db.documentContentBox.put(updatedContent);
@@ -172,11 +189,40 @@ class DocumentService implements IDocumentService {
       final newContent = DocumentContent(
         documentId: documentId,
         workspaceId: docMeta.workspaceId,
-        title: docMeta.title,
-        content: plainText,
+        deltaJson: content.deltaJson ?? _createEmptyDelta(),
+        plainText: plainText,
+        markdown: content.markdown ?? plainText,
         updatedAt: now,
       );
       _db.documentContentBox.put(newContent);
+    }
+
+    // 删除旧的切片（内容变更后需要重新切片）
+    await _deleteDocumentChunks(documentId);
+
+    // 异步触发索引任务
+    _queueIndexing(documentId, docMeta.workspaceId);
+  }
+
+  /// 异步触发索引任务
+  void _queueIndexing(String documentId, String workspaceId) {
+    // 将文档添加到索引队列
+    IndexingService.instance.queueDocument(
+      documentId,
+      workspaceId,
+      IndexTaskType.update,
+    );
+  }
+
+  Future<void> _deleteDocumentChunks(String documentId) async {
+    final query = _db.documentChunkBox
+        .query(DocumentChunk_.documentId.equals(documentId))
+        .build();
+    final chunks = query.find();
+    query.close();
+
+    for (final chunk in chunks) {
+      _db.documentChunkBox.remove(chunk.id);
     }
   }
 
@@ -218,13 +264,13 @@ class DocumentService implements IDocumentService {
       workspaceId: workspaceId,
       title: name,
       parentFolderId: parentFolderId,
-      filePath: '',
       wordCount: 0,
       characterCount: 0,
       isFolder: true,
       sortOrder: await _getNextSortOrder(workspaceId, parentFolderId),
       createdAt: now,
       updatedAt: now,
+      lastAccessedAt: now,
     );
 
     _db.documentMetaBox.put(folder);
@@ -243,7 +289,6 @@ class DocumentService implements IDocumentService {
       throw DocumentNotFoundException(documentId);
     }
 
-    // 验证目标文件夹存在（如果不是根目录）
     if (targetFolderId != null) {
       final folderQuery = _db.documentMetaBox
           .query(DocumentMeta_.uuid.equals(targetFolderId) &
@@ -283,6 +328,7 @@ class DocumentService implements IDocumentService {
         content = await file.readAsString();
         break;
       case '.docx':
+      case '.doc':
         final markdown = await _convertDocxToMarkdown(file.path);
         content = markdown ?? '';
         break;
@@ -311,44 +357,40 @@ class DocumentService implements IDocumentService {
   @override
   Future<Uint8List> exportDocument(
       String documentId, ExportFormat format) async {
-    final query = _db.documentMetaBox
-        .query(DocumentMeta_.uuid.equals(documentId))
-        .build();
-    final docMeta = query.findFirst();
-    query.close();
-
-    if (docMeta == null) {
+    final content = await getDocumentContent(documentId);
+    if (content == null) {
       throw DocumentNotFoundException(documentId);
     }
 
-    // 读取文档内容
-    final file = File(docMeta.filePath);
-    if (!await file.exists()) {
-      throw DocumentNotFoundException(documentId);
-    }
-    final content = await file.readAsString();
+    final docMeta = await getDocument(documentId);
+    final title = docMeta?.title ?? 'document';
+    final markdown =
+        content.markdown.isNotEmpty ? content.markdown : content.plainText;
 
     switch (format) {
       case ExportFormat.markdown:
-        return Uint8List.fromList(content.codeUnits);
+        return Uint8List.fromList(utf8.encode(markdown));
       case ExportFormat.html:
-        final html = _convertToHtml(content, docMeta.title);
-        return Uint8List.fromList(html.codeUnits);
+        final html = _convertToHtml(markdown, title);
+        return Uint8List.fromList(utf8.encode(html));
       case ExportFormat.docx:
-        return await _exportToDocx(content, docMeta.title);
+        return await _exportToDocx(markdown, title);
       case ExportFormat.pdf:
-        return await _exportToPdf(content, docMeta.title);
+        return await _exportToPdf(markdown, title);
     }
   }
 
   String _convertToHtml(String content, String title) {
-    // 简单的 Markdown 到 HTML 转换
     var html = content
-        .replaceAll(RegExp(r'^### (.+)$', multiLine: true), '<h3>\$1</h3>')
-        .replaceAll(RegExp(r'^## (.+)$', multiLine: true), '<h2>\$1</h2>')
-        .replaceAll(RegExp(r'^# (.+)$', multiLine: true), '<h1>\$1</h1>')
-        .replaceAll(RegExp(r'\*\*(.+?)\*\*'), '<strong>\$1</strong>')
-        .replaceAll(RegExp(r'\*(.+?)\*'), '<em>\$1</em>')
+        .replaceAllMapped(
+            RegExp(r'^### (.+)$', multiLine: true), (m) => '<h3>${m[1]}</h3>')
+        .replaceAllMapped(
+            RegExp(r'^## (.+)$', multiLine: true), (m) => '<h2>${m[1]}</h2>')
+        .replaceAllMapped(
+            RegExp(r'^# (.+)$', multiLine: true), (m) => '<h1>${m[1]}</h1>')
+        .replaceAllMapped(
+            RegExp(r'\*\*(.+?)\*\*'), (m) => '<strong>${m[1]}</strong>')
+        .replaceAllMapped(RegExp(r'\*(.+?)\*'), (m) => '<em>${m[1]}</em>')
         .replaceAll('\n\n', '</p><p>')
         .replaceAll('\n', '<br>');
 
@@ -383,9 +425,172 @@ class DocumentService implements IDocumentService {
   }
 
   Future<Uint8List> _exportToPdf(String content, String title) async {
-    // PDF 导出需要额外的库支持，这里返回占位实现
-    // 实际实现可以使用 markdown_to_pdf 包
     throw UnimplementedError('PDF export not yet implemented');
+  }
+
+  // ============ 查询方法 ============
+
+  /// 获取工作空间的所有文档
+  Future<List<DocumentMeta>> getDocumentsByWorkspace(String workspaceId) async {
+    final query = _db.documentMetaBox
+        .query(DocumentMeta_.workspaceId.equals(workspaceId))
+        .order(DocumentMeta_.sortOrder)
+        .build();
+    final documents = query.find();
+    query.close();
+    return documents;
+  }
+
+  /// 获取单个文档元数据
+  Future<DocumentMeta?> getDocument(String documentId) async {
+    final query = _db.documentMetaBox
+        .query(DocumentMeta_.uuid.equals(documentId))
+        .build();
+    final document = query.findFirst();
+    query.close();
+    return document;
+  }
+
+  /// 获取文档内容
+  Future<DocumentContent?> getDocumentContent(String documentId) async {
+    final query = _db.documentContentBox
+        .query(DocumentContent_.documentId.equals(documentId))
+        .build();
+    final content = query.findFirst();
+    query.close();
+    return content;
+  }
+
+  /// 获取文档纯文本内容（兼容旧接口）
+  Future<String?> getDocumentPlainText(String documentId) async {
+    final content = await getDocumentContent(documentId);
+    return content?.plainText;
+  }
+
+  /// 获取最近访问的文档
+  Future<List<DocumentMeta>> getRecentDocuments({int limit = 10}) async {
+    final query = _db.documentMetaBox
+        .query(DocumentMeta_.isFolder.equals(false))
+        .order(DocumentMeta_.lastAccessedAt, flags: Order.descending)
+        .build();
+    query.limit = limit;
+    final documents = query.find();
+    query.close();
+    return documents;
+  }
+
+  /// 更新文档访问时间
+  Future<void> updateLastAccessed(String documentId) async {
+    final query = _db.documentMetaBox
+        .query(DocumentMeta_.uuid.equals(documentId))
+        .build();
+    final docMeta = query.findFirst();
+    query.close();
+
+    if (docMeta != null) {
+      final updatedMeta = docMeta.copyWith(
+        lastAccessedAt: DateTime.now().millisecondsSinceEpoch,
+      );
+      _db.documentMetaBox.put(updatedMeta);
+    }
+  }
+
+  /// 重命名文档
+  Future<void> renameDocument(String documentId, String newTitle) async {
+    final query = _db.documentMetaBox
+        .query(DocumentMeta_.uuid.equals(documentId))
+        .build();
+    final docMeta = query.findFirst();
+    query.close();
+
+    if (docMeta == null) {
+      throw DocumentNotFoundException(documentId);
+    }
+
+    final now = DateTime.now().millisecondsSinceEpoch;
+    final updatedMeta = docMeta.copyWith(
+      title: newTitle,
+      updatedAt: now,
+    );
+    _db.documentMetaBox.put(updatedMeta);
+  }
+
+  /// 删除文档
+  Future<void> deleteDocument(String documentId) async {
+    final query = _db.documentMetaBox
+        .query(DocumentMeta_.uuid.equals(documentId))
+        .build();
+    final docMeta = query.findFirst();
+    query.close();
+
+    if (docMeta == null) {
+      throw DocumentNotFoundException(documentId);
+    }
+
+    // 如果是文件夹，递归删除所有子文档
+    if (docMeta.isFolder) {
+      await _deleteChildDocuments(documentId);
+    }
+
+    // 删除 DocumentContent
+    final contentQuery = _db.documentContentBox
+        .query(DocumentContent_.documentId.equals(documentId))
+        .build();
+    final content = contentQuery.findFirst();
+    contentQuery.close();
+    if (content != null) {
+      _db.documentContentBox.remove(content.id);
+    }
+
+    // 删除 DocumentChunks
+    await _deleteDocumentChunks(documentId);
+
+    // 删除 DocumentMeta
+    _db.documentMetaBox.remove(docMeta.id);
+  }
+
+  Future<void> _deleteChildDocuments(String parentFolderId) async {
+    final query = _db.documentMetaBox
+        .query(DocumentMeta_.parentFolderId.equals(parentFolderId))
+        .build();
+    final children = query.find();
+    query.close();
+
+    for (final child in children) {
+      await deleteDocument(child.uuid);
+    }
+  }
+
+  /// 更新文档排序
+  Future<void> updateDocumentOrder(
+      String documentId, int newSortOrder, String? newParentId) async {
+    final query = _db.documentMetaBox
+        .query(DocumentMeta_.uuid.equals(documentId))
+        .build();
+    final docMeta = query.findFirst();
+    query.close();
+
+    if (docMeta == null) {
+      throw DocumentNotFoundException(documentId);
+    }
+
+    final now = DateTime.now().millisecondsSinceEpoch;
+    final updatedMeta = docMeta.copyWith(
+      sortOrder: newSortOrder,
+      parentFolderId: newParentId,
+      updatedAt: now,
+    );
+    _db.documentMetaBox.put(updatedMeta);
+  }
+
+  /// 获取文件夹的子文档数量
+  Future<int> getChildCount(String folderId) async {
+    final query = _db.documentMetaBox
+        .query(DocumentMeta_.parentFolderId.equals(folderId))
+        .build();
+    final count = query.count();
+    query.close();
+    return count;
   }
 }
 
@@ -419,193 +624,4 @@ class ExportFailedException implements Exception {
   ExportFailedException(this.message);
   @override
   String toString() => 'Export failed: $message';
-}
-
-// Extension methods for DocumentService to support document tree operations
-extension DocumentServiceExtensions on DocumentService {
-  /// 获取工作空间的所有文档
-  /// Requirements: 1.4
-  Future<List<DocumentMeta>> getDocumentsByWorkspace(String workspaceId) async {
-    final query = _db.documentMetaBox
-        .query(DocumentMeta_.workspaceId.equals(workspaceId))
-        .order(DocumentMeta_.sortOrder)
-        .build();
-    final documents = query.find();
-    query.close();
-    return documents;
-  }
-
-  /// 获取单个文档
-  Future<DocumentMeta?> getDocument(String documentId) async {
-    final query = _db.documentMetaBox
-        .query(DocumentMeta_.uuid.equals(documentId))
-        .build();
-    final document = query.findFirst();
-    query.close();
-    return document;
-  }
-
-  /// 获取文档内容
-  Future<String?> getDocumentContent(String documentId) async {
-    final query = _db.documentMetaBox
-        .query(DocumentMeta_.uuid.equals(documentId))
-        .build();
-    final docMeta = query.findFirst();
-    query.close();
-
-    if (docMeta == null || docMeta.filePath.isEmpty) {
-      return null;
-    }
-
-    final file = File(docMeta.filePath);
-    if (await file.exists()) {
-      return await file.readAsString();
-    }
-    return null;
-  }
-
-  /// 重命名文档
-  /// Requirements: 1.4
-  Future<void> renameDocument(String documentId, String newTitle) async {
-    final query = _db.documentMetaBox
-        .query(DocumentMeta_.uuid.equals(documentId))
-        .build();
-    final docMeta = query.findFirst();
-    query.close();
-
-    if (docMeta == null) {
-      throw DocumentNotFoundException(documentId);
-    }
-
-    final now = DateTime.now().millisecondsSinceEpoch;
-    final updatedMeta = docMeta.copyWith(
-      title: newTitle,
-      updatedAt: now,
-    );
-    _db.documentMetaBox.put(updatedMeta);
-
-    // 更新 DocumentContent 中的标题
-    final contentQuery = _db.documentContentBox
-        .query(DocumentContent_.documentId.equals(documentId))
-        .build();
-    final existingContent = contentQuery.findFirst();
-    contentQuery.close();
-
-    if (existingContent != null) {
-      final updatedContent = existingContent.copyWith(
-        title: newTitle,
-        updatedAt: now,
-      );
-      _db.documentContentBox.put(updatedContent);
-    }
-  }
-
-  /// 删除文档
-  /// Requirements: 1.4
-  Future<void> deleteDocument(String documentId) async {
-    final query = _db.documentMetaBox
-        .query(DocumentMeta_.uuid.equals(documentId))
-        .build();
-    final docMeta = query.findFirst();
-    query.close();
-
-    if (docMeta == null) {
-      throw DocumentNotFoundException(documentId);
-    }
-
-    // 如果是文件夹，递归删除所有子文档
-    if (docMeta.isFolder) {
-      await _deleteChildDocuments(documentId);
-    }
-
-    // 删除文件
-    if (docMeta.filePath.isNotEmpty) {
-      final file = File(docMeta.filePath);
-      if (await file.exists()) {
-        await file.delete();
-      }
-    }
-
-    // 删除 DocumentContent
-    final contentQuery = _db.documentContentBox
-        .query(DocumentContent_.documentId.equals(documentId))
-        .build();
-    final content = contentQuery.findFirst();
-    contentQuery.close();
-    if (content != null) {
-      _db.documentContentBox.remove(content.id);
-    }
-
-    // 删除 DocumentMeta
-    _db.documentMetaBox.remove(docMeta.id);
-  }
-
-  /// 递归删除子文档
-  Future<void> _deleteChildDocuments(String parentFolderId) async {
-    final query = _db.documentMetaBox
-        .query(DocumentMeta_.parentFolderId.equals(parentFolderId))
-        .build();
-    final children = query.find();
-    query.close();
-
-    for (final child in children) {
-      if (child.isFolder) {
-        await _deleteChildDocuments(child.uuid);
-      }
-
-      // 删除文件
-      if (child.filePath.isNotEmpty) {
-        final file = File(child.filePath);
-        if (await file.exists()) {
-          await file.delete();
-        }
-      }
-
-      // 删除 DocumentContent
-      final contentQuery = _db.documentContentBox
-          .query(DocumentContent_.documentId.equals(child.uuid))
-          .build();
-      final content = contentQuery.findFirst();
-      contentQuery.close();
-      if (content != null) {
-        _db.documentContentBox.remove(content.id);
-      }
-
-      // 删除 DocumentMeta
-      _db.documentMetaBox.remove(child.id);
-    }
-  }
-
-  /// 更新文档排序
-  /// Requirements: 1.4
-  Future<void> updateDocumentOrder(
-      String documentId, int newSortOrder, String? newParentId) async {
-    final query = _db.documentMetaBox
-        .query(DocumentMeta_.uuid.equals(documentId))
-        .build();
-    final docMeta = query.findFirst();
-    query.close();
-
-    if (docMeta == null) {
-      throw DocumentNotFoundException(documentId);
-    }
-
-    final now = DateTime.now().millisecondsSinceEpoch;
-    final updatedMeta = docMeta.copyWith(
-      sortOrder: newSortOrder,
-      parentFolderId: newParentId,
-      updatedAt: now,
-    );
-    _db.documentMetaBox.put(updatedMeta);
-  }
-
-  /// 获取文件夹的子文档数量
-  Future<int> getChildCount(String folderId) async {
-    final query = _db.documentMetaBox
-        .query(DocumentMeta_.parentFolderId.equals(folderId))
-        .build();
-    final count = query.count();
-    query.close();
-    return count;
-  }
 }

@@ -20,6 +20,7 @@ class EditorState {
   final ToolbarPosition toolbarPosition;
   final bool loading;
   final String? currentFilePath;
+  final String? currentDocumentId;
   final List<EditorChatHistory> chatHistory;
   final bool focusMode;
   final bool showDocumentOutline;
@@ -31,6 +32,7 @@ class EditorState {
     this.loading = false,
     this.chatHistory = const [],
     this.currentFilePath,
+    this.currentDocumentId,
     this.showSpellCheck = false,
     this.focusMode = false,
     this.showDocumentOutline = false,
@@ -44,6 +46,7 @@ class EditorState {
     List<EditorChatHistory>? chatHistory,
     bool? saved,
     String? currentFilePath,
+    String? currentDocumentId,
     double? currentPosition,
     bool? showSpellCheck,
     bool? focusMode,
@@ -56,6 +59,7 @@ class EditorState {
       loading: loading ?? this.loading,
       chatHistory: chatHistory ?? this.chatHistory,
       currentFilePath: currentFilePath ?? this.currentFilePath,
+      currentDocumentId: currentDocumentId ?? this.currentDocumentId,
       showSpellCheck: showSpellCheck ?? this.showSpellCheck,
       focusMode: focusMode ?? this.focusMode,
       showDocumentOutline: showDocumentOutline ?? this.showDocumentOutline,

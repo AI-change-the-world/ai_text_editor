@@ -1,18 +1,21 @@
 import 'package:ai_text_editor/models/ai_model.dart';
-import 'package:ai_text_editor/objectbox.g.dart';
 import 'package:ai_text_editor/data/datasources/objectbox/database.dart';
-import 'package:ai_text_editor/objectbox/model.dart';
+import 'package:ai_text_editor/data/datasources/objectbox/entities/model_profile.dart';
+import 'package:ai_text_editor/services/model_profile_service.dart';
 import 'package:ai_text_editor/utils/toast_utils.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class ModelsState {
-  final List<Model> models;
-  final String? current;
-  ModelsState({required this.models, this.current});
+  final List<ModelProfile> models;
+  final String? currentTag;
 
-  ModelsState copyWith({List<Model>? models, String? current}) {
+  ModelsState({required this.models, this.currentTag});
+
+  ModelsState copyWith({List<ModelProfile>? models, String? currentTag}) {
     return ModelsState(
-        models: models ?? this.models, current: current ?? this.current);
+      models: models ?? this.models,
+      currentTag: currentTag ?? this.currentTag,
+    );
   }
 }
 
@@ -21,72 +24,87 @@ class ModelsNotifier extends AutoDisposeNotifier<ModelsState> {
 
   @override
   ModelsState build() {
-    final models = database.modelBox.getAll();
-    final lastQuery = database.modelChangeHistoryBox
-        .query()
-        .order(ModelChangeHistory_.createdAt, flags: Order.descending)
-        .build();
-    final List<ModelChangeHistory> lastList = lastQuery.find();
-    final last = lastList.firstOrNull;
+    final profiles = database.modelProfileBox.getAll();
+
+    // 找到默认的 chat 模型
+    final defaultChat = profiles
+        .where((p) => p.taskType == AITask.chat && p.isDefault)
+        .firstOrNull;
 
     return ModelsState(
-        models: models,
-        current: models
-            .firstWhere(
-              (v) => v.tag == last?.tag,
-              orElse: () => Model.empty(),
-            )
-            .tag);
+      models: profiles,
+      currentTag: defaultChat?.tag,
+    );
   }
 
-  Future<void> addChangeHistory(Model model) async {
-    final history = ModelChangeHistory(tag: model.tag)
-      ..createdAt = DateTime.now().millisecondsSinceEpoch;
-    database.modelChangeHistoryBox.put(history);
+  /// 设置当前模型
+  Future<void> setCurrentModel(ModelProfile profile) async {
+    // 更新为默认模型
+    await ModelProfileService.instance
+        .setDefaultProfileForTask(profile.tag, AITask.chat);
 
-    state = state.copyWith(current: model.tag);
-    GlobalModel.setModel(OpenAIInfo(model.baseUrl, model.sk, model.modelName));
+    state = state.copyWith(currentTag: profile.tag);
+
+    // 解密 API Key 并设置全局模型
+    final apiKey =
+        ModelProfileService.instance.decryptApiKey(profile.apiKey) ?? '';
+    GlobalModel.setModel(
+        OpenAIInfo(profile.baseUrl, apiKey, profile.modelName));
   }
 
-  Model? getCurrent() {
-    if (state.current == null || state.current == "") return null;
-    final m =
-        state.models.firstWhere((element) => element.tag == state.current);
-    return m;
+  /// 获取当前模型
+  ModelProfile? getCurrent() {
+    if (state.currentTag == null || state.currentTag!.isEmpty) return null;
+    return state.models.where((m) => m.tag == state.currentTag).firstOrNull;
   }
 
-  Future<void> addModel(Model model) async {
-    final models = database.modelBox.getAll();
-
-    final modelExists = models.any((m) => m.tag == model.tag);
-    if (modelExists) {
+  /// 添加模型
+  Future<void> addModel(ModelProfile profile) async {
+    final exists = state.models.any((m) => m.tag == profile.tag);
+    if (exists) {
+      ToastUtils.error(null, title: "Model tag already exists");
       return;
     }
 
-    database.modelBox.put(model);
-    state = state.copyWith(models: [...state.models, model]);
+    database.modelProfileBox.put(profile);
+    state = state.copyWith(models: [...state.models, profile]);
   }
 
-  Future<void> updateModel(Model model) async {
-    database.modelBox.put(model);
+  /// 更新模型
+  Future<void> updateModel(ModelProfile profile) async {
+    database.modelProfileBox.put(profile);
     state = state.copyWith(models: [
       for (final m in state.models)
-        if (m.tag == model.tag) model else m
+        if (m.tag == profile.tag) profile else m
     ]);
   }
 
-  Future<void> deleteModel(Model model) async {
-    if (model.tag == state.current) {
+  /// 删除模型
+  Future<void> deleteModel(ModelProfile profile) async {
+    if (profile.tag == state.currentTag) {
       ToastUtils.error(null, title: "Cannot delete current model");
       return;
     }
 
-    database.modelBox.remove(model.id);
+    database.modelProfileBox.remove(profile.id);
 
     state = state.copyWith(models: [
       for (final m in state.models)
-        if (m.id != model.id) m,
+        if (m.id != profile.id) m,
     ]);
+  }
+
+  /// 刷新模型列表
+  void refresh() {
+    final profiles = database.modelProfileBox.getAll();
+    state = state.copyWith(models: profiles);
+  }
+
+  /// 获取指定任务的模型列表
+  List<ModelProfile> getModelsForTask(AITask task) {
+    return state.models
+        .where((m) => m.taskType == task && m.isEnabled)
+        .toList();
   }
 }
 

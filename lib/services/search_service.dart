@@ -391,13 +391,28 @@ class SearchService implements ISearchService {
     final allDocs = dbQuery.find();
     dbQuery.close();
 
+    // 获取文档元数据用于标签过滤
+    final docMetaMap = <String, DocumentMeta>{};
+    for (final doc in allDocs) {
+      final metaQuery = _db.documentMetaBox
+          .query(DocumentMeta_.uuid.equals(doc.documentId))
+          .build();
+      final meta = metaQuery.findFirst();
+      metaQuery.close();
+      if (meta != null) {
+        docMetaMap[doc.documentId] = meta;
+      }
+    }
+
     // 过滤和评分
     final scoredResults = <_ScoredDocument>[];
 
     for (final doc in allDocs) {
+      final meta = docMetaMap[doc.documentId];
+
       // 应用标签过滤
-      if (effectiveTags.isNotEmpty) {
-        final docTags = doc.tags;
+      if (effectiveTags.isNotEmpty && meta != null) {
+        final docTags = meta.tags;
         if (!effectiveTags.any((tag) => docTags.contains(tag))) {
           continue;
         }
@@ -418,7 +433,7 @@ class SearchService implements ISearchService {
       }
 
       // 计算匹配分数
-      final score = _calculateFullTextScore(doc, parsedQuery);
+      final score = _calculateFullTextScore(doc, meta, parsedQuery);
 
       if (score > 0) {
         scoredResults.add(_ScoredDocument(doc, score));
@@ -442,23 +457,24 @@ class SearchService implements ISearchService {
     // 转换为搜索结果项
     final items = pagedResults.map((result) {
       final doc = result.doc;
+      final meta = docMetaMap[doc.documentId];
       final searchTerms = parsedQuery.allTerms;
 
       // 生成摘要片段
-      final snippet = _generateSnippet(doc.content, searchTerms);
+      final snippet = _generateSnippet(doc.plainText, searchTerms);
       final highlightRanges = getHighlightRanges(snippet, searchTerms);
 
       return SearchResultItem(
         workspaceId: doc.workspaceId,
         workspaceName: _getWorkspaceName(doc.workspaceId),
         documentId: doc.documentId,
-        documentTitle: doc.title,
-        documentPath: doc.documentId, // 可以从 DocumentMeta 获取实际路径
+        documentTitle: meta?.title ?? doc.documentId,
+        documentPath: doc.documentId,
         snippet: snippet,
         highlightRanges: highlightRanges,
         score: result.score,
         lastModified: DateTime.fromMillisecondsSinceEpoch(doc.updatedAt),
-        tags: doc.tags,
+        tags: meta?.tags ?? [],
       );
     }).toList();
 
@@ -474,10 +490,10 @@ class SearchService implements ISearchService {
 
   /// 计算全文搜索分数
   double _calculateFullTextScore(
-      DocumentContent doc, ParsedSearchQuery parsedQuery) {
+      DocumentContent doc, DocumentMeta? meta, ParsedSearchQuery parsedQuery) {
     double score = 0.0;
-    final titleLower = doc.title.toLowerCase();
-    final contentLower = doc.content.toLowerCase();
+    final titleLower = (meta?.title ?? '').toLowerCase();
+    final contentLower = doc.plainText.toLowerCase();
 
     // 检查必须排除的词
     for (final term in parsedQuery.mustNotTerms) {
@@ -753,7 +769,7 @@ class SearchService implements ISearchService {
         workspaceName: _getWorkspaceName(chunk.workspaceId),
         documentId: chunk.documentId,
         documentTitle: docMeta?.title ?? 'Unknown',
-        documentPath: docMeta?.filePath ?? '',
+        documentPath: chunk.documentId,
         snippet: chunk.chunkText.length > 200
             ? '${chunk.chunkText.substring(0, 200)}...'
             : chunk.chunkText,
@@ -1098,22 +1114,22 @@ class SearchService implements ISearchService {
     final suggestions = <SearchSuggestion>[];
     final queryLower = query.toLowerCase();
 
-    // 搜索文档标题
-    QueryBuilder<DocumentContent> queryBuilder;
+    // 搜索文档标题 - 从 DocumentMeta 获取
+    QueryBuilder<DocumentMeta> metaQueryBuilder;
     if (workspaceId != null) {
-      queryBuilder = _db.documentContentBox.query(
-        DocumentContent_.workspaceId.equals(workspaceId) &
-            DocumentContent_.title.contains(query, caseSensitive: false),
+      metaQueryBuilder = _db.documentMetaBox.query(
+        DocumentMeta_.workspaceId.equals(workspaceId) &
+            DocumentMeta_.title.contains(query, caseSensitive: false),
       );
     } else {
-      queryBuilder = _db.documentContentBox.query(
-        DocumentContent_.title.contains(query, caseSensitive: false),
+      metaQueryBuilder = _db.documentMetaBox.query(
+        DocumentMeta_.title.contains(query, caseSensitive: false),
       );
     }
 
-    final dbQuery = queryBuilder.build();
-    final docs = dbQuery.find();
-    dbQuery.close();
+    final metaQuery = metaQueryBuilder.build();
+    final docs = metaQuery.find();
+    metaQuery.close();
 
     for (final doc in docs.take(limit ~/ 2)) {
       final titleLower = doc.title.toLowerCase();
@@ -1126,14 +1142,14 @@ class SearchService implements ISearchService {
       ));
     }
 
-    // 搜索标签
+    // 搜索标签 - 从 DocumentMeta 获取
     final allTags = <String>{};
-    final allDocsQuery = _db.documentContentBox.query().build();
-    final allDocs = allDocsQuery.find();
-    allDocsQuery.close();
+    final allMetaQuery = _db.documentMetaBox.query().build();
+    final allMetas = allMetaQuery.find();
+    allMetaQuery.close();
 
-    for (final doc in allDocs) {
-      allTags.addAll(doc.tags);
+    for (final meta in allMetas) {
+      allTags.addAll(meta.tags);
     }
 
     for (final tag in allTags) {

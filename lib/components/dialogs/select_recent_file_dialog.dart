@@ -1,29 +1,27 @@
-import 'dart:io';
-
-import 'package:ai_text_editor/objectbox/recent_files.dart';
+import 'package:ai_text_editor/data/datasources/objectbox/entities/document_meta.dart';
 import 'package:ai_text_editor/utils/styles.dart';
-import 'package:ai_text_editor/utils/toast_utils.dart';
 import 'package:flutter/material.dart';
-// ignore: depend_on_referenced_packages
-import 'package:path/path.dart' as path;
+import 'package:get_time_ago/get_time_ago.dart';
 
-import '../../utils/logger.dart';
-
-class SelectRecentFileDialog extends StatefulWidget {
-  const SelectRecentFileDialog({super.key, required this.files});
-  final List<RecentFiles> files;
+/// 选择最近文档对话框
+class SelectRecentDocumentDialog extends StatefulWidget {
+  const SelectRecentDocumentDialog({super.key, required this.documents});
+  final List<DocumentMeta> documents;
 
   @override
-  State<SelectRecentFileDialog> createState() => _SelectRecentFileDialogState();
+  State<SelectRecentDocumentDialog> createState() =>
+      _SelectRecentDocumentDialogState();
 }
 
-class _SelectRecentFileDialogState extends State<SelectRecentFileDialog> {
-  bool showFullPath = true;
+class _SelectRecentDocumentDialogState
+    extends State<SelectRecentDocumentDialog> {
+  bool showUuid = false;
 
   @override
   Widget build(BuildContext context) {
-    Map<String, List<RecentFiles>> fileMap =
-        groupRecentFilesByDay(widget.files);
+    // 按最后访问时间分组
+    Map<String, List<DocumentMeta>> docMap =
+        _groupDocumentsByDay(widget.documents);
 
     return Material(
       borderRadius: BorderRadius.circular(10),
@@ -42,91 +40,104 @@ class _SelectRecentFileDialogState extends State<SelectRecentFileDialog> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 spacing: 10,
-                children: fileMap.entries.map((e) {
+                children: docMap.entries.map((e) {
                   return Column(
-                      spacing: 10,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          e.key,
-                          style: TextStyle(
-                              fontSize: 20, fontWeight: FontWeight.bold),
-                        ),
-                        ...e.value.map((file) {
-                          return GestureDetector(
-                            onTap: () {
-                              File f = File(file.path);
-                              if (f.existsSync()) {
-                                Navigator.of(context).pop(f);
-                              } else {
-                                ToastUtils.error(context,
-                                    title: "File Not Exists");
-                                logger.e("file not exists: ${file.path}");
-                              }
-                            },
-                            child: MouseRegion(
-                              cursor: SystemMouseCursors.click,
-                              child: SizedBox(
-                                height: 30,
-                                child: Row(
-                                  spacing: 10,
-                                  children: [
-                                    Icon(
-                                      Icons.file_open,
-                                      size: Styles.menuBarIconSize,
-                                      color: Styles.textButtonColor,
-                                    ),
-                                    Expanded(
-                                        child: Text(
-                                      showFullPath
-                                          ? file.path
-                                          : path.basename(file.path),
+                    spacing: 10,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        e.key,
+                        style: TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.bold),
+                      ),
+                      ...e.value.map((doc) {
+                        return GestureDetector(
+                          onTap: () {
+                            Navigator.of(context).pop(doc);
+                          },
+                          child: MouseRegion(
+                            cursor: SystemMouseCursors.click,
+                            child: SizedBox(
+                              height: 30,
+                              child: Row(
+                                spacing: 10,
+                                children: [
+                                  Icon(
+                                    Icons.description,
+                                    size: Styles.menuBarIconSize,
+                                    color: Styles.textButtonColor,
+                                  ),
+                                  Expanded(
+                                    child: Text(
+                                      showUuid ? doc.uuid : doc.title,
                                       maxLines: 1,
                                       softWrap: true,
                                       overflow: TextOverflow.ellipsis,
                                       style: TextStyle(
                                           color: Styles.textButtonColor),
-                                    ))
-                                  ],
-                                ),
+                                    ),
+                                  )
+                                ],
                               ),
                             ),
-                          );
-                        })
-                      ]);
+                          ),
+                        );
+                      })
+                    ],
+                  );
                 }).toList(),
               ),
             ),
             Positioned(
-                right: 0,
-                top: 0,
-                child: Row(
-                  children: [
-                    Container(
-                      padding: EdgeInsets.all(1),
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(4),
-                          color: Colors.blueAccent),
-                      child: Text(
-                        showFullPath ? "fullpath" : "basename",
-                        style: TextStyle(color: Colors.white),
-                      ),
+              right: 0,
+              top: 0,
+              child: Row(
+                children: [
+                  Container(
+                    padding: EdgeInsets.all(1),
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(4),
+                        color: Colors.blueAccent),
+                    child: Text(
+                      showUuid ? "uuid" : "title",
+                      style: TextStyle(color: Colors.white),
                     ),
-                    Transform.scale(
-                      scale: 0.6,
-                      child: Switch(
-                          value: showFullPath,
-                          onChanged: (s) {
-                            setState(() {
-                              showFullPath = s;
-                            });
-                          }),
+                  ),
+                  Transform.scale(
+                    scale: 0.6,
+                    child: Switch(
+                      value: showUuid,
+                      onChanged: (s) {
+                        setState(() {
+                          showUuid = s;
+                        });
+                      },
                     ),
-                  ],
-                ))
+                  ),
+                ],
+              ),
+            )
           ],
         ),
       ),
     );
   }
+
+  /// 按天分组文档
+  Map<String, List<DocumentMeta>> _groupDocumentsByDay(
+      List<DocumentMeta> docs) {
+    Map<String, List<DocumentMeta>> grouped = {};
+
+    for (var doc in docs) {
+      String dayKey = GetTimeAgo.parse(
+          DateTime.fromMillisecondsSinceEpoch(doc.lastAccessedAt));
+
+      grouped.putIfAbsent(dayKey, () => []).add(doc);
+    }
+
+    return grouped;
+  }
 }
+
+/// @deprecated Use SelectRecentDocumentDialog instead
+typedef SelectRecentFileDialog = SelectRecentDocumentDialog;

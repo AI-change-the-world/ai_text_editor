@@ -17,9 +17,8 @@ import 'package:ai_text_editor/features/editor/embeds/link/link_embed.dart';
 import 'package:ai_text_editor/init.dart';
 import 'package:ai_text_editor/models/ai_model.dart';
 import 'package:ai_text_editor/models/json_error_model.dart';
-import 'package:ai_text_editor/objectbox.g.dart';
 import 'package:ai_text_editor/data/datasources/objectbox/database.dart';
-import 'package:ai_text_editor/objectbox/recent_files.dart';
+import 'package:ai_text_editor/services/document_service.dart';
 import 'package:ai_text_editor/src/rust/api/charts_api.dart';
 import 'package:ai_text_editor/utils/logger.dart';
 import 'package:ai_text_editor/utils/toast_utils.dart';
@@ -308,24 +307,70 @@ class EditorNotifier extends Notifier<EditorState> {
     }
   }
 
-  /// 新建文件
-  Future newDoc(String filepath) async {
-    RecentFiles recentFiles = RecentFiles(path: filepath)
-      ..createdAt = DateTime.now().millisecondsSinceEpoch
-      ..lastEdited = DateTime.now().millisecondsSinceEpoch;
-
-    await database.recentFilesBox.putAsync(recentFiles);
+  /// 设置当前文档 ID
+  void setCurrentDocumentId(String? documentId) {
+    if (documentId != state.currentDocumentId) {
+      state = state.copyWith(currentDocumentId: documentId);
+    }
   }
 
-  /// 更新文件
-  Future updateDoc(String filepath) async {
-    final query = database.recentFilesBox
-        .query(RecentFiles_.path.equals(filepath))
-        .build();
-    final files = query.find();
-    if (files.isNotEmpty) {
-      files.first.lastEdited = DateTime.now().millisecondsSinceEpoch;
-      await database.recentFilesBox.putAsync(files.first);
+  /// 保存文档到 ObjectBox
+  /// Phase 3: 实现保存流程
+  Future<void> saveToObjectBox(String documentId) async {
+    try {
+      // 1. 获取 deltaJson
+      final deltaJson = getJson();
+
+      // 2. 获取纯文本
+      final plainText = getPlainText();
+
+      // 3. 获取 markdown
+      final markdown = getText();
+
+      // 4. 保存到 ObjectBox
+      await DocumentService.instance.saveDocument(
+        documentId,
+        DocumentContentData(
+          deltaJson: deltaJson,
+          plainText: plainText,
+          markdown: markdown,
+        ),
+      );
+
+      changeSavedStatus(true);
+      logger.d('Document saved to ObjectBox: $documentId');
+    } catch (e) {
+      logger.e('Failed to save document: $e');
+      rethrow;
+    }
+  }
+
+  /// 从 ObjectBox 加载文档
+  Future<void> loadFromObjectBox(String documentId) async {
+    try {
+      final content =
+          await DocumentService.instance.getDocumentContent(documentId);
+      if (content == null) {
+        throw Exception('Document not found: $documentId');
+      }
+
+      // 解析 deltaJson 并加载到编辑器
+      if (content.deltaJson.isNotEmpty) {
+        final json = jsonDecode(content.deltaJson);
+        quillController.document = Document.fromJson(json);
+        quillController.moveCursorToEnd();
+        quillTextChangeController.add(getText());
+      }
+
+      // 更新访问时间
+      await DocumentService.instance.updateLastAccessed(documentId);
+
+      setCurrentDocumentId(documentId);
+      changeSavedStatus(true);
+      logger.d('Document loaded from ObjectBox: $documentId');
+    } catch (e) {
+      logger.e('Failed to load document: $e');
+      rethrow;
     }
   }
 

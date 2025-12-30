@@ -12,6 +12,7 @@ import 'package:ai_text_editor/models/ai_model.dart';
 import 'package:ai_text_editor/notifiers/app_body_notifier.dart';
 import 'package:ai_text_editor/notifiers/editor_state.dart';
 import 'package:ai_text_editor/notifiers/models_notifier.dart';
+import 'package:ai_text_editor/services/model_profile_service.dart';
 import 'package:ai_text_editor/src/rust/api/converter_api.dart';
 import 'package:ai_text_editor/utils/file_utils.dart';
 import 'package:ai_text_editor/utils/logger.dart';
@@ -49,8 +50,9 @@ class _EditorHomeState extends ConsumerState<EditorHome> {
 
     final model = ref.read(modelsProvider.notifier).getCurrent();
     if (model != null) {
-      GlobalModel.setModel(
-          OpenAIInfo(model.baseUrl, model.sk, model.modelName));
+      final apiKey =
+          ModelProfileService.instance.decryptApiKey(model.apiKey) ?? '';
+      GlobalModel.setModel(OpenAIInfo(model.baseUrl, apiKey, model.modelName));
       logger.i("Model found, set model ${model.modelName}");
     } else {
       logger.i("Model not found, should set model first");
@@ -158,11 +160,15 @@ class _EditorHomeState extends ConsumerState<EditorHome> {
                                 null,
                                 title: "File Saved",
                               );
-                              ref
-                                  .read(editorNotifierProvider.notifier)
-                                  .updateDoc(ref
-                                      .read(editorNotifierProvider)
-                                      .currentFilePath!);
+                              // 同时保存到 ObjectBox（如果有 documentId）
+                              final docId = ref
+                                  .read(editorNotifierProvider)
+                                  .currentDocumentId;
+                              if (docId != null) {
+                                ref
+                                    .read(editorNotifierProvider.notifier)
+                                    .saveToObjectBox(docId);
+                              }
                               ref
                                   .read(editorNotifierProvider.notifier)
                                   .setLoading(false);
@@ -193,9 +199,6 @@ class _EditorHomeState extends ConsumerState<EditorHome> {
                                 ref
                                     .read(editorNotifierProvider.notifier)
                                     .setCurrentFilePath(p);
-                                ref
-                                    .read(editorNotifierProvider.notifier)
-                                    .newDoc(p);
                                 ref
                                     .read(editorNotifierProvider.notifier)
                                     .setLoading(false);

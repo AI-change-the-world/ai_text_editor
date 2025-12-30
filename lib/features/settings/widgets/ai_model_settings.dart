@@ -109,6 +109,8 @@ class _AIModelSettingsState extends ConsumerState<AIModelSettings> {
 
   String _getTaskLabel(AITask task) {
     switch (task) {
+      case AITask.chat:
+        return '对话';
       case AITask.writing:
         return '写作';
       case AITask.qa:
@@ -368,10 +370,8 @@ class _AIModelSettingsState extends ConsumerState<AIModelSettings> {
                 const SizedBox(width: 24),
                 _buildModelParam(
                   'API Key',
-                  profile.apiKey != null && profile.apiKey!.isNotEmpty
-                      ? '已配置'
-                      : '未配置',
-                  isWarning: profile.apiKey == null || profile.apiKey!.isEmpty,
+                  profile.apiKey.isNotEmpty ? '已配置' : '未配置',
+                  isWarning: profile.apiKey.isEmpty,
                 ),
               ],
             ),
@@ -443,7 +443,7 @@ class _AIModelSettingsState extends ConsumerState<AIModelSettings> {
         break;
       case 'setDefault':
         await ModelProfileService.instance.setDefaultProfileForTask(
-          profile.uuid,
+          profile.tag,
           profile.taskType,
         );
         ref.invalidate(modelProfilesProvider);
@@ -451,7 +451,7 @@ class _AIModelSettingsState extends ConsumerState<AIModelSettings> {
       case 'delete':
         final confirmed = await _showDeleteConfirmDialog(profile);
         if (confirmed == true) {
-          await ModelProfileService.instance.deleteProfile(profile.uuid);
+          await ModelProfileService.instance.deleteProfile(profile.tag);
           ref.invalidate(modelProfilesProvider);
         }
         break;
@@ -798,6 +798,8 @@ class _ModelProfileDialogState extends State<ModelProfileDialog> {
 
   String _getTaskLabel(AITask task) {
     switch (task) {
+      case AITask.chat:
+        return '对话';
       case AITask.writing:
         return '写作';
       case AITask.qa:
@@ -1050,7 +1052,7 @@ class _ModelProfileDialogState extends State<ModelProfileDialog> {
       if (isEditing) {
         // 更新现有配置
         await service.updateProfile(
-          widget.profile!.uuid,
+          widget.profile!.tag,
           UpdateModelProfileRequest(
             name: _nameController.text.trim(),
             provider: _selectedProvider.id,

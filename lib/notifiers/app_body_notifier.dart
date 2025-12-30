@@ -4,7 +4,7 @@ import 'dart:math';
 import 'package:ai_text_editor/init.dart';
 import 'package:ai_text_editor/objectbox.g.dart';
 import 'package:ai_text_editor/data/datasources/objectbox/database.dart';
-import 'package:ai_text_editor/objectbox/recent_files.dart';
+import 'package:ai_text_editor/data/datasources/objectbox/entities/document_meta.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class AppBodyState {
@@ -92,38 +92,44 @@ class AppBodyNotifier extends Notifier<AppBodyState> {
 final appBodyProvider =
     NotifierProvider<AppBodyNotifier, AppBodyState>(AppBodyNotifier.new);
 
-class RecentFilesNotifier extends Notifier<List<RecentFiles>> {
+/// 最近文档 Notifier - 使用新的 DocumentMeta
+class RecentDocumentsNotifier extends Notifier<List<DocumentMeta>> {
   @override
-  List<RecentFiles> build() {
-    final filesQuery = ObxDatabase.db.recentFilesBox
-        .query()
-        .order(RecentFiles_.createdAt, flags: Order.descending)
+  List<DocumentMeta> build() {
+    final query = ObxDatabase.db.documentMetaBox
+        .query(DocumentMeta_.isFolder.equals(false))
+        .order(DocumentMeta_.lastAccessedAt, flags: Order.descending)
         .build();
-    filesQuery.limit = 5;
+    query.limit = 10;
 
-    final result = filesQuery.find();
+    final result = query.find();
+    query.close();
     return result;
   }
 
-  refresh() {
-    final filesQuery = ObxDatabase.db.recentFilesBox
-        .query()
-        .order(RecentFiles_.createdAt, flags: Order.descending)
+  void refresh() {
+    final query = ObxDatabase.db.documentMetaBox
+        .query(DocumentMeta_.isFolder.equals(false))
+        .order(DocumentMeta_.lastAccessedAt, flags: Order.descending)
         .build();
-    filesQuery.limit = 5;
+    query.limit = 10;
 
-    state = filesQuery.find();
+    state = query.find();
+    query.close();
   }
 
-  void add(RecentFiles file) {
-    state = [...state, file];
+  void add(DocumentMeta doc) {
+    state = [doc, ...state.where((d) => d.uuid != doc.uuid)].take(10).toList();
   }
 
-  void remove(RecentFiles file) {
-    state = state.where((element) => element.id != file.id).toList();
+  void remove(DocumentMeta doc) {
+    state = state.where((element) => element.uuid != doc.uuid).toList();
   }
 }
 
-final recentFilesProvider =
-    NotifierProvider<RecentFilesNotifier, List<RecentFiles>>(
-        RecentFilesNotifier.new);
+final recentDocumentsProvider =
+    NotifierProvider<RecentDocumentsNotifier, List<DocumentMeta>>(
+        RecentDocumentsNotifier.new);
+
+/// @deprecated Use recentDocumentsProvider instead
+final recentFilesProvider = recentDocumentsProvider;
