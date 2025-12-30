@@ -1,4 +1,4 @@
-use crate::to_markdown::{csv::CsvToMarkdown, TToMarkdown};
+use crate::to_markdown::{csv::CsvToMarkdown, pdf::PdfToMarkdown, TToMarkdown};
 
 pub fn convert_to_markdown(s: String) -> anyhow::Result<String> {
     let kind = infer::get_from_path(s.clone())?;
@@ -8,7 +8,10 @@ pub fn convert_to_markdown(s: String) -> anyhow::Result<String> {
             "csv" => {
                 result = Some(CsvToMarkdown::to_markdown(s)?);
             }
-            _ => anyhow::bail!("unsupported type"),
+            "pdf" => {
+                result = Some(PdfToMarkdown::to_markdown(s)?);
+            }
+            _ => anyhow::bail!("unsupported type: {}", k.extension()),
         },
         None => {
             anyhow::bail!("unknow file type")
