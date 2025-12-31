@@ -226,6 +226,14 @@ class LocalASRService extends ChangeNotifier {
           tokens: '$dir/${_config!.offlineTokens}',
         );
         break;
+      case 'zipformer2_ctc':
+        modelConfig = sherpa_onnx.OfflineModelConfig(
+          zipformerCtc: sherpa_onnx.OfflineZipformerCtcModelConfig(
+            model: '$dir/${_config!.offlineEncoder}',
+          ),
+          tokens: '$dir/${_config!.offlineTokens}',
+        );
+        break;
       default:
         // transducer 类型模型 (nemo_transducer, zipformer 等)
         modelConfig = sherpa_onnx.OfflineModelConfig(

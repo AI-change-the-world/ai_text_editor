@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../utils/app_theme.dart';
+import '../widgets/hybrid_asr_widget.dart';
 import '../widgets/streaming_asr_widget.dart';
 
 /// 语音转录工具主页面
@@ -21,7 +22,7 @@ class _VoiceToolPageState extends ConsumerState<VoiceToolPage>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
   }
 
   @override
@@ -68,7 +69,8 @@ class _VoiceToolPageState extends ConsumerState<VoiceToolPage>
           indicatorColor: colors.primary,
           indicatorSize: TabBarIndicatorSize.label,
           tabs: const [
-            Tab(text: '实时录音'),
+            Tab(text: '混合识别'),
+            Tab(text: '流式识别'),
             Tab(text: '导入音频'),
           ],
         ),
@@ -76,7 +78,9 @@ class _VoiceToolPageState extends ConsumerState<VoiceToolPage>
       body: TabBarView(
         controller: _tabController,
         children: [
-          // 实时录音转录
+          // 混合识别（流式 + 分段非流式）
+          const HybridASRWidget(),
+          // 纯流式识别
           const StreamingASRWidget(),
           // 导入音频文件转录
           _buildImportAudioTab(colors),

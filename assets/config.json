@@ -10,9 +10,9 @@
             "tokens": "tokens.txt"
         },
         "offline": {
-            "modelDir": "",
-            "modelType": "whisper",
-            "encoder": "encoder.onnx",
+            "modelDir": "D:/sherpa-onnx-zipformer-ctc-zh-int8-2025-07-03",
+            "modelType": "zipformer2_ctc",
+            "encoder": "model.int8.onnx",
             "decoder": "decoder.onnx",
             "joiner": "",
             "tokens": "tokens.txt"
