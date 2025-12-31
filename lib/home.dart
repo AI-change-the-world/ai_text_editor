@@ -1,4 +1,4 @@
-import 'package:ai_text_editor/features/ai_assistant/ai_assistant.dart';
+import 'package:ai_text_editor/features/tools/tools.dart';
 import 'package:ai_text_editor/src/rust/api/message_api.dart';
 import 'package:ai_text_editor/src/rust/messages.dart';
 import 'package:ai_text_editor/utils/toast_utils.dart';
@@ -54,9 +54,9 @@ class _HomeState extends ConsumerState<Home> with WindowListener {
 
   @override
   Widget build(BuildContext context) {
-    // Wrap with AIAssistantOverlay for keyboard shortcuts and floating button
+    // Wrap with ToolsOverlay for keyboard shortcuts and floating button
     // Requirements: 7.1, 7.2, 7.14
-    return AIAssistantOverlay(
+    return ToolsOverlay(
       showFAB: true,
       child: Scaffold(
         body: Center(

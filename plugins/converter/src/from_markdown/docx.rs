@@ -142,7 +142,10 @@ impl MarkdownToDocx {
                 TextStyle::BoldItalic => run = run.bold().italic(),
                 TextStyle::Bold => run = run.bold(),
                 TextStyle::Italic => run = run.italic(),
-                TextStyle::Strikethrough => run = run.strike(),
+                TextStyle::Strikethrough => {
+                    // docx-rs 0.4.17 没有 strike() 方法，使用 vanish 或跳过
+                    // 暂时保留文本但不添加删除线样式
+                }
                 TextStyle::Plain => {}
             }
             

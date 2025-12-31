@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../utils/app_theme.dart';
 import '../../settings/views/settings_page.dart';
@@ -180,28 +181,49 @@ class WorkspaceSelector extends ConsumerWidget {
 
   Widget _buildFooter(BuildContext context, WidgetRef ref, AppColors colors) {
     return Container(
-      height: 60,
-      padding: const EdgeInsets.only(left: 12, right: 12),
+      padding: const EdgeInsets.only(left: 12, right: 12, bottom: 8),
       decoration: BoxDecoration(
         border: Border(top: BorderSide(color: colors.border)),
       ),
-      child: InkWell(
-        onTap: () => showSettingsPage(context),
-        borderRadius: BorderRadius.circular(8),
-        hoverColor: colors.sidebarItemHover,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
-          child: Row(
-            children: [
-              Icon(Icons.settings_outlined,
-                  size: 20, color: colors.textSecondary),
-              const SizedBox(width: 10),
-              Text(
-                '设置',
-                style: TextStyle(fontSize: 14, color: colors.textPrimary),
-              ),
-            ],
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const SizedBox(height: 8),
+          // 设置入口
+          _buildFooterItem(
+            context: context,
+            icon: Icons.settings_outlined,
+            label: '设置',
+            colors: colors,
+            onTap: () => showSettingsPage(context),
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFooterItem({
+    required BuildContext context,
+    required IconData icon,
+    required String label,
+    required AppColors colors,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      hoverColor: colors.sidebarItemHover,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+        child: Row(
+          children: [
+            Icon(icon, size: 20, color: colors.textSecondary),
+            const SizedBox(width: 10),
+            Text(
+              label,
+              style: TextStyle(fontSize: 14, color: colors.textPrimary),
+            ),
+          ],
         ),
       ),
     );

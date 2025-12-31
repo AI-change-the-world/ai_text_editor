@@ -11,3 +11,4 @@ export 'search_service.dart';
 export 'workspace_service.dart';
 export 'tools/tools.dart';
 export 'agent/agent.dart';
+export 'voice_tool/voice_tool_services.dart';

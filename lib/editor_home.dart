@@ -5,7 +5,7 @@ import 'package:ai_text_editor/components/structures/editor.dart';
 import 'package:ai_text_editor/components/others/faded_text.dart';
 import 'package:ai_text_editor/components/others/position_widget.dart';
 import 'package:ai_text_editor/components/structures/spell_check_view.dart';
-import 'package:ai_text_editor/features/ai_assistant/ai_assistant.dart';
+import 'package:ai_text_editor/features/tools/tools.dart';
 import 'package:ai_text_editor/features/editor/widgets/document_outline.dart';
 import 'package:ai_text_editor/features/editor/widgets/focus_mode_overlay.dart';
 import 'package:ai_text_editor/models/ai_model.dart';
@@ -61,9 +61,9 @@ class _EditorHomeState extends ConsumerState<EditorHome> {
 
   @override
   Widget build(BuildContext context) {
-    // Wrap with AIAssistantOverlay for keyboard shortcuts and floating button
+    // Wrap with ToolsOverlay for keyboard shortcuts and floating button
     // Requirements: 7.1, 7.2, 7.14
-    return AIAssistantOverlay(
+    return ToolsOverlay(
       showFAB: true,
       child: Stack(
         children: [
@@ -517,8 +517,8 @@ class _EditorHomeState extends ConsumerState<EditorHome> {
                         text: Text("AI 助手"),
                         shortcutText: "⌘J",
                         onTap: () {
-                          // Toggle AI Assistant panel - Requirements: 7.1, 7.2
-                          ref.read(aiAssistantProvider.notifier).togglePanel();
+                          // Toggle Tools panel - Requirements: 7.1, 7.2
+                          ref.read(toolsPanelProvider.notifier).togglePanel();
                         },
                       )
                     ])),

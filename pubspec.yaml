@@ -44,10 +44,13 @@ dependencies:
   menu_bar: ^0.5.3
   objectbox: ^5.1.0
   objectbox_flutter_libs: any
+  path_provider: ^2.1.5
+  record: ^6.1.2
   riverpod: ^2.6.1
   rust_lib_ai_text_editor:
     path: rust_builder
   screenshot: ^3.0.0
+  sherpa_onnx: ^1.12.20
   slang: ^4.11.0
   slang_flutter: ^4.11.0
   toastification: ^2.3.0

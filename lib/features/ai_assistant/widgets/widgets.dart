@@ -8,5 +8,6 @@ export 'ai_assistant_settings_provider.dart';
 export 'ai_assistant_sidebar_entry.dart';
 export 'chat_input.dart';
 export 'citation_widget.dart';
+export 'embedded_ai_chat_panel.dart';
 export 'message_list.dart';
 export 'search_scope_selector.dart';

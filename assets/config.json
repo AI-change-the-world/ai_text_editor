@@ -1,5 +1,29 @@
 {
     "app-name": "云笺妙笔",
+    "asr": {
+        "online": {
+            "modelDir": "D:/sherpa-onnx-streaming-zipformer-zh-14M-2023-02-23",
+            "modelType": "zipformer",
+            "encoder": "encoder-epoch-99-avg-1.onnx",
+            "decoder": "decoder-epoch-99-avg-1.onnx",
+            "joiner": "joiner-epoch-99-avg-1.onnx",
+            "tokens": "tokens.txt"
+        },
+        "offline": {
+            "modelDir": "",
+            "modelType": "whisper",
+            "encoder": "encoder.onnx",
+            "decoder": "decoder.onnx",
+            "joiner": "",
+            "tokens": "tokens.txt"
+        },
+        "vad": {
+            "model": "",
+            "minSilenceDuration": 0.25,
+            "minSpeechDuration": 0.5,
+            "maxSpeechDuration": 5.0
+        }
+    },
     "words": [
         {
             "text": "学而不思则罔，思而不学则殆。",
