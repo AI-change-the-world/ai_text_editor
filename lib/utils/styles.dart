@@ -27,7 +27,8 @@ class Styles {
   /// 根据字体名称获取实际字体
   static String? getFontFamily(String fontFamily) {
     if (fontFamily == 'System') return null;
-    if (fontFamily == 'SourceHanSansCN') return 'SourceHanSansCN-Regular';
+    if (fontFamily == 'HanSansCN') return 'HanSansCN';
+    if (fontFamily == 'song') return 'song';
     return fontFamily;
   }
 
